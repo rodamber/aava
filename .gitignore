@@ -28,6 +28,12 @@
 *.x86_64
 *.hex
 
+lc
+om
+
 # Debug files
 *.dSYM/
 *.su
+
+# Vagrant
+.vagrant
