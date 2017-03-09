@@ -1,5 +1,5 @@
 * Project
-- [ ] Interface
-  - [ ] Dynamic arrays
-  - [ ] Commands
+- [X] Interface
+  - [X] Dynamic arrays
+  - [X] Commands
 - [ ] Shell test script
