@@ -64,24 +64,20 @@ void delete(dynarray * const da) {
   da->size--;
 }
 
-int write(dynarray * const da, const size_t at, const char elem) {
+void write(dynarray * const da, const size_t at, const char elem) {
   if (at == da->size) {
     insert(da, elem);
-    return 0;
-  } else if (at < da->size) {
-    da->array[at] = elem;
-    return 0;
   } else {
-    return -1;
+    da->array[at] = elem;
   }
 }
 
-void free_dynarray(dynarray * const  da) {
+void free_dynarray(dynarray * const da) {
   free(da->array);
   free(da);
 }
 
-void print_array(dynarray * const  da) {
+void print_array(dynarray * const da) {
   size_t i;
   for (i = 0; i < da->size; i++) {
     printf("%c", da->array[i]);
@@ -91,73 +87,70 @@ void print_array(dynarray * const  da) {
 
 /* ************************************************************************** */
 
-/* later check if this is too slow, altough I doubt that */
-void T(dynarray * da) {
+typedef struct {
+  size_t *positions; /* this could be a dynamic array if it was char* =/ */
+  size_t comparisons;
+} result;
+
+/* ************************************************************************** */
+
+void read(dynarray * const da) {
   char c;
+  int i = 0;
+
   while ((c = getchar()) != '\n') {
-    write(da, da->size, c);
+    write(da, i++, c);
   }
+}
+
+void N(dynarray const * const T, dynarray const * const P) {
+  (void) T; (void) P;
+  printf("N command.\n");
+}
+
+void K(dynarray const * const T, dynarray const * const P) {
+  (void) T; (void) P;
+  printf("K command.\n");
+}
+
+void B(dynarray const * const T, dynarray const * const P) {
+  (void) T; (void) P;
+  printf("B command.\n");
 }
 
 /* ************************************************************************** */
 
-void T_impl_1(char **s, size_t *sz, size_t s_count) {
-  size_t i = 0, j = 0;
-
-  for (; j < s_count; j++) {
-    dynarray * da = new_dynarray();
-
-    for (; i < sz[j]; i++) {
-      insert(da, s[j][i]);
-    }
-    free_dynarray(da);
-  }
-}
-
-void T_impl_2(char **s, size_t *sz, size_t s_count) {
-  dynarray * da = new_dynarray();
-  size_t i = 0, j = 0;
-
-  for (; j < s_count; j++) {
-    for (; i < sz[j]; i++) {
-      write(da, i, s[j][i]);
-    }
-  }
-
-  free_dynarray(da);
-}
-
+/* don't forget to reread the spec and check if we're printing the right amount
+   of spaces and newlines */
 int main() {
-  char s128[128];
-  char s256[256];
-  char s512[512];
-  char s1024[1024];
-  char s2048[2048];
-  char s4096[4096];
+  char command;
+  dynarray * T = new_dynarray();
+  dynarray * P = new_dynarray();
 
-  s128[127]   = '\0';
-  s256[255]   = '\0';
-  s512[511]   = '\0';
-  s1024[1023] = '\0';
-  s2048[2047] = '\0';
-  s4096[4095] = '\0';
+  while ((command = getchar()) != 'X') {
+    getchar(); /* space character */
 
-  size_t s_count = 6;
+    switch (command) {
+    case 'T':
+      read(T);
+      break;
+    case 'N':
+      read(P);
+      N(T, P);
+      break;
+    case 'K':
+      read(P);
+      K(T, P);
+      break;
+    case 'B':
+      read(P);
+      B(T, P);
+      break;
+    }
+  }
 
-  /* char *s__[] = { s128, s256, s512, s1024, s2048, s4096 }; */
-  /* size_t sz_[] = { 128, 256, 512, 1024, 2048, 4096}; */
-
-  /* char *s__[]  = { s4096, s2048, s1024, s512, s256, s128 }; */
-  /* size_t sz_[] = { 4096, 2048, 1024, 512, 256, 128 }; */
-
-  /* char *s__[] = { s128, s512, s256, s2048, s1024, s4096 }; */
-  /* size_t sz_[] = { 128, 512, 256, 2048, 1024, 4096 }; */
-
-  char *s__[] = { s256, s128, s1024, s512, s4096, s2048 };
-  size_t sz_[] = { 256, 128, 1024, 512, 4096, 2048 };
-
-  T_impl_2(s__, sz_, s_count);
-
+  free_dynarray(T);
+  free_dynarray(P);
   return 0;
 }
 
