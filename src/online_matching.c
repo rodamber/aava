@@ -193,7 +193,6 @@ result *N(vector_char const * const T, vector_char const * const P) {
   for (t = 0; t <= T->size - P->size; t++) {
     if (strncmp(at_char(T, t), at_char(P, 0), P->size) == 0) {
       add(result, t);
-      inc(result);
     }
   }
 
