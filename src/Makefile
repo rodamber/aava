@@ -1,5 +1,5 @@
 CC				= gcc-4.7
-CC_FLAGS	= -O3 -ansi -Wall
+CC_FLAGS	= -O0 -ansi -Wall
 
 .PHONY: clean
 
@@ -18,4 +18,4 @@ lc: link_cut.o
 	$(CC) -c $(CC_FLAGS) $< -o $@
 
 clean:
-	$(RM) lc om *.o
+	$(RM) lc om *.o *.i *.s a.out
