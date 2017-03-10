@@ -4,24 +4,6 @@
 
 /* ************************************************************************** */
 
-/* MinUnit */
-int tests_run = 0;
-
-#ifdef DEBUG
-
-#define mu_assert(message, test) do { if (!(test)) return message; } while (0)
-#define mu_run_test(test) do { char *message = test(); tests_run++; \
-    if (message) return message; } while (0)
-
-#else
-
-#define mu_assert(message,test)
-#define mu_run_test
-
-#endif
-
-/* ************************************************************************** */
-
 #define DEFINE_VECTOR(TYPE)                     \
   typedef struct {                              \
     int volume; /* used + free */               \
@@ -137,6 +119,20 @@ DEFINE_AT(int)
 DEFINE_CONST_ITERATOR(char)
 DEFINE_CONST_ITERATOR(int)
 
+#define DEFINE_FROM_ARRAY(TYPE)                                           \
+  vector_##TYPE *from_array_##TYPE(TYPE const * const arr, const int n) { \
+    vector_##TYPE *vec = new_vector_##TYPE();                             \
+                                                                          \
+    int i = 0;                                                            \
+    for (; i < n; i++) {                                                  \
+      insert_##TYPE(vec, arr[i]);                                         \
+    }                                                                     \
+    return vec;                                                           \
+  }                                                                       \
+
+DEFINE_FROM_ARRAY(char)
+DEFINE_FROM_ARRAY(int)
+
 #define DEFINE_PRINT_VECTOR(TYPE, X)                          \
   void print_vector_##TYPE(vector_##TYPE const * const da) {  \
     int i;                                                    \
@@ -148,16 +144,6 @@ DEFINE_CONST_ITERATOR(int)
 
 DEFINE_PRINT_VECTOR(char, "%c")
 DEFINE_PRINT_VECTOR(int, "%d ")
-
-/* void print_vector_int(vector_int const * const da) { */
-/*   int i; */
-/*   for (i = 0; i < da->size; i++) { */
-/*     printf("%d ", da->array[i]); */
-/*   } */
-/*   printf("\n"); */
-/* } */
-
-
 
 /* ************************************************************************** */
 
@@ -280,4 +266,3 @@ int main() {
   free_vector_char(P);
   return 0;
 }
-
