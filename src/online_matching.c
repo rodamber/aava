@@ -14,6 +14,8 @@
 DEFINE_VECTOR(char)
 DEFINE_VECTOR(int)
 
+typedef vector_char string;
+
 #define DEFINE_NEW_VECTOR(TYPE)                               \
   vector_##TYPE *new_vector_##TYPE() {                        \
     int const volume = 1; /* 128 */                           \
@@ -172,24 +174,24 @@ void inc(result * const result) {
   result->comparisons++;
 }
 
+int const left_right = 1;
+int const right_left = -1;
+
 int ncmp(char const * const s1, char const * const s2, int const n,
          int const direction, result * const res) {
   int i = 0;
   for (; i < n; i++) {
     inc(res);
     if (s1[direction * i] != s2[direction * i]) {
-      return -1;
+      return direction == left_right ? i : n - i - 1;
     }
   }
-  return 0;
+  return -1;
 }
-
-int const left_right = 1;
-int const right_left = -1;
 
 /* ************************************************************************** */
 
-void read(vector_char * const vec) {
+void read(string * const vec) {
   char c;
   int i = 0;
 
@@ -200,7 +202,11 @@ void read(vector_char * const vec) {
   downvolume_char(vec);
 }
 
-result *N(vector_char const * const T, vector_char const * const P) {
+/* ************************************************************************** */
+/* Naive                                                                      */
+/* ************************************************************************** */
+
+result *N(string const * const T, string const * const P) {
   result *const res = new_result();
   int const n = P->size, m = T->size;
 
@@ -208,31 +214,75 @@ result *N(vector_char const * const T, vector_char const * const P) {
   int t;
   for (t = 0; t <= m - n; t++) {
     /* FIXME: We're counting the comparisons here */
-    if (ncmp(at_char(T, t), at_char(P, 0), n, left_right, res) == 0) {
+    if (ncmp(at_char(T, t), at_char(P, 0), n, left_right, res) == -1) {
       add(res, t);
     }
   }
   return res;
 }
 
-result *K(vector_char const * const T, vector_char const * const P) {
+/* ************************************************************************** */
+/* Knuth-Morris-Pratt                                                         */
+/* ************************************************************************** */
+
+result *K(string const * const T, string const * const P) {
   (void) T; (void) P;
   result *result = new_result();
   return result;
 }
 
-result *B(vector_char const * const T, vector_char const * const P) {
-  /* We start with a simple P right to left scan, which should be no
-     better than the naive algorithm. */
+/* ************************************************************************** */
+/* Boyer-Moore                                                                */
+/* ************************************************************************** */
+
+int *R_at(int const *const R, char const x) {
+  enum {a, c, t, g};
+  switch (x) {
+  case 'a': return (int*) &R[a];
+  case 'c': return (int*) &R[c];
+  case 't': return (int*) &R[t];
+  case 'g': return (int*) &R[g];
+  default:
+    fprintf(stderr, "R_at: bad character '%c'", x);
+    return NULL;
+  }
+}
+
+/* Don't forget to free the array R */
+int *bad_char_preprocessing(string const *const S) {
+  int *const R = malloc(sizeof(int) * 4);
+
+  int i = 0;
+  for (; i < S->size; i++) {
+    *R_at(R, *at_char(S, i)) = i;
+  }
+  return R;
+}
+
+#define MAX(a,b) (((a)>(b))?(a):(b))
+
+int bad_char_shift(int const *const R, int const i, char const c) {
+  return MAX(1, i - *R_at(R, c));
+}
+
+result *B(string const * const T, string const * const P) {
   result *const res = new_result();
   int const n = P->size, m = T->size;
 
-  int t = n - 1;
-  for (; t < m; t++) {
-    if (ncmp(at_char(T, t), at_char(P, n - 1), n, right_left, res) == 0) {
+  /* Right-most character occurrence array */
+  int *const R = bad_char_preprocessing(P);
+
+  int t     = n - 1; /* T index */
+  int shift = 0;     /* amount to shift P */
+  for (; t < m; t += shift) {
+    int const i = ncmp(at_char(T, t), at_char(P, n - 1), n, right_left, res);
+    if (i == -1) { /* match */
       add(res, t - n + 1);
     }
+    shift = bad_char_shift(R, i, *at_char(T, t));
   }
+
+  free(R);
   return res;
 }
 
