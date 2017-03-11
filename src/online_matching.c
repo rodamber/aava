@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+int max(int const a, int const b) {
+  return a > b ? a : b;
+}
+
 /* ************************************************************************** */
 
 #define DEFINE_VECTOR(TYPE)                     \
@@ -250,7 +254,7 @@ int *R_at(int const *const R, char const x) {
 
 /* Don't forget to free the array R */
 int *bad_char_preprocessing(string const *const S) {
-  int *const R = malloc(sizeof(int) * 4);
+  int *const R = calloc(4, sizeof(int));
 
   int i = 0;
   for (; i < S->size; i++) {
@@ -259,10 +263,8 @@ int *bad_char_preprocessing(string const *const S) {
   return R;
 }
 
-#define MAX(a,b) (((a)>(b))?(a):(b))
-
 int bad_char_shift(int const *const R, int const i, char const c) {
-  return MAX(1, i - *R_at(R, c));
+  return max(1, i - *R_at(R, c));
 }
 
 result *B(string const * const T, string const * const P) {
