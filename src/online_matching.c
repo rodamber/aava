@@ -172,6 +172,21 @@ void inc(result * const result) {
   result->comparisons++;
 }
 
+int ncmp(char const * const s1, char const * const s2, int const n,
+         int const direction, result * const res) {
+  int i = 0;
+  for (; i < n; i++) {
+    inc(res);
+    if (s1[direction * i] != s2[direction * i]) {
+      return -1;
+    }
+  }
+  return 0;
+}
+
+int const left_right = 1;
+int const right_left = -1;
+
 /* ************************************************************************** */
 
 void read(vector_char * const vec) {
@@ -186,17 +201,18 @@ void read(vector_char * const vec) {
 }
 
 result *N(vector_char const * const T, vector_char const * const P) {
-  result *result = new_result();
+  result *const res = new_result();
+  int const n = P->size, m = T->size;
 
   /* Don't forget the arrays are not null terminated. */
   int t;
-  for (t = 0; t <= T->size - P->size; t++) {
-    if (strncmp(at_char(T, t), at_char(P, 0), P->size) == 0) {
-      add(result, t);
+  for (t = 0; t <= m - n; t++) {
+    /* FIXME: We're counting the comparisons here */
+    if (ncmp(at_char(T, t), at_char(P, 0), n, left_right, res) == 0) {
+      add(res, t);
     }
   }
-
-  return result;
+  return res;
 }
 
 result *K(vector_char const * const T, vector_char const * const P) {
@@ -206,9 +222,18 @@ result *K(vector_char const * const T, vector_char const * const P) {
 }
 
 result *B(vector_char const * const T, vector_char const * const P) {
-  (void) T; (void) P;
-  result *result = new_result();
-  return result;
+  /* We start with a simple P right to left scan, which should be no
+     better than the naive algorithm. */
+  result *const res = new_result();
+  int const n = P->size, m = T->size;
+
+  int t = n - 1;
+  for (; t < m; t++) {
+    if (ncmp(at_char(T, t), at_char(P, n - 1), n, right_left, res) == 0) {
+      add(res, t - n + 1);
+    }
+  }
+  return res;
 }
 
 /* ************************************************************************** */
@@ -234,6 +259,7 @@ int main() {
       result = N(T, P);
 
       print_vector_int(result->positions);
+      printf("%d \n", result->comparisons);
 
       free_result(result);
       break;
