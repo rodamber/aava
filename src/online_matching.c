@@ -301,6 +301,17 @@ int *Z(string const * const str) {
 /* Boyer-Moore                                                                */
 /* ************************************************************************** */
 
+#define SWAP(x, y, T) do { T SWAP = x; x = y; y = SWAP; } while (0)
+
+void reverse(string *const str) {
+  int const half = str->size / 2;
+  int i;
+
+  for (i = 0; i < half; i++) {
+    SWAP(*at_char(str, i), *at_char(str, str->size - i - 1), int);
+  }
+}
+
 int *R_at(int const *const R, char const x) {
   enum {a, c, t, g};
   switch (x) {
