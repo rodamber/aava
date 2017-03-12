@@ -2,4 +2,35 @@
 - [X] Interface
   - [X] Dynamic arrays
   - [X] Commands
+- [ ] Knuth-Morris-Pratt
+- [-] Boyer-Moore
+  - [X] Naive right-to-left
+  - [X] Simple bad character rule
+  - [-] (Strong) Good suffix rule
+    - [X] Z algorithm
+    - [ ] Suffix rule itself
+  - [ ] Combine everything
 - [ ] Shell test script
+* Boyer-Moore
+** (Strong) Good suffix rule
+Suppose for a given alignment of P and T, a substring t of T matches a suffix of
+P, but a mismatch occurs at the next comparison to the left.
+
+Then find, if it exists, the right-most copy t' of t in P such that t' is not a
+suffix of P and the character to the left of t' in P differs from the character
+to the left of t in P.
+
+Shift P to the right so that substring t' in P is below substring t in T.
+
+If t' does not exist, then shift the left end of P past the left end of t in T
+by the least amount so that a prefix of the shifted pattern matches a suffix of
+t in T.
+
+If no such shift is possible, then shift P by n places to the right.
+
+If an occurrrence of P is found, then shift P by the least amount so that a
+proper prefix of the shifted P matches a suffix of the occurrence of P in T.
+
+If no such shift is possible, then shift P by n places, that is, shift P past t
+in T.
+
