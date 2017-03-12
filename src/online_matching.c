@@ -151,6 +151,18 @@ DEFINE_FROM_ARRAY(int)
 DEFINE_PRINT_VECTOR(char, "%c")
 DEFINE_PRINT_VECTOR(int, "%d ")
 
+string *new_string(char const *const s) {
+  string *const str = new_vector_char();
+
+  int i = 0;
+  while (s[i]) {
+    insert_char(str, s[i]);
+    i++;
+  }
+
+  return str;
+}
+
 /* ************************************************************************** */
 
 typedef struct {
@@ -247,6 +259,11 @@ int match_count(char const *const s1, char const *const s2, int const n) {
   return i;
 }
 
+/* gdb debug */
+/* printf "z = <%d %d %d %d %d %d %d %d %d %d %d>\n", z[0],z[1],z[2],z[3],z[4],z[5],z[6],z[7],z[8],z[9],z[10] */
+/* printf "l = %d, r = %d\n", l, r */
+/* printf "k = %d, z[k] = %d\n", k, z[k] */
+
 /* Don't forget to free the Z table */
 int *Z(string const * const str) {
   int *const z = calloc(str->size, sizeof(int));
@@ -261,7 +278,7 @@ int *Z(string const * const str) {
         l = k;
       }
     } else { /* case 2 */
-      int const k_prime   = k - l + 1;
+      int const k_prime   = k - l; /* + 1;*/
       int const beta_size = r - k + 1;
 
       if (z[k_prime] < beta_size) { /* case 2a */
@@ -339,8 +356,8 @@ result *B(string const * const T, string const * const P) {
    of spaces and newlines */
 int main() {
   char command;
-  vector_char * T = new_vector_char();
-  vector_char * P = new_vector_char();
+  vector_char *T = new_vector_char();
+  vector_char *P = new_vector_char();
   result *result;
 
   while ((command = getchar()) != 'X') {
@@ -383,7 +400,6 @@ int main() {
     }
   }
 
- /* finally: */
   free_vector_char(T);
   free_vector_char(P);
   return 0;
