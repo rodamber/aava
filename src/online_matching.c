@@ -117,6 +117,14 @@ DEFINE_WRITE(int)
 DEFINE_AT(char)
 DEFINE_AT(int)
 
+#define DEFINE_AT_BACK(TYPE)                                         \
+  TYPE *at_back_##TYPE(vector_##TYPE const * const v, const int i) { \
+    return &(v->array[v->size - i - 1]);                             \
+  }                                                                  \
+
+DEFINE_AT_BACK(char)
+DEFINE_AT_BACK(int)
+
 #define DEFINE_CONST_ITERATOR(TYPE)                                   \
   TYPE const *const_iterator_##TYPE(vector_##TYPE const * const da) { \
     return da->array;                                                 \
@@ -253,43 +261,45 @@ result *K(string const * const T, string const * const P) {
 
 int match_count(char const *const s1, char const *const s2, int const n) {
   int i = 0;
-  while (i < n && s1[i] == s2[i]) {
-    i++;
+  while (i > -n && s1[i] == s2[i]) {
+    i--;
   }
-  return i;
+  return -i;
 }
 
-/* gdb debug */
-/* printf "z = <%d %d %d %d %d %d %d %d %d %d %d>\n", z[0],z[1],z[2],z[3],z[4],z[5],z[6],z[7],z[8],z[9],z[10] */
-/* printf "l = %d, r = %d\n", l, r */
-/* printf "k = %d, z[k] = %d\n", k, z[k] */
+/* gdb debug
+printf "z = <%d %d %d %d %d %d %d %d %d %d %d>\n", z[0],z[1],z[2],z[3],z[4],z[5],z[6],z[7],z[8],z[9],z[10]
+printf "l = %d, r = %d\n", l, r
+printf "k = %d, z[k] = %d\n", k, z[k]
+*/
 
-/* Don't forget to free the Z table */
+/*
+  Reverse Z algorithm.
+ */
 int *Z(string const * const str) {
   int *const z = calloc(str->size, sizeof(int));
   int l, r, k;
 
-  for (l = r = 0, k = 1; k < str->size; k++) {
-    if (k > r) { /* case 1 */ 
-      z[k] = match_count(at_char(str, 0), at_char(str, k), str->size - k);
+  for (l = r = str->size - 1, k = l - 1; k >= 0; k--) {
+    if (k < l) { /* case 1 */ 
+      z[k] = match_count(at_back_char(str, 0), at_char(str, k), k + 1);
 
       if (z[k] > 0) {
-        r = k + z[k] - 1;
-        l = k;
+        l = k - z[k] + 1;
+        r = k;
       }
     } else { /* case 2 */
-      int const k_prime   = k - l; /* + 1;*/
-      int const beta_size = r - k + 1;
+      int const k_prime   = k + (str->size - 1) - r;
+      int const beta_size = k - l + 1;
 
       if (z[k_prime] < beta_size) { /* case 2a */
         z[k] = z[k_prime];
       } else { /* case 2b */
-        int const count = match_count(at_char(str, beta_size + 1), 
-                                      at_char(str, r + 1), 
-                                      str->size - (r + 1));
+        int const count = match_count(at_back_char(str, beta_size - 1),
+                                      at_char(str, l - 1), l);
         z[k] = beta_size + count;
-        r += count;
-        l = k;
+        l -= count;
+        r = k;
       }
 
     }
@@ -300,17 +310,6 @@ int *Z(string const * const str) {
 /* ************************************************************************** */
 /* Boyer-Moore                                                                */
 /* ************************************************************************** */
-
-#define SWAP(x, y, T) do { T SWAP = x; x = y; y = SWAP; } while (0)
-
-void reverse(string *const str) {
-  int const half = str->size / 2;
-  int i;
-
-  for (i = 0; i < half; i++) {
-    SWAP(*at_char(str, i), *at_char(str, str->size - i - 1), int);
-  }
-}
 
 int *R_at(int const *const R, char const x) {
   enum {a, c, t, g};
@@ -338,6 +337,17 @@ int *bad_char_preprocessing(string const *const S) {
 
 int bad_char_shift(int const *const R, int const i, char const c) {
   return max(1, i - *R_at(R, c));
+}
+
+#define SWAP(x, y, T) do { T SWAP = x; x = y; y = SWAP; } while (0)
+
+void reverse(string *const str) {
+  int const half = str->size / 2;
+  int i;
+
+  for (i = 0; i < half; i++) {
+    SWAP(*at_char(str, i), *at_char(str, str->size - i - 1), int);
+  }
 }
 
 result *B(string const * const T, string const * const P) {
