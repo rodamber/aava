@@ -236,6 +236,51 @@ result *K(string const * const T, string const * const P) {
 }
 
 /* ************************************************************************** */
+/* Z algorithm                                                                */
+/* ************************************************************************** */
+
+int match_count(char const *const s1, char const *const s2, int const n) {
+  int i = 0;
+  while (i < n && s1[i] == s2[i]) {
+    i++;
+  }
+  return i;
+}
+
+/* Don't forget to free the Z table */
+int *Z(string const * const str) {
+  int *const z = calloc(str->size, sizeof(int));
+  int l, r, k;
+
+  for (l = r = 0, k = 1; k < str->size; k++) {
+    if (k > r) { /* case 1 */ 
+      z[k] = match_count(at_char(str, 0), at_char(str, k), str->size - k);
+
+      if (z[k] > 0) {
+        r = k + z[k] - 1;
+        l = k;
+      }
+    } else { /* case 2 */
+      int const k_prime   = k - l + 1;
+      int const beta_size = r - k + 1;
+
+      if (z[k_prime] < beta_size) { /* case 2a */
+        z[k] = z[k_prime];
+      } else { /* case 2b */
+        int const count = match_count(at_char(str, beta_size + 1), 
+                                      at_char(str, r + 1), 
+                                      str->size - (r + 1));
+        z[k] = beta_size + count;
+        r += count;
+        l = k;
+      }
+
+    }
+  }
+  return z;
+}
+
+/* ************************************************************************** */
 /* Boyer-Moore                                                                */
 /* ************************************************************************** */
 
