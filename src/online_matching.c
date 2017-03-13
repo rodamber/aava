@@ -6,6 +6,15 @@ int max(int const a, int const b) {
   return a > b ? a : b;
 }
 
+void print_array(int *arr, int n) {
+  int i;
+  printf("<");
+  for (i = 0; i < n - 1; i++) {
+    printf("%d ", arr[i]);
+  }
+  printf("%d>\n", arr[n - 1]);
+}
+
 /* ************************************************************************** */
 
 #define DEFINE_VECTOR(TYPE)                     \
@@ -201,6 +210,8 @@ void inc(result * const result) {
 int const left_right = 1;
 int const right_left = -1;
 
+/* Returns index of mismatch, or -1 if it matches and direction is right to
+   left, or n if it matches and direction is left to right */
 int ncmp(char const * const s1, char const * const s2, int const n,
          int const direction, result * const res) {
   int i = 0;
@@ -210,9 +221,7 @@ int ncmp(char const * const s1, char const * const s2, int const n,
       return direction == left_right ? i : n - i - 1;
     }
   }
-
-  /* FIXME: should return -1 when right_left and n when left_right */
-  return -1;
+  return direction == left_right ? n : -1;
 }
 
 /* ************************************************************************** */
@@ -240,7 +249,7 @@ result *N(string const * const T, string const * const P) {
   int t;
   for (t = 0; t <= m - n; t++) {
     /* FIXME: We're counting the comparisons here */
-    if (ncmp(at_char(T, t), at_char(P, 0), n, left_right, res) == -1) {
+    if (ncmp(at_char(T, t), at_char(P, 0), n, left_right, res) == n) {
       add(res, t);
     }
   }
@@ -347,14 +356,15 @@ int **strong_good_suffix_preprocessing(string const *const str) {
   int *const l_prime = calloc(str->size, sizeof(int));
   int *const z = Z(str);
 
+  /* printf("z': "); print_array(z, str->size); */
+
   int j;
   for (j = 0; j < str->size - 1; j++) {
-    /* FIXME: not sure if that -1 is correct */
-    int const i = (str->size - 1) - z[j];
+    int const i = str->size - z[j];
     L_prime[i] = j;
 
-    if (z[j] == j) {
-      l_prime[i] = j;
+    if (z[j] == j + 1) {
+      l_prime[i] = j + 1;
     }
   }
   free(z);
@@ -370,15 +380,14 @@ int strong_good_suffix_shift(int **const ls, int const i, int const n) {
   int const *const L_prime = ls[0]; 
   int const *const l_prime = ls[1];
 
-  /* FIXME: not sure if these last -1's in the last 3 cases are correct */
   if (i == n - 1) {
     return 1;
   } else if (i == -1) {
-    return (n - 1) - l_prime[1] - 1 ;
+    return (n - 1) - l_prime[1] ;
   } else if (L_prime[i + 1] > 0) {
-    return (n - 1) - L_prime[i + 1] - 1; 
+    return (n - 1) - L_prime[i + 1]; 
   } else {
-    return (n - 1) - l_prime[i + 1] - 1;
+    return (n - 1) - l_prime[i + 1];
   }
 }
 
@@ -389,6 +398,9 @@ result *B(string const * const T, string const * const P) {
   /* Right-most character occurrence array */
   int *const R = bad_char_preprocessing(P);
   int **const ls = strong_good_suffix_preprocessing(P);
+
+  /* printf("L': "); print_array(ls[0], P->size); */
+  /* printf("l': "); print_array(ls[1], P->size); */
 
   int t     = n - 1; /* T index */
   int shift = 0;     /* amount to shift P */
@@ -411,10 +423,17 @@ result *B(string const * const T, string const * const P) {
 /* ************************************************************************** */
 
 int main() {
+  puts("");
+
   char *txts[] = {"tcgcagggcg", "aaaaaaaaaa", "gcccaaagac"};
   char *pats[] = {"tc", "aaa", "ca"};
   char *poss[] = {"0", "0 1 2 3 4 5 6 7", "3"};
-  int cmps[] = {7, 24, 9};
+  char *cmps[] = {"7", "24", "9"};
+
+  /* char *txts[] = {"cagtagtagctgacagtagtagtacggcagtagtag"}; */
+  /* char *pats[] = {"cagtagtag"}; */
+  /* char *poss[] = {"0 13 27"}; */
+  /* char *cmps[] = {"..."}; */
 
   size_t i;
   for (i = 0; i < sizeof(txts) / sizeof(char*); i++) {
@@ -423,8 +442,8 @@ int main() {
 
     result *res = B(txt, pat);
     print_vector_int(res->positions);
-    printf("should be %s\n", poss[i]);
-    printf("%d (should be %d)\n", res->comparisons, cmps[i]);
+    printf("(should be %s)\n", poss[i]);
+    printf("%d (should be %s)\n", res->comparisons, cmps[i]);
     
     free(txt);
     free(pat);
