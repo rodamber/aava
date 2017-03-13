@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -210,18 +211,18 @@ void inc(result * const result) {
 int const left_right = 1;
 int const right_left = -1;
 
-/* Returns index of mismatch, or -1 if it matches and direction is right to
+/* Returns index of mismatch, or -n if it matches and direction is right to
    left, or n if it matches and direction is left to right */
 int ncmp(char const * const s1, char const * const s2, int const n,
          int const direction, result * const res) {
-  int i = 0;
-  for (; i < n; i++) {
+  int i;
+  for (i = 0; i < n; i++) {
     inc(res);
     if (s1[direction * i] != s2[direction * i]) {
-      return direction == left_right ? i : n - i - 1;
+      break;
     }
   }
-  return direction == left_right ? n : -1;
+  return direction * i;
 }
 
 /* ************************************************************************** */
@@ -337,12 +338,17 @@ int *R_at(int const *const R, char const x) {
 
 /* Don't forget to free the array R */
 int *bad_char_preprocessing(string const *const S) {
-  int *const R = calloc(4, sizeof(int));
+  int *const R = malloc(4* sizeof(int));
+  memset(R, INT_MAX, 4 * sizeof(int));
 
   int i;
   for (i = 0; i < S->size; i++) {
     *R_at(R, *at_char(S, i)) = i;
   }
+
+#ifdef DEBUG
+  printf("R': "); print_array(R, 4);
+#endif
   return R;
 }
 
@@ -361,8 +367,10 @@ int **strong_good_suffix_preprocessing(string const *const str) {
   int j;
   for (j = 0; j < str->size - 1; j++) {
     int const i = str->size - z[j];
-    L_prime[i] = j;
 
+    if (z[j] > 0) {
+      L_prime[i] = j;
+    }
     if (z[j] == j + 1) {
       l_prime[i] = j + 1;
     }
@@ -379,15 +387,16 @@ int **strong_good_suffix_preprocessing(string const *const str) {
 int strong_good_suffix_shift(int **const ls, int const i, int const n) {
   int const *const L_prime = ls[0]; 
   int const *const l_prime = ls[1];
+  int const offset = (n - 1) + i;
 
-  if (i == n - 1) {
+  if (offset == n - 1) { /* Failed on first character */
     return 1;
-  } else if (i == -1) {
-    return (n - 1) - l_prime[1] ;
-  } else if (L_prime[i + 1] > 0) {
-    return (n - 1) - L_prime[i + 1]; 
+  } else if (offset == -1) { /* Matched pattern */
+    return n - l_prime[1];
+  } else if (L_prime[offset + 1] > 0) { /* Mismatch occurs at i */
+    return (n - 1) - L_prime[offset + 1]; 
   } else {
-    return (n - 1) - l_prime[i + 1];
+    return n - l_prime[offset + 1];
   }
 }
 
@@ -399,18 +408,41 @@ result *B(string const * const T, string const * const P) {
   int *const R = bad_char_preprocessing(P);
   int **const ls = strong_good_suffix_preprocessing(P);
 
-  /* printf("L': "); print_array(ls[0], P->size); */
-  /* printf("l': "); print_array(ls[1], P->size); */
+#ifdef DEBUG
+  printf("L': "); print_array(ls[0], P->size);
+  printf("l': "); print_array(ls[1], P->size);
 
-  int t     = n - 1; /* T index */
-  int shift = 0;     /* amount to shift P */
-  for (; t < m; t += shift) {
+  char ixs[] = "012345678901234567890123456789";
+  char eqs[] = "==============================";
+  int indent = 0;
+  int it = 0;
+#endif
+
+  int t;         /* T index */
+  int shift = 0; /* amount to shift P */
+
+  for (t = n - 1; t < m; t += shift) {
+#ifdef DEBUG
+    printf("%d %.*s\n", it++, T->size, eqs);
+    printf("  %.*s\n", T->size, ixs);
+    printf("  %.*s\n", T->size, T->array);
+    printf("  %*s%.*s\n", (indent += shift), "", P->size, P->array);
+#endif
+
     int const i = ncmp(at_char(T, t), at_char(P, n - 1), n, right_left, res);
-    if (i == -1) { /* match */
+    if (i == -n) { /* match */
       add(res, t - n + 1);
     }
-    shift = max(bad_char_shift(R, i, *at_char(T, t)),
-                strong_good_suffix_shift(ls, i, n));
+
+    int const bc = bad_char_shift(R, n + i - 1, *at_char(T, t));
+    int const gs = strong_good_suffix_shift(ls, i, n);
+
+#ifdef DEBUG
+    printf("  ncmps = %d\n", res->comparisons);
+    printf("  bc = %d, gs = %d, i = %d\n", bc, gs, i);
+#endif
+
+    shift = max(bc, gs);
   }
 
   free(R);
@@ -422,6 +454,8 @@ result *B(string const * const T, string const * const P) {
 
 /* ************************************************************************** */
 
+#ifdef DEBUG
+
 int main() {
   puts("");
 
@@ -430,11 +464,6 @@ int main() {
   char *poss[] = {"0", "0 1 2 3 4 5 6 7", "3"};
   char *cmps[] = {"7", "24", "9"};
 
-  /* char *txts[] = {"cagtagtagctgacagtagtagtacggcagtagtag"}; */
-  /* char *pats[] = {"cagtagtag"}; */
-  /* char *poss[] = {"0 13 27"}; */
-  /* char *cmps[] = {"..."}; */
-
   size_t i;
   for (i = 0; i < sizeof(txts) / sizeof(char*); i++) {
     string *txt = new_string(txts[i]);
@@ -442,66 +471,70 @@ int main() {
 
     result *res = B(txt, pat);
     print_vector_int(res->positions);
-    printf("(should be %s)\n", poss[i]);
-    printf("%d (should be %s)\n", res->comparisons, cmps[i]);
+    printf("(vs %s)\n", poss[i]);
+    printf("%d (vs %s)\n", res->comparisons, cmps[i]);
     
-    free(txt);
-    free(pat);
-    free(res);
+    free_vector_char(txt);
+    free_vector_char(pat);
+    free_result(res);
   }
 
   return 0;
 }
 
-/* /\* don't forget to reread the spec and check if we're printing the right amount */
-/*    of spaces and newlines *\/ */
-/* int main() { */
-/*   char command; */
-/*   vector_char *T = new_vector_char(); */
-/*   vector_char *P = new_vector_char(); */
-/*   result *result; */
+#else
 
-/*   while ((command = getchar()) != 'X') { */
-/*     getchar(); /\* space character *\/ */
+/* don't forget to reread the spec and check if we're printing the right amount
+   of spaces and newlines */
+int main() {
+  char command;
+  vector_char *T = new_vector_char();
+  vector_char *P = new_vector_char();
+  result *result;
 
-/*     switch (command) { */
-/*     case 'T': */
-/*       read(T); */
-/*       /\* printf("T: T = "); print_vector_char(T); *\/ */
-/*       break; */
-/*     case 'N': */
-/*       read(P); */
-/*       result = N(T, P); */
+  while ((command = getchar()) != 'X') {
+    getchar(); /* space character */
 
-/*       print_vector_int(result->positions); */
-/*       printf("%d \n", result->comparisons); */
+    switch (command) {
+    case 'T':
+      read(T);
+      /* printf("T: T = "); print_vector_char(T); */
+      break;
+    case 'N':
+      read(P);
+      result = N(T, P);
 
-/*       free_result(result); */
-/*       break; */
-/*     case 'K': */
-/*       read(P); */
-/*       result = K(T, P); */
+      print_vector_int(result->positions);
+      printf("%d \n", result->comparisons);
 
-/*       print_vector_int(result->positions); */
-/*       printf("%d \n", result->comparisons); */
+      free_result(result);
+      break;
+    case 'K':
+      read(P);
+      result = K(T, P);
 
-/*       free_result(result); */
-/*       break; */
-/*     case 'B': */
-/*       read(P); */
-/*       result = B(T, P); */
+      print_vector_int(result->positions);
+      printf("%d \n", result->comparisons);
 
-/*       print_vector_int(result->positions); */
-/*       printf("%d \n", result->comparisons); */
+      free_result(result);
+      break;
+    case 'B':
+      read(P);
+      result = B(T, P);
 
-/*       free_result(result); */
-/*       break; */
-/*     default: */
-/*       printf("Ignoring command: '%c'.\n", command); */
-/*     } */
-/*   } */
+      print_vector_int(result->positions);
+      printf("%d \n", result->comparisons);
 
-/*   free_vector_char(T); */
-/*   free_vector_char(P); */
-/*   return 0; */
-/* } */
+      free_result(result);
+      break;
+    default:
+      printf("Ignoring command: '%c'.\n", command);
+    }
+  }
+
+  free_vector_char(T);
+  free_vector_char(P);
+  return 0;
+}
+
+#endif
