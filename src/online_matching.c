@@ -279,12 +279,6 @@ int match_count(char const *const s1, char const *const s2, int const n) {
   return -i;
 }
 
-/* gdb debug
-printf "z = <%d %d %d %d %d %d %d %d %d %d %d>\n", z[0],z[1],z[2],z[3],z[4],z[5],z[6],z[7],z[8],z[9],z[10]
-printf "l = %d, r = %d\n", l, r
-printf "k = %d, z[k] = %d\n", k, z[k]
-*/
-
 /*
   Reverse Z algorithm.
  */
@@ -345,10 +339,6 @@ int *bad_char_preprocessing(string const *const S) {
   for (i = 0; i < S->size; i++) {
     *R_at(R, *at_char(S, i)) = i;
   }
-
-#ifdef DEBUG
-  printf("R': "); print_array(R, 4);
-#endif
   return R;
 }
 
@@ -408,27 +398,10 @@ result *B(string const * const T, string const * const P) {
   int *const R = bad_char_preprocessing(P);
   int **const ls = strong_good_suffix_preprocessing(P);
 
-#ifdef DEBUG
-  printf("L': "); print_array(ls[0], P->size);
-  printf("l': "); print_array(ls[1], P->size);
-
-  char ixs[] = "012345678901234567890123456789";
-  char eqs[] = "==============================";
-  int indent = 0;
-  int it = 0;
-#endif
-
   int t;         /* T index */
   int shift = 0; /* amount to shift P */
 
   for (t = n - 1; t < m; t += shift) {
-#ifdef DEBUG
-    printf("%d %.*s\n", it++, T->size, eqs);
-    printf("  %.*s\n", T->size, ixs);
-    printf("  %.*s\n", T->size, T->array);
-    printf("  %*s%.*s\n", (indent += shift), "", P->size, P->array);
-#endif
-
     int const i = ncmp(at_char(T, t), at_char(P, n - 1), n, right_left, res);
     if (i == -n) { /* match */
       add(res, t - n + 1);
@@ -436,11 +409,6 @@ result *B(string const * const T, string const * const P) {
 
     int const bc = bad_char_shift(R, n + i - 1, *at_char(T, t));
     int const gs = strong_good_suffix_shift(ls, i, n);
-
-#ifdef DEBUG
-    printf("  ncmps = %d\n", res->comparisons);
-    printf("  bc = %d, gs = %d, i = %d\n", bc, gs, i);
-#endif
 
     shift = max(bc, gs);
   }
@@ -453,36 +421,6 @@ result *B(string const * const T, string const * const P) {
 }
 
 /* ************************************************************************** */
-
-#ifdef DEBUG
-
-int main() {
-  puts("");
-
-  char *txts[] = {"tcgcagggcg", "aaaaaaaaaa", "gcccaaagac"};
-  char *pats[] = {"tc", "aaa", "ca"};
-  char *poss[] = {"0", "0 1 2 3 4 5 6 7", "3"};
-  char *cmps[] = {"7", "24", "9"};
-
-  size_t i;
-  for (i = 0; i < sizeof(txts) / sizeof(char*); i++) {
-    string *txt = new_string(txts[i]);
-    string *pat = new_string(pats[i]);
-
-    result *res = B(txt, pat);
-    print_vector_int(res->positions);
-    printf("(vs %s)\n", poss[i]);
-    printf("%d (vs %s)\n", res->comparisons, cmps[i]);
-    
-    free_vector_char(txt);
-    free_vector_char(pat);
-    free_result(res);
-  }
-
-  return 0;
-}
-
-#else
 
 /* don't forget to reread the spec and check if we're printing the right amount
    of spaces and newlines */
@@ -536,5 +474,3 @@ int main() {
   free_vector_char(P);
   return 0;
 }
-
-#endif
