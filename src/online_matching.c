@@ -210,6 +210,8 @@ int ncmp(char const * const s1, char const * const s2, int const n,
       return direction == left_right ? i : n - i - 1;
     }
   }
+
+  /* FIXME: should return -1 when right_left and n when left_right */
   return -1;
 }
 
@@ -328,8 +330,8 @@ int *R_at(int const *const R, char const x) {
 int *bad_char_preprocessing(string const *const S) {
   int *const R = calloc(4, sizeof(int));
 
-  int i = 0;
-  for (; i < S->size; i++) {
+  int i;
+  for (i = 0; i < S->size; i++) {
     *R_at(R, *at_char(S, i)) = i;
   }
   return R;
@@ -339,30 +341,46 @@ int bad_char_shift(int const *const R, int const i, char const c) {
   return max(1, i - *R_at(R, c));
 }
 
-#define SWAP(x, y, T) do { T SWAP = x; x = y; y = SWAP; } while (0)
 
-void reverse(string *const str) {
-  int const half = str->size / 2;
-  int i;
-
-  for (i = 0; i < half; i++) {
-    SWAP(*at_char(str, i), *at_char(str, str->size - i - 1), int);
-  }
-}
-
-int *big_L_prime(string const *const str) {
+int **strong_good_suffix_preprocessing(string const *const str) {
   int *const L_prime = calloc(str->size, sizeof(int));
-  int *const z       = Z(str);
+  int *const l_prime = calloc(str->size, sizeof(int));
+  int *const z = Z(str);
 
   int j;
   for (j = 0; j < str->size - 1; j++) {
-    L_prime[str->size - z[j]] = j;
-  }
+    /* FIXME: not sure if that -1 is correct */
+    int const i = (str->size - 1) - z[j];
+    L_prime[i] = j;
 
+    if (z[j] == j) {
+      l_prime[i] = j;
+    }
+  }
   free(z);
-  return L_prime;
+
+  int **pair = malloc(2 * sizeof(int*));
+  pair[0] = L_prime;
+  pair[1] = l_prime;
+
+  return pair;
 }
 
+int strong_good_suffix_shift(int **const ls, int const i, int const n) {
+  int const *const L_prime = ls[0]; 
+  int const *const l_prime = ls[1];
+
+  /* FIXME: not sure if these last -1's in the last 3 cases are correct */
+  if (i == n - 1) {
+    return 1;
+  } else if (i == -1) {
+    return (n - 1) - l_prime[1] - 1 ;
+  } else if (L_prime[i + 1] > 0) {
+    return (n - 1) - L_prime[i + 1] - 1; 
+  } else {
+    return (n - 1) - l_prime[i + 1] - 1;
+  }
+}
 
 result *B(string const * const T, string const * const P) {
   result *const res = new_result();
@@ -370,6 +388,7 @@ result *B(string const * const T, string const * const P) {
 
   /* Right-most character occurrence array */
   int *const R = bad_char_preprocessing(P);
+  int **const ls = strong_good_suffix_preprocessing(P);
 
   int t     = n - 1; /* T index */
   int shift = 0;     /* amount to shift P */
@@ -378,64 +397,92 @@ result *B(string const * const T, string const * const P) {
     if (i == -1) { /* match */
       add(res, t - n + 1);
     }
-    shift = bad_char_shift(R, i, *at_char(T, t));
+    shift = max(bad_char_shift(R, i, *at_char(T, t)),
+                strong_good_suffix_shift(ls, i, n));
   }
 
   free(R);
+  free(ls[0]);
+  free(ls[1]);
+  free(ls);
   return res;
 }
 
 /* ************************************************************************** */
 
-/* don't forget to reread the spec and check if we're printing the right amount
-   of spaces and newlines */
 int main() {
-  char command;
-  vector_char *T = new_vector_char();
-  vector_char *P = new_vector_char();
-  result *result;
+  char *txts[] = {"tcgcagggcg", "aaaaaaaaaa", "gcccaaagac"};
+  char *pats[] = {"tc", "aaa", "ca"};
+  char *poss[] = {"0", "0 1 2 3 4 5 6 7", "3"};
+  int cmps[] = {7, 24, 9};
 
-  while ((command = getchar()) != 'X') {
-    getchar(); /* space character */
+  size_t i;
+  for (i = 0; i < sizeof(txts) / sizeof(char*); i++) {
+    string *txt = new_string(txts[i]);
+    string *pat = new_string(pats[i]);
 
-    switch (command) {
-    case 'T':
-      read(T);
-      /* printf("T: T = "); print_vector_char(T); */
-      break;
-    case 'N':
-      read(P);
-      result = N(T, P);
-
-      print_vector_int(result->positions);
-      printf("%d \n", result->comparisons);
-
-      free_result(result);
-      break;
-    case 'K':
-      read(P);
-      result = K(T, P);
-
-      print_vector_int(result->positions);
-      printf("%d \n", result->comparisons);
-
-      free_result(result);
-      break;
-    case 'B':
-      read(P);
-      result = B(T, P);
-
-      print_vector_int(result->positions);
-      printf("%d \n", result->comparisons);
-
-      free_result(result);
-      break;
-    default:
-      printf("Ignoring command: '%c'.\n", command);
-    }
+    result *res = B(txt, pat);
+    print_vector_int(res->positions);
+    printf("should be %s\n", poss[i]);
+    printf("%d (should be %d)\n", res->comparisons, cmps[i]);
+    
+    free(txt);
+    free(pat);
+    free(res);
   }
 
-  free_vector_char(T);
-  free_vector_char(P);
   return 0;
 }
+
+/* /\* don't forget to reread the spec and check if we're printing the right amount */
+/*    of spaces and newlines *\/ */
+/* int main() { */
+/*   char command; */
+/*   vector_char *T = new_vector_char(); */
+/*   vector_char *P = new_vector_char(); */
+/*   result *result; */
+
+/*   while ((command = getchar()) != 'X') { */
+/*     getchar(); /\* space character *\/ */
+
+/*     switch (command) { */
+/*     case 'T': */
+/*       read(T); */
+/*       /\* printf("T: T = "); print_vector_char(T); *\/ */
+/*       break; */
+/*     case 'N': */
+/*       read(P); */
+/*       result = N(T, P); */
+
+/*       print_vector_int(result->positions); */
+/*       printf("%d \n", result->comparisons); */
+
+/*       free_result(result); */
+/*       break; */
+/*     case 'K': */
+/*       read(P); */
+/*       result = K(T, P); */
+
+/*       print_vector_int(result->positions); */
+/*       printf("%d \n", result->comparisons); */
+
+/*       free_result(result); */
+/*       break; */
+/*     case 'B': */
+/*       read(P); */
+/*       result = B(T, P); */
+
+/*       print_vector_int(result->positions); */
+/*       printf("%d \n", result->comparisons); */
+
+/*       free_result(result); */
+/*       break; */
+/*     default: */
+/*       printf("Ignoring command: '%c'.\n", command); */
+/*     } */
+/*   } */
+
+/*   free_vector_char(T); */
+/*   free_vector_char(P); */
+/*   return 0; */
+/* } */

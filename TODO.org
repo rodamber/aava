@@ -3,13 +3,13 @@
   - [X] Dynamic arrays
   - [X] Commands
 - [ ] Knuth-Morris-Pratt
-- [-] Boyer-Moore
+- [X] Boyer-Moore
   - [X] Naive right-to-left
   - [X] Simple bad character rule
-  - [-] (Strong) Good suffix rule
+  - [X] (Strong) Good suffix rule
     - [X] Z algorithm
-    - [ ] Suffix rule itself
-  - [ ] Combine everything
+    - [X] Suffix rule itself
+  - [X] Combine everything
 - [ ] Shell test script
 * Boyer-Moore
 ** (Strong) Good suffix rule
