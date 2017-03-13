@@ -350,6 +350,20 @@ void reverse(string *const str) {
   }
 }
 
+int *big_L_prime(string const *const str) {
+  int *const L_prime = calloc(str->size, sizeof(int));
+  int *const z       = Z(str);
+
+  int j;
+  for (j = 0; j < str->size - 1; j++) {
+    L_prime[str->size - z[j]] = j;
+  }
+
+  free(z);
+  return L_prime;
+}
+
+
 result *B(string const * const T, string const * const P) {
   result *const res = new_result();
   int const n = P->size, m = T->size;
