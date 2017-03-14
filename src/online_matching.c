@@ -213,11 +213,11 @@ int const right_left = -1;
 
 /* Returns index of mismatch, or -n if it matches and direction is right to
    left, or n if it matches and direction is left to right */
-int ncmp(char const * const s1, char const * const s2, int const n,
-         int const direction, result * const res) {
+int ncmp(char const *const s1, char const *const s2, int const n,
+         int const direction, result *const res) {
   int i;
   for (i = 0; i < n; i++) {
-    inc(res);
+    if (res) inc(res);
     if (s1[direction * i] != s2[direction * i]) {
       break;
     }
@@ -261,10 +261,51 @@ result *N(string const * const T, string const * const P) {
 /* Knuth-Morris-Pratt                                                         */
 /* ************************************************************************** */
 
-result *K(string const * const T, string const * const P) {
-  (void) T; (void) P;
-  result *result = new_result();
-  return result;
+int *pi_preprocessing(string const *const s) {
+  int const n = s->size;
+  int *const pi = malloc(s->size * sizeof(int));
+  pi[0] = 0;
+
+  int t;
+  int matched = 0;
+
+  for (t = 1; t < n; t++) {
+    int const i = ncmp(at_char(s, t),
+                       at_char(s, 0), n - 1 - t, left_right, NULL);
+    if (i == n) {
+      matched = i - t;
+    } else {
+      matched = pi[matched - 1];
+    }
+    pi[t] = matched;
+  }
+
+  return pi;
+}
+
+result *K(string const *const txt, string const *const pat) {
+  result *res = new_result();
+
+  int const m = txt->size;
+  int const n = pat->size;
+
+  int *const pi = pi_preprocessing(pat);
+
+  int t;         /* T index */
+  int shift = 0; /* amount to shift P */
+
+  for (t = 0; t < m; t += shift) {
+    int const i = ncmp(at_char(txt, t), at_char(pat, 0), n, left_right, res);
+    if (i == n) { /* match */
+      add(res, t - n + 1);
+      shift += pi[n - 1];
+    } else {
+      shift = i - pi[i - 1];
+    }
+  }
+
+  free(pi);
+  return res;
 }
 
 /* ************************************************************************** */
@@ -287,7 +328,7 @@ int *Z(string const * const str) {
   int l, r, k;
 
   for (l = r = str->size - 1, k = l - 1; k >= 0; k--) {
-    if (k < l) { /* case 1 */ 
+    if (k < l) { /* case 1 */
       z[k] = match_count(at_back_char(str, 0), at_char(str, k), k + 1);
 
       if (z[k] > 0) {
@@ -318,12 +359,12 @@ int *Z(string const * const str) {
 /* ************************************************************************** */
 
 int *R_at(int const *const R, char const x) {
-  enum {a, c, t, g};
+  enum {A, C, T, G};
   switch (x) {
-  case 'a': return (int*) &R[a];
-  case 'c': return (int*) &R[c];
-  case 't': return (int*) &R[t];
-  case 'g': return (int*) &R[g];
+  case 'A': return (int*) &R[A];
+  case 'C': return (int*) &R[C];
+  case 'T': return (int*) &R[T];
+  case 'G': return (int*) &R[G];
   default:
     fprintf(stderr, "R_at: bad character '%c'", x);
     return NULL;
@@ -375,7 +416,7 @@ int **strong_good_suffix_preprocessing(string const *const str) {
 }
 
 int strong_good_suffix_shift(int **const ls, int const i, int const n) {
-  int const *const L_prime = ls[0]; 
+  int const *const L_prime = ls[0];
   int const *const l_prime = ls[1];
   int const offset = (n - 1) + i;
 
@@ -384,7 +425,7 @@ int strong_good_suffix_shift(int **const ls, int const i, int const n) {
   } else if (offset == -1) { /* Matched pattern */
     return n - l_prime[1];
   } else if (L_prime[offset + 1] > 0) { /* Mismatch occurs at i */
-    return (n - 1) - L_prime[offset + 1]; 
+    return (n - 1) - L_prime[offset + 1];
   } else {
     return n - l_prime[offset + 1];
   }
@@ -443,7 +484,7 @@ int main() {
       result = N(T, P);
 
       print_vector_int(result->positions);
-      printf("%d \n", result->comparisons);
+      /* printf("%d \n", result->comparisons); */
 
       free_result(result);
       break;
