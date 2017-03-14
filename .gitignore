@@ -37,3 +37,6 @@ om
 
 # Vagrant
 .vagrant
+
+# Test
+myout.d/*
