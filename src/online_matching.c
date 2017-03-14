@@ -262,22 +262,20 @@ result *N(string const * const T, string const * const P) {
 /* ************************************************************************** */
 
 int *pi_preprocessing(string const *const s) {
-  int const n = s->size;
+  int const n   = s->size;
   int *const pi = malloc(s->size * sizeof(int));
   pi[0] = 0;
 
-  int t;
-  int matched = 0;
-
-  for (t = 1; t < n; t++) {
-    int const i = ncmp(at_char(s, t),
-                       at_char(s, 0), n - 1 - t, left_right, NULL);
-    if (i == n) {
-      matched = i - t;
-    } else {
-      matched = pi[matched - 1];
+  int k = -1;
+  int q;
+  for (q = 1; q < n; q++) {
+    while (k >= 0 && *at_char(s, k + 1) != *at_char(s, q)) {
+      k = pi[k] - 1;
     }
-    pi[t] = matched;
+    if (*at_char(s, k + 1) == *at_char(s, q)) {
+      k++;
+    }
+    pi[q] = k + 1;
   }
 
   return pi;
@@ -291,20 +289,20 @@ result *K(string const *const txt, string const *const pat) {
 
   int *const pi = pi_preprocessing(pat);
 
-  int t;         /* T index */
-  int shift = 0; /* amount to shift P */
-
-  for (t = 0; t < m; t += shift) {
-    int const i = ncmp(at_char(txt, t), at_char(pat, 0), n, left_right, res);
-    if (i == n) { /* match */
-      add(res, t - n + 1);
-      shift += pi[n - 1];
-    } else {
-      shift = i - pi[i - 1];
+  int t = 0; /* txt index */
+  int p = 0;
+  while (t < m) {
+    int const mismatch = ncmp(at_char(txt, t + p),
+                              at_char(pat, p), n, left_right, res);
+    if (mismatch == n) { /* match */
+      add(res, t);
     }
+    p = pi[mismatch - 1] - 1;
+    t += (mismatch == 0 ? 1 : mismatch - p);
   }
 
   free(pi);
+  /* inc(res); /\* FIXME: *\/ */
   return res;
 }
 
@@ -436,14 +434,15 @@ result *B(string const * const T, string const * const P) {
   int const n = P->size, m = T->size;
 
   /* Right-most character occurrence array */
-  int *const R = bad_char_preprocessing(P);
+  int *const R   = bad_char_preprocessing(P);
   int **const ls = strong_good_suffix_preprocessing(P);
 
   int t;         /* T index */
   int shift = 0; /* amount to shift P */
 
   for (t = n - 1; t < m; t += shift) {
-    int const i = ncmp(at_char(T, t), at_char(P, n - 1), n, right_left, res);
+    /* FIXME: at_back_char(P, 0) ? Aren't we making superfluous comparisons? */
+    int const i = ncmp(at_char(T, t), at_back_char(P, 0), n, right_left, res);
     if (i == -n) { /* match */
       add(res, t - n + 1);
     }
