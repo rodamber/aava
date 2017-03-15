@@ -96,10 +96,10 @@ DEFINE_DELETE(int)
 
 #define DEFINE_WRITE(TYPE)                                                     \
   void write_##TYPE(vector_##TYPE * const da, const int at, const TYPE elem) { \
-    if (at == da->size) {                                                      \
+    if (at == da->size + 1) {                                                  \
       insert_##TYPE(da, elem);                                                 \
     } else {                                                                   \
-      da->array[at] = elem;                                                    \
+      da->array[at - 1] = elem;                                                \
     }                                                                          \
   }                                                                            \
 
@@ -108,18 +108,18 @@ DEFINE_WRITE(int)
 
 #ifdef DEBUG
 
-#define DEFINE_AT(TYPE)                                               \
-  TYPE *at_##TYPE(vector_##TYPE const * const v, const int i) {       \
-    if (i >= v->size)                                                 \
-      printf("Out of bounds access: size = %d, i = %d", v->size, i);  \
-    return &(v->array[i]);                                            \
-  }                                                                   \
+#define DEFINE_AT(TYPE)                                                \
+  TYPE *at_##TYPE(vector_##TYPE const * const v, const int i) {        \
+    if (i > v->size)                                                   \
+      printf("Out of bounds access: size = %d, i = %d\n", v->size, i); \
+    return &(v->array[i - 1]);                                         \
+  }                                                                    \
 
 #else
 
 #define DEFINE_AT(TYPE)                                         \
   TYPE *at_##TYPE(vector_##TYPE const * const v, const int i) { \
-    return &(v->array[i]);                                      \
+    return &(v->array[i - 1]);                                  \
   }                                                             \
 
 #endif
@@ -129,7 +129,7 @@ DEFINE_AT(int)
 
 #define DEFINE_AT_BACK(TYPE)                                         \
   TYPE *at_back_##TYPE(vector_##TYPE const * const v, const int i) { \
-    return &(v->array[v->size - i - 1]);                             \
+    return &(v->array[v->size - i]);                                 \
   }                                                                  \
 
 DEFINE_AT_BACK(char)
@@ -169,6 +169,24 @@ DEFINE_FROM_ARRAY(int)
 DEFINE_PRINT_VECTOR(char, "%c")
 DEFINE_PRINT_VECTOR(int, "%d ")
 
+#define DEFINE_REVERSE(TYPE)                                      \
+  vector_##TYPE *reverse_##TYPE(vector_##TYPE const *const vec) { \
+    vector_##TYPE *const rev = new_vector_##TYPE();               \
+                                                                  \
+    int i;                                                        \
+    for (i = 1; i <= vec->size; i++) {                            \
+      insert_##TYPE(rev, *at_back_##TYPE(vec, i));                \
+    }                                                             \
+                                                                  \
+    return rev;                                                   \
+  }                                                               \
+
+/* printf("vec: "); print_vector_##TYPE(vec);                      \ */
+/* printf("rev: "); print_vector_##TYPE(rev);                      \ */
+
+DEFINE_REVERSE(char)
+DEFINE_REVERSE(int)
+
 string *new_string(char const *const s) {
   string *const str = new_vector_char();
 
@@ -179,6 +197,15 @@ string *new_string(char const *const s) {
   }
 
   return str;
+}
+
+vector_int *new_vector_init_int(int const val, int const nmemb) {
+  vector_int *const vec = new_vector_int();
+
+  int n = nmemb;
+  while (n--) insert_int(vec, val);
+
+  return vec;
 }
 
 /* ************************************************************************** */
@@ -201,7 +228,7 @@ void free_result(result *result) {
 }
 
 void add(result const * const result, const int new_pos) {
-  insert_int(result->positions, new_pos);
+  insert_int(result->positions, new_pos - 1);
 }
 
 void inc(result * const result) {
@@ -211,8 +238,8 @@ void inc(result * const result) {
 int const left_right = 1;
 int const right_left = -1;
 
-/* Returns index of mismatch, or -n if it matches and direction is right to
-   left, or n if it matches and direction is left to right */
+/* Returns index of mismatch, or -n-1 if it matches and direction is right to
+   left, or n+1 if it matches and direction is left to right */
 int ncmp(char const *const s1, char const *const s2, int const n,
          int const direction, result *const res) {
   int i;
@@ -222,19 +249,17 @@ int ncmp(char const *const s1, char const *const s2, int const n,
       break;
     }
   }
-  return direction * i;
+  return direction * (i + 1);
 }
-
-/* ************************************************************************** */
 
 void read(string * const vec) {
   char c;
-  int i = 0;
+  int i = 1;
 
   while ((c = getchar()) != '\n') {
     write_char(vec, i++, c);
   }
-  vec->size = i;
+  vec->size = i - 1;
   downvolume_char(vec);
 }
 
@@ -242,15 +267,14 @@ void read(string * const vec) {
 /* Naive                                                                      */
 /* ************************************************************************** */
 
-result *N(string const * const T, string const * const P) {
+result *naive (string const * const T, string const * const P) {
   result *const res = new_result();
   int const n = P->size, m = T->size;
 
-  /* Don't forget the arrays are not null terminated. */
   int t;
-  for (t = 0; t <= m - n; t++) {
+  for (t = 1; t <= m - n + 1; t++) {
     /* FIXME: We're counting the comparisons here */
-    if (ncmp(at_char(T, t), at_char(P, 0), n, left_right, res) == n) {
+    if (ncmp(at_char(T, t), at_char(P, 1), n, left_right, res) == n + 1) {
       add(res, t);
     }
   }
@@ -281,7 +305,7 @@ int *pi_preprocessing(string const *const s) {
   return pi;
 }
 
-result *K(string const *const txt, string const *const pat) {
+result *knuth_morris_pratt(string const *const txt, string const *const pat) {
   result *res = new_result();
 
   int const m = txt->size;
@@ -312,45 +336,59 @@ result *K(string const *const txt, string const *const pat) {
 
 int match_count(char const *const s1, char const *const s2, int const n) {
   int i = 0;
-  while (i > -n && s1[i] == s2[i]) {
-    i--;
+  while (i < n && s1[i] == s2[i]) {
+    i++;
   }
-  return -i;
+  return i;
 }
 
-/*
-  Reverse Z algorithm.
- */
-int *Z(string const * const str) {
-  int *const z = calloc(str->size, sizeof(int));
-  int l, r, k;
+vector_int *z_algorithm(string const *const str) {
+#define Z(K) *at_int(z, (K))
+#define S(K) at_char(str, K) /* mind the '*' */
 
-  for (l = r = str->size - 1, k = l - 1; k >= 0; k--) {
-    if (k < l) { /* case 1 */
-      z[k] = match_count(at_back_char(str, 0), at_char(str, k), k + 1);
+  int const n         = str->size;
+  vector_int *const z = new_vector_int();
+  insert_int(z, 0);
 
-      if (z[k] > 0) {
-        l = k - z[k] + 1;
-        r = k;
+  int l = 0, r = 0, k = 2;
+  for (; k <= n; k++) {
+    if (k > r) {
+      insert_int(z, match_count(S(k), S(1), n - k + 1));
+
+      if (k == 2 || Z(k) > 0) { /* case 1 */
+        r = k + Z(k) - 1;
+        l = k;
+
+      } else {
+        int const k_prime   = k - l + 1;
+        int const beta_size = r - k + 1;
+
+        if (Z(k_prime) < beta_size) { /* case 2a */
+          insert_int(z, Z(k_prime));
+
+        } else { /* case 2a */
+          int const count = match_count(S(r + 1), S(beta_size + 1), n - r + 1);
+          insert_int(z, beta_size + count);
+          r += count;
+          l = k;
+        }
       }
-    } else { /* case 2 */
-      int const k_prime   = k + (str->size - 1) - r;
-      int const beta_size = k - l + 1;
-
-      if (z[k_prime] < beta_size) { /* case 2a */
-        z[k] = z[k_prime];
-      } else { /* case 2b */
-        int const count = match_count(at_back_char(str, beta_size - 1),
-                                      at_char(str, l - 1), l);
-        z[k] = beta_size + count;
-        l -= count;
-        r = k;
-      }
-
     }
   }
+
   return z;
+
+#undef S
+#undef Z
 }
+
+vector_int *reverse_z_algorithm(string const *const str) {
+  string *const rev_str = reverse_char(str);
+  vector_int *const z = z_algorithm(rev_str);
+  free(rev_str);
+  return (vector_int*) z;
+}
+
 
 /* ************************************************************************** */
 /* Boyer-Moore                                                                */
@@ -369,14 +407,13 @@ int *R_at(int const *const R, char const x) {
   }
 }
 
-/* Don't forget to free the array R */
-int *bad_char_preprocessing(string const *const S) {
-  int *const R = malloc(4* sizeof(int));
-  memset(R, INT_MAX, 4 * sizeof(int));
+/* /\* Don't forget to free the array R *\/ */
+int *bad_char_preprocessing(string const *const pat) {
+  int *const R = calloc(4, sizeof(int));
 
   int i;
-  for (i = 0; i < S->size; i++) {
-    *R_at(R, *at_char(S, i)) = i;
+  for (i = 1; i <= pat->size; i++) {
+    *R_at(R, *at_char(pat, i)) = i;
   }
   return R;
 }
@@ -386,77 +423,98 @@ int bad_char_shift(int const *const R, int const i, char const c) {
 }
 
 
-int **strong_good_suffix_preprocessing(string const *const str) {
-  int *const L_prime = calloc(str->size, sizeof(int));
-  int *const l_prime = calloc(str->size, sizeof(int));
-  int *const z = Z(str);
+vector_int **strong_good_suffix_preprocessing(string const *const str) {
+#define N(K) *at_int(z, K)
 
-  /* printf("z': "); print_array(z, str->size); */
+  int const n = str->size;
+
+  vector_int *const L_prime = new_vector_init_int(0, n);
+  vector_int *const l_prime = new_vector_init_int(0, n);
+
+  vector_int *const z = reverse_z_algorithm(str);
+
+  /* printf("z': "); print_vector_int(z); */
 
   int j;
-  for (j = 0; j < str->size - 1; j++) {
-    int const i = str->size - z[j];
+  for (j = 1; j <= n - 1; j++) {
+    int const i = n - N(j) + 1;
 
-    if (z[j] > 0) {
-      L_prime[i] = j;
+    if (N(j) > 0) {
+      *at_int(L_prime, i) = j;
     }
-    if (z[j] == j + 1) {
-      l_prime[i] = j + 1;
+    if (N(j) == j) {
+      *at_int(l_prime, i) = j;
     }
   }
-  free(z);
+  free_vector_int(z);
 
-  int **pair = malloc(2 * sizeof(int*));
+  vector_int **pair = malloc(2 * sizeof(vector_int*));
   pair[0] = L_prime;
   pair[1] = l_prime;
 
   return pair;
+#undef N
 }
 
-int strong_good_suffix_shift(int **const ls, int const i, int const n) {
-  int const *const L_prime = ls[0];
-  int const *const l_prime = ls[1];
-  int const offset = (n - 1) + i;
+int strong_good_suffix_shift(vector_int **const ls, int const ix) {
+  vector_int const *const L_prime = ls[0];
+  vector_int const *const l_prime = ls[1];
 
-  if (offset == n - 1) { /* Failed on first character */
+  int const n = L_prime->size;
+
+  if (ix == -1) { /* Failed on first character */
     return 1;
-  } else if (offset == -1) { /* Matched pattern */
-    return n - l_prime[1];
-  } else if (L_prime[offset + 1] > 0) { /* Mismatch occurs at i */
-    return (n - 1) - L_prime[offset + 1];
+  } else if (ix == -n - 1) { /* Matched pattern */
+    return n - *at_int(l_prime, 2);
+  }
+
+  int i = n + ix + 1;
+  if (*at_int(L_prime, i) > 0) { /* Mismatch occurs at i */
+    return n - *at_int(L_prime, i);
   } else {
-    return n - l_prime[offset + 1];
+    return n - *at_int(l_prime, i);
   }
 }
 
-result *B(string const * const T, string const * const P) {
+result *boyer_moore(string const * const txt, string const * const pat) {
   result *const res = new_result();
-  int const n = P->size, m = T->size;
+  int const n = pat->size, m = txt->size;
 
-  /* Right-most character occurrence array */
-  int *const R   = bad_char_preprocessing(P);
-  int **const ls = strong_good_suffix_preprocessing(P);
+  /* Preprocessing */
+  int *const R = bad_char_preprocessing(pat);
+  vector_int **const ls = strong_good_suffix_preprocessing(pat);
 
-  int t;         /* T index */
-  int shift = 0; /* amount to shift P */
+  /* printf("R = %d | %d | %d | %d\n", R[0], R[1], R[2], R[3]); */
+  /* printf("L = "); print_array(ls[0]->array, n); */
+  /* printf("l = "); print_array(ls[1]->array, n); */
 
-  for (t = n - 1; t < m; t += shift) {
-    /* FIXME: at_back_char(P, 0) ? Aren't we making superfluous comparisons? */
-    int const i = ncmp(at_char(T, t), at_back_char(P, 0), n, right_left, res);
-    if (i == -n) { /* match */
+  /* Search */
+  int t; /* txt index */
+  int shift = 0;
+  for (t = n; t <= m; t += shift) {
+    int const ix = ncmp(at_char(txt, t), at_back_char(pat, 1), n, right_left, res);
+    if (ix == -n - 1) { /* match */
       add(res, t - n + 1);
     }
 
-    int const bc = bad_char_shift(R, n + i - 1, *at_char(T, t));
-    int const gs = strong_good_suffix_shift(ls, i, n);
+    int const bc = bad_char_shift(R, n + ix + 1, *at_char(txt, t));
+    int const gs = strong_good_suffix_shift(ls, ix);
 
     shift = max(bc, gs);
+
+    /* printf("------------\n"); */
+    /* printf("T %.*s\n", txt->size, txt->array); */
+    /* printf("P %*s%.*s\n", t - n, " ", pat->size, pat->array); */
+    /* printf("  %*s^\n", t + ix, " "); */
+    /* printf("cmps: %d; bc: %d; gs: %d\n", res->comparisons, bc, gs); */
+
   }
 
   free(R);
-  free(ls[0]);
-  free(ls[1]);
+  free_vector_int(ls[0]);
+  free_vector_int(ls[1]);
   free(ls);
+
   return res;
 }
 
@@ -480,7 +538,7 @@ int main() {
       break;
     case 'N':
       read(P);
-      result = N(T, P);
+      result = naive(T, P);
 
       print_vector_int(result->positions);
       /* printf("%d \n", result->comparisons); */
@@ -489,7 +547,7 @@ int main() {
       break;
     case 'K':
       read(P);
-      result = K(T, P);
+      result = knuth_morris_pratt(T, P);
 
       print_vector_int(result->positions);
       printf("%d \n", result->comparisons);
@@ -498,7 +556,7 @@ int main() {
       break;
     case 'B':
       read(P);
-      result = B(T, P);
+      result = boyer_moore(T, P);
 
       print_vector_int(result->positions);
       printf("%d \n", result->comparisons);

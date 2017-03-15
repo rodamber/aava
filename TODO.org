@@ -11,3 +11,156 @@
     - [X] Suffix rule itself
   - [X] Combine everything
 - [ ] Shell test script
+* test
+** 01.in
+R = 0 | 2 | 1 | 0
+L = <0 0>
+l = <0 0>
+------------
+T TCGCAGGGCG
+P TC
+ ^
+cmps: 2; bc: 1; gs: 2
+------------
+T TCGCAGGGCG
+P   TC
+    ^
+cmps: 4; bc: 1; gs: 2
+------------
+T TCGCAGGGCG
+P     TC
+       ^
+cmps: 5; bc: 2; gs: 1
+------------
+T TCGCAGGGCG
+P       TC
+         ^
+cmps: 6; bc: 2; gs: 1
+------------
+T TCGCAGGGCG
+P         TC
+           ^
+cmps: 7; bc: 2; gs: 1
+** 02.in
+R = 3 | 0 | 0 | 0
+L = <0 2 0>
+l = <0 2 0>
+------------
+T AAAAAAAAAA
+P AAA
+ ^
+cmps: 3; bc: 1; gs: 1
+------------
+T AAAAAAAAAA
+P  AAA
+   ^
+cmps: 6; bc: 1; gs: 1
+------------
+T AAAAAAAAAA
+P   AAA
+   ^
+cmps: 9; bc: 1; gs: 1
+------------
+T AAAAAAAAAA
+P    AAA
+    ^
+cmps: 12; bc: 1; gs: 1
+------------
+T AAAAAAAAAA
+P     AAA
+     ^
+cmps: 15; bc: 1; gs: 1
+------------
+T AAAAAAAAAA
+P      AAA
+      ^
+cmps: 18; bc: 1; gs: 1
+------------
+T AAAAAAAAAA
+P       AAA
+       ^
+cmps: 21; bc: 1; gs: 1
+------------
+T AAAAAAAAAA
+P        AAA
+        ^
+cmps: 24; bc: 1; gs: 1
+** 05.in
+R = 2 | 1 | 0 | 0
+L = <0 0>
+l = <0 0>
+------------
+T GCCCAAAGAC
+P CA
+ ^
+cmps: 1; bc: 1; gs: 1
+------------
+T GCCCAAAGAC
+P  CA
+    ^
+cmps: 2; bc: 1; gs: 1
+------------
+T GCCCAAAGAC
+P   CA
+     ^
+cmps: 3; bc: 1; gs: 1
+------------
+T GCCCAAAGAC
+P    CA
+    ^
+cmps: 5; bc: 1; gs: 2
+------------
+T GCCCAAAGAC
+P      CA
+       ^
+cmps: 7; bc: 1; gs: 2
+------------
+T GCCCAAAGAC
+P        CA
+         ^
+cmps: 9; bc: 1; gs: 2
+
+** 06.in
+R = 3 | 0 | 0 | 0
+L = <0 2 0>
+l = <0 2 0>
+------------
+T AAAAAAAAAA
+P AAA
+ ^
+cmps: 3; bc: 1; gs: 1
+------------
+T AAAAAAAAAA
+P  AAA
+   ^
+cmps: 6; bc: 1; gs: 1
+------------
+T AAAAAAAAAA
+P   AAA
+   ^
+cmps: 9; bc: 1; gs: 1
+------------
+T AAAAAAAAAA
+P    AAA
+    ^
+cmps: 12; bc: 1; gs: 1
+------------
+T AAAAAAAAAA
+P     AAA
+     ^
+cmps: 15; bc: 1; gs: 1
+------------
+T AAAAAAAAAA
+P      AAA
+      ^
+cmps: 18; bc: 1; gs: 1
+------------
+T AAAAAAAAAA
+P       AAA
+       ^
+cmps: 21; bc: 1; gs: 1
+------------
+T AAAAAAAAAA
+P        AAA
+        ^
+cmps: 24; bc: 1; gs: 1
