@@ -282,55 +282,6 @@ result *naive (string const * const T, string const * const P) {
 }
 
 /* ************************************************************************** */
-/* Knuth-Morris-Pratt                                                         */
-/* ************************************************************************** */
-
-int *pi_preprocessing(string const *const s) {
-  int const n   = s->size;
-  int *const pi = malloc(s->size * sizeof(int));
-  pi[0] = 0;
-
-  int k = -1;
-  int q;
-  for (q = 1; q < n; q++) {
-    while (k >= 0 && *at_char(s, k + 1) != *at_char(s, q)) {
-      k = pi[k] - 1;
-    }
-    if (*at_char(s, k + 1) == *at_char(s, q)) {
-      k++;
-    }
-    pi[q] = k + 1;
-  }
-
-  return pi;
-}
-
-result *knuth_morris_pratt(string const *const txt, string const *const pat) {
-  result *res = new_result();
-
-  int const m = txt->size;
-  int const n = pat->size;
-
-  int *const pi = pi_preprocessing(pat);
-
-  int t = 0; /* txt index */
-  int p = 0;
-  while (t < m) {
-    int const mismatch = ncmp(at_char(txt, t + p),
-                              at_char(pat, p), n, left_right, res);
-    if (mismatch == n) { /* match */
-      add(res, t);
-    }
-    p = pi[mismatch - 1] - 1;
-    t += (mismatch == 0 ? 1 : mismatch - p);
-  }
-
-  free(pi);
-  /* inc(res); /\* FIXME: *\/ */
-  return res;
-}
-
-/* ************************************************************************** */
 /* Z algorithm                                                                */
 /* ************************************************************************** */
 
@@ -385,10 +336,46 @@ vector_int *z_algorithm(string const *const str) {
 vector_int *reverse_z_algorithm(string const *const str) {
   string *const rev_str = reverse_char(str);
   vector_int *const z = z_algorithm(rev_str);
-  free(rev_str);
+  free_vector_char(rev_str);
   return (vector_int*) z;
 }
 
+/* ************************************************************************** */
+/* Knuth-Morris-Pratt                                                         */
+/* ************************************************************************** */
+
+/* vector_int *kmp_preprocessing(string const *const pat) { */
+/*   vector_int *const sp =  */
+/* } */
+
+result *knuth_morris_pratt(string const *const txt, string const *const pat) {
+  (void) txt; (void) pat;
+  return (result*) 0;
+}
+/* result *knuth_morris_pratt(string const *const txt, string const *const pat) { */
+/*   result *res = new_result(); */
+
+/*   int const m = txt->size; */
+/*   int const n = pat->size; */
+
+/*   int *const pi = pi_preprocessing(pat); */
+
+/*   int t = 0; /\* txt index *\/ */
+/*   int p = 0; */
+/*   while (t < m) { */
+/*     int const mismatch = ncmp(at_char(txt, t + p), */
+/*                               at_char(pat, p), n, left_right, res); */
+/*     if (mismatch == n) { /\* match *\/ */
+/*       add(res, t); */
+/*     } */
+/*     p = pi[mismatch - 1] - 1; */
+/*     t += (mismatch == 0 ? 1 : mismatch - p); */
+/*   } */
+
+/*   free(pi); */
+/*   /\* inc(res); /\\* FIXME: *\\/ *\/ */
+/*   return res; */
+/* } */
 
 /* ************************************************************************** */
 /* Boyer-Moore                                                                */
