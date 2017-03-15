@@ -344,14 +344,26 @@ vector_int *reverse_z_algorithm(string const *const str) {
 /* Knuth-Morris-Pratt                                                         */
 /* ************************************************************************** */
 
-/* vector_int *kmp_preprocessing(string const *const pat) { */
-/*   vector_int *const sp =  */
-/* } */
+vector_int *kmp_preprocessing(string const *const pat) {
+  int const n = pat->size;
+  vector_int *const sp_prime = new_vector_init_int(0, n);
+  vector_int *const z = z_algorithm(pat);
+
+  int j;
+  for (j = n; j >= 2; j--) {
+    int const i = j + *at_int(z, j) - 1;
+    write_int(sp_prime, i, *at_int(z, j));
+  }
+  free_vector_int(z);
+
+  return sp_prime;
+}
 
 result *knuth_morris_pratt(string const *const txt, string const *const pat) {
   (void) txt; (void) pat;
   return (result*) 0;
 }
+
 /* result *knuth_morris_pratt(string const *const txt, string const *const pat) { */
 /*   result *res = new_result(); */
 
