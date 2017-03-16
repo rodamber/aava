@@ -306,24 +306,25 @@ vector_int *z_algorithm(string const *const str) {
     if (k > r) {
       insert_int(z, match_count(S(k), S(1), n - k + 1));
 
-      if (k == 2 || Z(k) > 0) { /* case 1 */
+      if (Z(k) > 0) { /* case 1 */
         r = k + Z(k) - 1;
         l = k;
-
-      } else {
-        int const k_prime   = k - l + 1;
-        int const beta_size = r - k + 1;
-
-        if (Z(k_prime) < beta_size) { /* case 2a */
-          insert_int(z, Z(k_prime));
-
-        } else { /* case 2a */
-          int const count = match_count(S(r + 1), S(beta_size + 1), n - r + 1);
-          insert_int(z, beta_size + count);
-          r += count;
-          l = k;
-        }
       }
+
+    } else {
+      int const k_prime   = k - l + 1;
+      int const beta_size = r - k + 1;
+
+      if (Z(k_prime) < beta_size) { /* case 2a */
+        insert_int(z, Z(k_prime));
+
+      } else { /* case 2a */
+        int const count = 
+          (r == n ? 0 : match_count(S(r + 1), S(beta_size + 1), n - r));
+        insert_int(z, beta_size + count);
+        r += count;
+        l = k;
+      } 
     }
   }
 
@@ -360,34 +361,48 @@ vector_int *kmp_preprocessing(string const *const pat) {
 }
 
 result *knuth_morris_pratt(string const *const txt, string const *const pat) {
-  (void) txt; (void) pat;
-  return (result*) 0;
+#define PI(i) (*at_int(pi, (i)))
+#define F(i) ((i) == 1 ? 1 : PI((i) - 1) + 1)
+#define P(p) *at_char(pat, (p))
+#define T(c) *at_char(txt, (c))
+
+  result *res = new_result();
+
+  vector_int *const pi = kmp_preprocessing(pat);
+
+  int const m = txt->size;
+  int const n = pat->size;
+
+  int c = 1; /* txt index */
+  int p = 1;
+
+  while (c + (n - p) <= m) {
+    while (p <= n && P(p) == T(c)) {
+      inc(res);
+      p++;
+      c++;
+    }
+
+    if (p == n + 1) {
+      add(res, c - n);
+    }
+
+    if (p == 1) {
+      inc(res);
+      c++;
+    }
+
+    p = F(p);
+  }
+
+  free_vector_int(pi);
+  return res;
+
+#undef PI
+#undef F
+#undef P
+#undef T
 }
-
-/* result *knuth_morris_pratt(string const *const txt, string const *const pat) { */
-/*   result *res = new_result(); */
-
-/*   int const m = txt->size; */
-/*   int const n = pat->size; */
-
-/*   int *const pi = pi_preprocessing(pat); */
-
-/*   int t = 0; /\* txt index *\/ */
-/*   int p = 0; */
-/*   while (t < m) { */
-/*     int const mismatch = ncmp(at_char(txt, t + p), */
-/*                               at_char(pat, p), n, left_right, res); */
-/*     if (mismatch == n) { /\* match *\/ */
-/*       add(res, t); */
-/*     } */
-/*     p = pi[mismatch - 1] - 1; */
-/*     t += (mismatch == 0 ? 1 : mismatch - p); */
-/*   } */
-
-/*   free(pi); */
-/*   /\* inc(res); /\\* FIXME: *\\/ *\/ */
-/*   return res; */
-/* } */
 
 /* ************************************************************************** */
 /* Boyer-Moore                                                                */
@@ -431,8 +446,6 @@ vector_int **strong_good_suffix_preprocessing(string const *const str) {
   vector_int *const l_prime = new_vector_init_int(0, n);
 
   vector_int *const z = reverse_z_algorithm(str);
-
-  /* printf("z': "); print_vector_int(z); */
 
   int j;
   for (j = 1; j <= n - 1; j++) {

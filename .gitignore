@@ -28,8 +28,8 @@
 *.x86_64
 *.hex
 
-lc
-om
+src/om
+src/lc
 
 # Debug files
 *.dSYM/
