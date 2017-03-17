@@ -345,64 +345,135 @@ vector_int *reverse_z_algorithm(string const *const str) {
 /* Knuth-Morris-Pratt                                                         */
 /* ************************************************************************** */
 
-vector_int *kmp_preprocessing(string const *const pat) {
-  int const n = pat->size;
-  vector_int *const sp_prime = new_vector_init_int(0, n);
-  vector_int *const z = z_algorithm(pat);
+/* vector_int *kmp_preprocessing(string const *const pat) { */
+/*   int const n = pat->size; */
+/*   vector_int *const sp_prime = new_vector_init_int(0, n); */
+/*   vector_int *const z = z_algorithm(pat); */
 
-  int j;
-  for (j = n; j >= 2; j--) {
-    int const i = j + *at_int(z, j) - 1;
-    write_int(sp_prime, i, *at_int(z, j));
+/*   int j; */
+/*   for (j = n; j >= 2; j--) { */
+/*     int const i = j + *at_int(z, j) - 1; */
+/*     write_int(sp_prime, i, *at_int(z, j)); */
+/*   } */
+/*   free_vector_int(z); */
+
+/*   return sp_prime; */
+/* } */
+
+/* result *knuth_morris_pratt(string const *const txt, string const *const pat) { */
+/* #define PI(i) (*at_int(pi, (i))) */
+/* #define F(i) ((i) == 1 ? 1 : PI((i) - 1) + 1) */
+/* #define P(p) *at_char(pat, (p)) */
+/* #define T(c) *at_char(txt, (c)) */
+
+/*   result *res = new_result(); */
+
+/*   vector_int *const pi = kmp_preprocessing(pat); */
+/*   /\* printf("pi = "); print_vector_int(pi); *\/ */
+
+/*   int const m = txt->size; */
+/*   int const n = pat->size; */
+
+/*   int c = 1; /\* txt index *\/ */
+/*   int p = 1; */
+
+/*   while (c + (n - p) <= m) { */
+/*     while (p <= n && P(p) == T(c)) { */
+/*       inc(res); */
+/*       p++; */
+/*       c++; */
+/*     } */
+
+/*     if (p == n + 1) { */
+/*       add(res, c - n); */
+/*     } */
+
+/*     if (p == 1) { */
+/*       inc(res); */
+/*       c++; */
+/*     } */
+
+/*     p = F(p); */
+/*   } */
+
+/*   free_vector_int(pi); */
+/*   return res; */
+
+/* #undef PI */
+/* #undef F */
+/* #undef P */
+/* #undef T */
+/* } */
+
+#define P(i) *at_char(pat, (i))
+#define PI(i) *at_int(pi, (i))
+
+vector_int *compute_prefix_function(string const *const pat) {
+
+  int const m = pat->size;
+  vector_int *const pi = new_vector_init_int(0, m);
+
+  int k = 0;
+  int q = 2;
+  for (; q <= m; q++) {
+    while (k > 0 && P(k + 1) != P(q)) {
+      k = PI(k);
+    }
+
+    if (P(k + 1) == P(q)) {
+      k++;
+    }
+
+    PI(q) = k;
   }
-  free_vector_int(z);
 
-  return sp_prime;
+  return pi;
 }
+
+#undef P
+#undef PI
+
+#define P(i) *at_char(pat, (i))
+#define T(i) *at_char(txt, (i))
+#define PI(i) *at_int(pi, (i))
 
 result *knuth_morris_pratt(string const *const txt, string const *const pat) {
-#define PI(i) (*at_int(pi, (i)))
-#define F(i) ((i) == 1 ? 1 : PI((i) - 1) + 1)
-#define P(p) *at_char(pat, (p))
-#define T(c) *at_char(txt, (c))
+  result *const res = new_result();
 
-  result *res = new_result();
+  int const n = txt->size;
+  int const m = pat->size;
 
-  vector_int *const pi = kmp_preprocessing(pat);
+  vector_int *const pi = compute_prefix_function(pat);
+  /* printf("pi = "); print_vector_int(pi); */
 
-  int const m = txt->size;
-  int const n = pat->size;
-
-  int c = 1; /* txt index */
-  int p = 1;
-
-  while (c + (n - p) <= m) {
-    while (p <= n && P(p) == T(c)) {
+  int q = 0;
+  int i = 1;
+  for (; i <= n; i++) {
+    while (q > 0 && P(q + 1) != T(i)) {
       inc(res);
-      p++;
-      c++;
+      q = PI(q);
     }
 
-    if (p == n + 1) {
-      add(res, c - n);
+    if (inc(res), P(q + 1) == T(i)) {
+      q++;
     }
 
-    if (p == 1) {
-      inc(res);
-      c++;
+    if (q == m) {
+      if (i != n) {
+        inc(res);
+      }
+      add(res, i - m + 1);
+      q = PI(q);
     }
-
-    p = F(p);
   }
-
   free_vector_int(pi);
-  return res;
 
-#undef PI
-#undef F
+  return res;
+}
+
 #undef P
 #undef T
-}
+#undef PI
 
 /* ************************************************************************** */
 /* Boyer-Moore                                                                */
