@@ -1,8 +1,15 @@
 * Project
+Fails tests 11, 12, 17, 18, 19, 20.
+
+11 e 12 boyer moore
+12 so encontra de 4 em 4 quando devia ser em todas as posicoes
+
+12 T CCCCCCCCCCCCCCCCC... B CCCC
+
 - [X] Interface
   - [X] Dynamic arrays
   - [X] Commands
-- [ ] Knuth-Morris-Pratt
+- [X] Knuth-Morris-Pratt
 - [X] Boyer-Moore
   - [X] Naive right-to-left
   - [X] Simple bad character rule
@@ -10,7 +17,7 @@
     - [X] Z algorithm
     - [X] Suffix rule itself
   - [X] Combine everything
-- [ ] Shell test script
+- [X] Shell test script
 * test
 ** 01.in
 R = 0 | 2 | 1 | 0

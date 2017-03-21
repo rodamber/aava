@@ -270,7 +270,6 @@ result *naive (string const * const T, string const * const P) {
 
   int t;
   for (t = 1; t <= m - n + 1; t++) {
-    /* FIXME: We're counting the comparisons here */
     if (ncmp(at_char(T, t), at_char(P, 1), n, left_right, res) == n + 1) {
       add(res, t);
     }
@@ -428,7 +427,7 @@ int *R_at(int const *const R, char const x) {
   }
 }
 
-/* /\* Don't forget to free the array R *\/ */
+/* Don't forget to free the array R */
 int *bad_char_preprocessing(string const *const pat) {
   int *const R = calloc(4, sizeof(int));
 
