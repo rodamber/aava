@@ -1,3 +1,4 @@
+{-# LANGUAGE Strict #-}
 module Haskell where
 
 import Data.Maybe
@@ -9,12 +10,12 @@ type Txt = T.Text
 type Pat = Txt
 
 data Input = Input
-  { inputText :: Txt
+  { inputText    :: Txt
   , inputPattern :: Pat
   } deriving (Show, Eq)
 
 data Output = Output
-  { positions :: [Int]
+  { positions   :: [Int]
   , comparisons :: Int
   } deriving (Eq, Show)
 

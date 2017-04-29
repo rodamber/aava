@@ -1,4 +1,7 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE Strict                    #-}
+
+import Data.Foldable
 import Data.List
 import Data.Maybe
 import qualified Data.Text as T
@@ -114,11 +117,14 @@ test_matchIndex =
 test_search msg search =
   describe msg $ do
     matchTests search
-    matchSpec $ prop_searchPositions search
+    -- matchSpec $ prop_searchPositions search
 
 --------------------------------------------------------------------------------
 
 main = do
+  traverse_ (quickCheckWith stdArgs { maxSuccess = 200 } . prop_searchPositions)
+            [naive, knuthMorrisPratt, boyerMoore]
+
   hspec $ do
     describe "Haskell" $ do
       test_indexedTails
@@ -129,8 +135,8 @@ main = do
 
     describe "C" $ do
       test_search "naive" naive
-      -- test_search "knuth_morris_pratt" knuthMorrisPratt
+      test_search "knuth_morris_pratt" knuthMorrisPratt
 
-      -- describe "Boyer Moore" $ do
-        -- test_zAlgorithm
-        -- test_search "boyer_moore" boyerMoore
+      describe "Boyer Moore" $ do
+        test_zAlgorithm
+        test_search "boyer_moore" boyerMoore

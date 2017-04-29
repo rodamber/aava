@@ -1,5 +1,6 @@
-{-# LANGUAGE FlexibleInstances        #-}
-{-# LANGUAGE TypeSynonymInstances     #-}
+{-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE Strict               #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 
 module Lib where
 
