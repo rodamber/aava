@@ -75,8 +75,8 @@ badCharShiftSpec r ix c = max 1 (ix - x)
 s `index1` i = s `S.index` (i - 1)
 update1 i = S.update (i - 1)
 
-buildBigL' :: T.Text -> S.Seq Int
-buildBigL' t = execState (traverse_ loop [1 .. n - 1]) (S.replicate n 0)
+buildBigL'Spec :: S.Seq Int -> S.Seq Int
+buildBigL'Spec bigN = execState (traverse_ loop [1 .. n - 1]) (S.replicate n 0)
   where
     n = T.length t
     bigN = S.fromList $ reverseZAlgorithmSpec t
@@ -98,16 +98,12 @@ maximumMay t | null t    = Nothing
 maximumDef :: (Ord a, Foldable t) => a -> t a -> a
 maximumDef def = fromMaybe def . maximumMay
 
-buildL' :: T.Text -> S.Seq Int
-buildL' t =
-  let n = T.length t
-      bigN = S.fromList $ reverseZAlgorithmSpec t
-      js   = filterWithIndex (\ix x -> (ix + 1) == x) bigN
+buildSmallL'Spec :: S.Seq Int -> S.Seq Int
+buildSmallL'Spec bigN =
+  let n  = S.length bigN
+      js = filterWithIndex (\ix x -> (ix + 1) == x) bigN
   in (flip fmap) (S.fromList [1..n]) $ \i ->
        maximumDef 0 $ S.filter (<= n - i + 1) js
-
-strongGoodSuffixPreprocessingSpec :: T.Text -> (S.Seq Int, S.Seq Int)
-strongGoodSuffixPreprocessingSpec t = (buildBigL' t, buildL' t)
 
 data Match = Match | Mismatch Int
 

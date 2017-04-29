@@ -173,6 +173,31 @@ DEFINE_CONST_ITERATOR(int)
 DEFINE_FROM_ARRAY(char)
 DEFINE_FROM_ARRAY(int)
 
+string *new_string(char const *const s) {
+  vector_char *const vec = new_vector_char();
+
+  int i = 0;
+  while (s[i]) {
+    insert_char(vec, s[i]);
+    i++;
+  }
+
+  return vec;
+}
+
+#define DEFINE_NEW_VECTOR_INIT(TYPE)                                       \
+  vector_##TYPE *new_vector_init_##TYPE(TYPE const val, int const nmemb) { \
+    vector_##TYPE *const vec = new_vector_##TYPE();                        \
+                                                                           \
+    int n = nmemb;                                                         \
+    while (n--) insert_##TYPE(vec, val);                                   \
+                                                                           \
+    return vec;                                                            \
+  }                                                                        \
+
+DEFINE_NEW_VECTOR_INIT(int)
+DEFINE_NEW_VECTOR_INIT(char)
+
 #define DEFINE_PRINT_VECTOR(TYPE, X)                          \
   void print_vector_##TYPE(vector_##TYPE const * const da) {  \
     int i;                                                    \
@@ -199,27 +224,6 @@ DEFINE_PRINT_VECTOR(int, "%d ")
 
 DEFINE_REVERSE(char)
 DEFINE_REVERSE(int)
-
-string *new_string(char const *const s) {
-  string *const str = new_vector_char();
-
-  int i = 0;
-  while (s[i]) {
-    insert_char(str, s[i]);
-    i++;
-  }
-
-  return str;
-}
-
-vector_int *new_vector_init_int(int const val, int const nmemb) {
-  vector_int *const vec = new_vector_int();
-
-  int n = nmemb;
-  while (n--) insert_int(vec, val);
-
-  return vec;
-}
 
 /* ************************************************************************** */
 
@@ -490,55 +494,55 @@ int bad_char_shift(int const *const R, int const i, char const c) {
   return max(1, i - *R_at(R, c));
 }
 
-
-vector_int **strong_good_suffix_preprocessing(string const *const str) {
-#define N(K) *at_int(z, K)
-
+vector_int *build_big_l_prime(string const *const str, vector_int const *const N) {
+  // FIXME: WE DON'T THE STR...
   int const n = str->size;
-
-  vector_int *const L_prime = new_vector_init_int(0, n);
-  vector_int *const l_prime = new_vector_init_int(0, n);
-
-  vector_int *const z = reverse_z_algorithm(str);
+  vector_int *const big_l_prime = new_vector_init_int(0, n);
 
   int j;
   for (j = 1; j <= n - 1; j++) {
-    int const i = n - N(j) + 1;
+    int const i = n - *at_int(N, j) + 1;
 
-    if (N(j) > 0) {
-      *at_int(L_prime, i) = j;
-    }
-    if (N(j) == j) {
-      *at_int(l_prime, i) = j;
+    if (*at_int(N, j) > 0) {
+      *at_int(big_l_prime, i) = j;
     }
   }
-  free_vector_int(z);
 
-  vector_int **pair = malloc(2 * sizeof(vector_int*));
-  pair[0] = L_prime;
-  pair[1] = l_prime;
-
-  return pair;
-#undef N
+  return big_l_prime;
 }
 
-int strong_good_suffix_shift(vector_int **const ls, int const ix) {
-  vector_int const *const L_prime = ls[0];
-  vector_int const *const l_prime = ls[1];
+vector_int *build_small_l_prime(string const *const str, vector_int const *const N) {
+  int const n = str->size;
+  vector_int *const l_prime = new_vector_init_int(0, n);
 
-  int const n = L_prime->size;
+  int i;
+  for (i = 1; i <= n; i++) {
+    int j;
+    for (j = 1; j <= n - 1; j++) {
+      if (j <= n - i + 1 && *at_int(N, j) == j) {
+        *at_int(l_prime, i) = j;
+      }
+    }
+  }
+
+  return l_prime;
+}
+
+int strong_good_suffix_shift(vector_int const *const big_l_prime,
+                             vector_int const *const small_l_prime, int const ix) {
+  int const n = big_l_prime->size;
 
   if (ix == -1) { /* Failed on first character */
     return 1;
   } else if (ix == -n - 1) { /* Matched pattern */
-    return n - *at_int(l_prime, 2);
+    return n - *at_int(small_l_prime, 2);
   }
 
   int i = n + ix + 1;
-  if (*at_int(L_prime, i) > 0) { /* Mismatch occurs at i */
-    return n - *at_int(L_prime, i);
+  if (*at_int(big_l_prime, i) > 0) { /* Mismatch occurs at i */
+    return n - *at_int(big_l_prime, i);
   } else {
-    return n - *at_int(l_prime, i);
+    return n - *at_int(small_l_prime, i);
   }
 }
 
@@ -548,7 +552,9 @@ result *boyer_moore(string const * const txt, string const * const pat) {
 
   /* Preprocessing */
   int *const R = bad_char_preprocessing(pat);
-  vector_int **const ls = strong_good_suffix_preprocessing(pat);
+  vector_int *const N = reverse_z_algorithm(pat);
+  vector_int *const big_l_prime = build_big_l_prime(pat, N);
+  vector_int *const small_l_prime = build_small_l_prime(pat, N);
 
   /* Search */
   int t; /* txt index */
@@ -560,15 +566,15 @@ result *boyer_moore(string const * const txt, string const * const pat) {
     }
 
     int const bc = bad_char_shift(R, n + ix + 1, *at_char(txt, t));
-    int const gs = strong_good_suffix_shift(ls, ix);
+    int const gs = strong_good_suffix_shift(big_l_prime, small_l_prime, ix);
 
     shift = max(bc, gs);
   }
 
   free(R);
-  free_vector_int(ls[0]);
-  free_vector_int(ls[1]);
-  free(ls);
+  free(N);
+  free_vector_int(big_l_prime);
+  free_vector_int(small_l_prime);
 
   return res;
 }

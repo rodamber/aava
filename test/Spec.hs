@@ -137,6 +137,9 @@ test_strongGoodSuffixRule =
       HS.strongGoodSuffixPreprocessingSpec "cabdabdab"
         `shouldBe` (S.fromList [0,0,0,0,6,0,0,3,0], S.fromList [0,0,0,0,0,0,0,0,0])
 
+    matchSpec $ \t -> HS.strongGoodSuffixPreprocessingSpec t ==
+                      strongGoodSuffixPreprocessing t
+
 --------------------------------------------------------------------------------
 -- Haskell naive spec
 --------------------------------------------------------------------------------
@@ -184,4 +187,5 @@ main = do
 
       describe "Boyer Moore" $ do
         test_zAlgorithm
+        test_strongGoodSuffixRule
         test_search "boyer_moore" boyerMoore
