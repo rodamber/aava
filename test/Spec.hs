@@ -14,8 +14,8 @@ import Test.QuickCheck.Arbitrary
 
 import Lib
 
-import qualified C
-import C (Result, Vector)
+import qualified FFI as C
+import FFI (Result, Vector)
 
 import qualified Haskell as HS
 import Haskell (Txt, Pat, Input(..), Output(..))
@@ -133,9 +133,9 @@ main = do
 
     describe "C" $ do
       test_search "naive" naive
-      test_search "knuth_morris_pratt" knuthMorrisPratt
+      -- test_search "knuth_morris_pratt" knuthMorrisPratt
 
-      describe "Boyer Moore" $ do
-        test_zAlgorithm
-        test_search "boyer_moore" boyerMoore
+      -- describe "Boyer Moore" $ do
+        -- test_zAlgorithm
+        -- test_search "boyer_moore" boyerMoore
 

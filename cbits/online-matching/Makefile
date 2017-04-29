@@ -6,12 +6,9 @@ CC_FLAGS	= -O0 -ansi -Wall
 debug: CC_FLAGS += -g -DDEBUG
 debug: all
 
-all: om lc
+all: om
 
 om: online_matching.o
-	$(CC) $(CC_FLAGS) $< -o $@
-
-lc: link_cut.o
 	$(CC) $(CC_FLAGS) $< -o $@
 
 %.o: %.c

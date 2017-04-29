@@ -570,65 +570,53 @@ result *boyer_moore(string const * const txt, string const * const pat) {
 
 /* ************************************************************************** */
 
-/* int main() { */
-/*   string *txt = new_string("C"); */
-/*   string *pat = new_string("C"); */
+int main_() {
+  char command;
+  vector_char *T = new_vector_char();
+  vector_char *P = new_vector_char();
+  result *result;
 
-/*   result *res = naive(txt, pat); */
-/*   print_result(res); */
+  while ((command = getchar()) != 'X') {
+    getchar(); /* space character */
 
-/*   free_result(res); */
-/*   free_vector_char(txt); */
-/*   free_vector_char(pat); */
+    switch (command) {
+    case 'T':
+      read_(T);
+      break;
+    case 'N':
+      read_(P);
+      result = naive(T, P);
 
-/*   return 0; */
-/* } */
+      print_vector_int(result->positions);
 
-/* int main() { */
-/*   char command; */
-/*   vector_char *T = new_vector_char(); */
-/*   vector_char *P = new_vector_char(); */
-/*   result *result; */
+      free_result(result);
+      break;
+    case 'K':
+      read_(P);
+      result = knuth_morris_pratt(T, P);
 
-/*   while ((command = getchar()) != 'X') { */
-/*     getchar(); /\* space character *\/ */
+      print_vector_int(result->positions);
+      printf("%d \n", result->comparisons);
 
-/*     switch (command) { */
-/*     case 'T': */
-/*       read_(T); */
-/*       break; */
-/*     case 'N': */
-/*       read_(P); */
-/*       result = naive(T, P); */
+      free_result(result);
+      break;
+    case 'B':
+      read_(P);
+      result = boyer_moore(T, P);
 
-/*       print_vector_int(result->positions); */
+      print_vector_int(result->positions);
+      printf("%d \n", result->comparisons);
 
-/*       free_result(result); */
-/*       break; */
-/*     case 'K': */
-/*       read_(P); */
-/*       result = knuth_morris_pratt(T, P); */
+      free_result(result);
+      break;
+    default:
+      printf("Ignoring command: '%c'.\n", command);
+    }
+  }
 
-/*       print_vector_int(result->positions); */
-/*       printf("%d \n", result->comparisons); */
+  free_vector_char(T);
+  free_vector_char(P);
+  return 0;
+}
 
-/*       free_result(result); */
-/*       break; */
-/*     case 'B': */
-/*       read_(P); */
-/*       result = boyer_moore(T, P); */
-
-/*       print_vector_int(result->positions); */
-/*       printf("%d \n", result->comparisons); */
-
-/*       free_result(result); */
-/*       break; */
-/*     default: */
-/*       printf("Ignoring command: '%c'.\n", command); */
-/*     } */
-/*   } */
-
-/*   free_vector_char(T); */
-/*   free_vector_char(P); */
-/*   return 0; */
-/* } */
+/* int main() { return main_(); } */

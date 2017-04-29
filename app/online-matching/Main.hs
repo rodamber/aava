@@ -6,9 +6,6 @@ import Data.Foldable
 import qualified Data.Text as T
 import System.Environment
 
-import qualified C
-import C (Result, Vector)
-
 import qualified Haskell as HS
 import Haskell (Search, Txt, Pat, Input(..), Output(..))
 

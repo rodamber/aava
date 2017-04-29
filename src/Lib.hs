@@ -14,8 +14,8 @@ import Foreign.C.String
 
 import System.IO.Unsafe (unsafePerformIO)
 
-import qualified C
-import C (Result, Vector)
+import qualified FFI as C
+import FFI (Result, Vector)
 
 import qualified Haskell as HS
 import Haskell (Txt, Pat, Input(..), Output(..))
