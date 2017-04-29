@@ -123,20 +123,6 @@ test_search msg search =
 --------------------------------------------------------------------------------
 
 main = do
-  -- let txtKMP = "CAGCTCTCTTTGCGAAGTCTGACCGCAGTTGGATGGAGTA"
-  -- let patKMP = "GAG"
-  -- putStr "C knuth_morris_pratt:" >> print (match C.naive (Input txtKMP patKMP))
-  -- putStr "HS:" >> print (match HS.naive (Input txtKMP patKMP))
-
-  -- let txt = "TTTAGTCCTTG"
-  -- let txtBMBM = "TT"
-  -- putStr "C boyer_moore:" >> print (match C.boyer_moore (Input txt txtBMBM))
-  -- putStr "HS:" >> print (match HS.naive (Input txt txtBMBM))
-
-  let s = "TCTC"
-  putStrLn "C: "  >> print (reverseZAlgorithm s)
-  putStrLn "HS: " >> print (HS.reverseZAlgorithmSpec s)
-
   hspec $ do
     describe "Haskell" $ do
       test_indexedTails
