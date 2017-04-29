@@ -87,3 +87,6 @@ foreign import ccall unsafe "strong_good_suffix_preprocessing"
 
 foreign import ccall unsafe "strong_good_suffix_shift"
     strong_good_suffix_shift :: Ptr (Ptr (Vector Int)) -> CInt -> CInt
+
+foreign import ccall unsafe "main_"
+    main_ :: IO ()
