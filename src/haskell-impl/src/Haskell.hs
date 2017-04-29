@@ -4,10 +4,6 @@
 module Haskell where
 
 import Data.Maybe
-
-import Data.Sequence hiding (reverse, replicate, drop, length, zip)
-import qualified Data.Sequence as Seq (reverse, replicate, drop, length, zip)
-
 import qualified Data.Text as T
 
 --------------------------------------------------------------------------------
