@@ -11,8 +11,10 @@ import qualified Data.Text as T
 type Txt = T.Text
 type Pat = Txt
 
-data Input = Input { inputText :: Txt, inputPattern :: Pat }
-  deriving (Show, Eq)
+data Input = Input
+  { inputText :: Txt
+  , inputPattern :: Pat
+  } deriving (Show, Eq)
 
 data Output = Output
   { positions :: [Int]

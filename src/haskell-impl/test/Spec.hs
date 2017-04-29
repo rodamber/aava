@@ -86,9 +86,10 @@ test_matchIndex =
         Just ix' -> ix == ix'
         Nothing -> True
 
-test_cSearch msg search = describe msg $ do
-  matchTests search
-  matchSpec search
+test_cSearch msg search =
+  describe msg $ do
+    matchTests search
+    matchSpec search
 
 --------------------------------------------------------------------------------
 
