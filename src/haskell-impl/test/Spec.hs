@@ -18,17 +18,29 @@ import C (Result, Vector)
 import qualified Haskell as HS
 import Haskell (Txt, Pat, Input(..), Output(..))
 
+--------------------------------------------------------------------------------
+
+myGen = listOf1 (elements ['A', 'C', 'T', 'G'])
 
 instance Arbitrary Input where
   arbitrary = do
-    let g = listOf1 (elements ['A', 'C', 'T', 'G'])
-    txt <- g
+    txt <- myGen
     let len = length txt
-    pat <- g `suchThat` \p -> length p <= len
+    pat <- myGen `suchThat` \p -> length p <= len
     return $ Input (T.pack txt) (T.pack pat)
 
+newtype EqualInput = EqualInput Input
+  deriving (Show, Eq)
+
+instance Arbitrary EqualInput where
+  arbitrary = do
+    txt <- T.pack <$> myGen
+    return $ EqualInput $ Input txt txt
+    
 instance Arbitrary T.Text where
   arbitrary = T.pack <$> arbitrary
+
+--------------------------------------------------------------------------------
 
 prop_searchPositionsSpec search input =
   positions (match search input) == positions (HS.naive input)
@@ -49,8 +61,8 @@ professorTests s = do
   -- test 06 is the same as test 02
 
 matchTests s = do
-  it "matches when the text and the pattern are equal" $ property $ \x ->
-    positions (match s x) `shouldBe` [0]
+  it "matches when the text and the pattern are equal" $ property $
+    \(EqualInput x) -> positions (match s x) `shouldBe` [0]
   professorTests s
 
 test_indexedTails =
@@ -74,14 +86,22 @@ test_matchIndex =
         Just ix' -> ix == ix'
         Nothing -> True
 
-main = do
-  let txt = "C"
-  let pat = "C"
+test_cSearch msg search = describe msg $ do
+  matchTests search
+  matchSpec search
 
-  putStr "C naive:" >> print (match C.naive (Input txt pat))
-  putStr "C knuth_morris_pratt:" >> print (match C.naive (Input txt pat))
-  putStr "C boyer_moore:" >> print (match C.boyer_moore (Input txt pat))
-  putStr "HS:" >> print (match HS.naive (Input txt pat))
+--------------------------------------------------------------------------------
+
+main = do
+  -- let txtKMP = "CAGCTCTCTTTGCGAAGTCTGACCGCAGTTGGATGGAGTA"
+  -- let patKMP = "GAG"
+  -- putStr "C knuth_morris_pratt:" >> print (match C.naive (Input txtKMP patKMP))
+  -- putStr "HS:" >> print (match HS.naive (Input txtKMP patKMP))
+
+  -- let txt = "TTTAGTCCTTG"
+  -- let txtBMBM = "TT"
+  -- putStr "C boyer_moore:" >> print (match C.boyer_moore (Input txt txtBMBM))
+  -- putStr "HS:" >> print (match HS.naive (Input txt txtBMBM))
 
   hspec $ do
     describe "Haskell" $ do
@@ -90,15 +110,7 @@ main = do
       describe "naive" $ matchTests HS.naive
 
     describe "C" $ do
-      describe "naive" $ do
-        matchTests C.naive
-        matchSpec C.naive
-
-      describe "knuth-morris-pratt" $ do
-        matchTests C.knuth_morris_pratt
-        matchSpec C.knuth_morris_pratt
-
-      describe "boyer-moore" $ do
-        matchTests C.boyer_moore
-        matchSpec C.boyer_moore
+      test_cSearch "naive"               C.naive
+      test_cSearch "knuth-morris-pratt"  C.knuth_morris_pratt
+      test_cSearch "boyer-moore"         C.boyer_moore
 
