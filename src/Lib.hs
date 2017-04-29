@@ -1,7 +1,4 @@
 {-# LANGUAGE FlexibleInstances        #-}
-{-# LANGUAGE ForeignFunctionInterface #-}
-{-# LANGUAGE OverloadedStrings        #-}
-{-# LANGUAGE TypeOperators            #-}
 {-# LANGUAGE TypeSynonymInstances     #-}
 
 module Lib where

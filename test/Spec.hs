@@ -1,8 +1,4 @@
-{-# LANGUAGE LambdaCase          #-}
-{-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
-{-# LANGUAGE ViewPatterns        #-}
-
 import Data.List
 import Data.Maybe
 import qualified Data.Text as T
@@ -38,7 +34,7 @@ instance Arbitrary EqualInput where
   arbitrary = do
     txt <- T.pack <$> myGen
     return $ EqualInput $ Input txt txt
-    
+
 instance Arbitrary T.Text where
   arbitrary = T.pack <$> myGen
 
@@ -138,4 +134,3 @@ main = do
       -- describe "Boyer Moore" $ do
         -- test_zAlgorithm
         -- test_search "boyer_moore" boyerMoore
-

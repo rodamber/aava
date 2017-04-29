@@ -16,10 +16,11 @@ cabal-version:       >=1.10
 executable online-matching
   hs-source-dirs:      app/online-matching
   main-is:             Main.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
                      , aava-proj
                      , text
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-extensions:  OverloadedStrings
   default-language:    Haskell2010
 
 library
@@ -31,6 +32,7 @@ library
                      , mtl
                      , QuickCheck >= 2.8
                      , hspec
+  default-extensions:  OverloadedStrings
   default-language:    Haskell2010
   C-Sources:           cbits/online-matching/online_matching.c
 
@@ -45,6 +47,7 @@ test-suite aava-proj-test
                      , hspec
                      , QuickCheck >= 2.8
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-extensions:  OverloadedStrings
   default-language:    Haskell2010
 
 source-repository head
