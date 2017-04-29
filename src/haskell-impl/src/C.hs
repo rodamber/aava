@@ -10,10 +10,22 @@ data Vector a
 
 type Search =  Ptr (Vector Char) -- text
             -> Ptr (Vector Char) -- pattern
-            -> IO (Ptr (Result))
+            -> IO (Ptr Result)
 
 left_right = 1
 right_left = -1
+
+foreign import ccall unsafe "get_array_int"
+    get_array_int :: Ptr (Vector Int) -> Ptr CInt
+
+foreign import ccall unsafe "get_size_int"
+    get_size_int :: Ptr (Vector Int) -> CInt
+
+foreign import ccall unsafe "get_array_char"
+    get_array_char :: Ptr (Vector Char) -> Ptr CChar
+
+foreign import ccall unsafe "get_size_char"
+    get_size_char :: Ptr (Vector Char) -> CChar
 
 foreign import ccall unsafe "new_string"
     new_string :: CString -> IO (Ptr (Vector Char))
@@ -46,28 +58,32 @@ foreign import ccall unsafe "boyer_moore"
     boyer_moore :: Search
 
 foreign import ccall unsafe "ncmp"
-    ncmp :: CString -> CString -> CInt -> CInt -> Ptr (Result)
+    ncmp :: CString -> CString -> CInt -> CInt -> Ptr Result -> CInt
+
+foreign import ccall unsafe "reverse_char"
+    reverse_char :: Ptr (Vector Char) -> IO (Ptr (Vector Char))
 
 foreign import ccall unsafe "match_count"
     match_count :: CString -> CString -> CInt
 
 foreign import ccall unsafe "z_algorithm"
-    z_algorithm :: Ptr (Vector Char) -> Ptr (Vector Int)
+    z_algorithm :: Ptr (Vector Char) -> IO (Ptr (Vector Int))
 
 foreign import ccall unsafe "reverse_z_algorithm"
-    reverse_z_algorithm :: Ptr (Vector Char) -> Ptr (Vector Int)
+    reverse_z_algorithm :: Ptr (Vector Char) -> IO (Ptr (Vector Int))
 
 foreign import ccall unsafe "compute_prefix_function"
-    compute_prefix_function :: Ptr (Vector Char) -> Ptr (Vector Int)
+    compute_prefix_function :: Ptr (Vector Char) -> IO (Ptr (Vector Int))
 
 foreign import ccall unsafe "bad_char_preprocessing"
-    bad_char_preprocessing :: Ptr (Vector Char) -> CInt
+    bad_char_preprocessing :: Ptr (Vector Char) -> IO (Ptr CInt)
 
 foreign import ccall unsafe "bad_char_shift"
     bad_char_shift :: Ptr CInt -> CInt -> CChar
 
 foreign import ccall unsafe "strong_good_suffix_preprocessing"
-    strong_good_suffix_preprocessing :: Ptr (Vector Char) -> Ptr (Vector Int)
+    strong_good_suffix_preprocessing :: Ptr (Vector Char)
+                                     -> IO (Ptr (Ptr (Vector Int)))
 
 foreign import ccall unsafe "strong_good_suffix_shift"
-    strong_good_suffix_shift :: Ptr (Ptr (Vector Int)) -> CInt -> Ptr Result
+    strong_good_suffix_shift :: Ptr (Ptr (Vector Int)) -> CInt -> CInt

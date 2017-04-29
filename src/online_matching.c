@@ -28,6 +28,22 @@ void print_array(int *arr, int n) {
 DEFINE_VECTOR(char)
 DEFINE_VECTOR(int)
 
+#define DEFINE_GET_ARRAY(TYPE)                             \
+  TYPE *get_array_##TYPE(vector_##TYPE const *const vec) { \
+    return vec->array;                                     \
+  }                                                        \
+
+DEFINE_GET_ARRAY(char)
+DEFINE_GET_ARRAY(int)
+
+#define DEFINE_GET_SIZE(TYPE)                           \
+  int get_size_##TYPE(vector_##TYPE const *const vec) { \
+    return vec->size;                                   \
+  }                                                     \
+
+DEFINE_GET_SIZE(char)
+DEFINE_GET_SIZE(int)
+
 typedef vector_char string;
 
 #define DEFINE_NEW_VECTOR(TYPE)                               \
@@ -341,7 +357,7 @@ vector_int *z_algorithm(string const *const str) {
       if (Z(k_prime) < beta_size) { /* case 2a */
         insert_int(z, Z(k_prime));
 
-      } else { /* case 2a */
+      } else { /* case 2b */
         int const count =
           (r == n ? 0 : match_count(S(r + 1), S(beta_size + 1), n - r));
         insert_int(z, beta_size + count);
