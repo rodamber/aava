@@ -40,3 +40,6 @@ src/lc
 
 # Test
 myout.d/*
+
+# Haskell
+.stack-work
