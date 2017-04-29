@@ -32,6 +32,7 @@ library
                      , mtl
                      , QuickCheck >= 2.8
                      , hspec
+                     , safe
   default-extensions:  BangPatterns, OverloadedStrings
   default-language:    Haskell2010
   C-Sources:           cbits/online-matching/online_matching.c

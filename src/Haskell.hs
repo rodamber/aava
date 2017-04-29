@@ -1,6 +1,10 @@
-{-# LANGUAGE Strict #-}
+{-# LANGUAGE Strict       #-}
+{-# LANGUAGE ViewPatterns #-}
 module Haskell where
 
+import Debug.Trace
+
+import Control.Monad.State
 import Data.Foldable
 import qualified Data.Map as M
 import Data.Maybe
@@ -68,23 +72,39 @@ badCharShiftSpec r ix c = max 1 (ix - x)
 
 --------------------------------------------------------------------------------
 
+s `index1` i = s `S.index` (i - 1)
+update1 i = S.update (i - 1)
+
 buildBigL' :: T.Text -> S.Seq Int
-buildBigL' t = S.fromList $
-  (flip fmap) [1 .. n] $ \i -> maximum $
-    (flip fmap) [i .. n - 1] $ \j ->
-      if bigN `S.index` j == n - i + 1 then j else 0
+buildBigL' t = execState (traverse_ loop [1 .. n - 1]) (S.replicate n 0)
   where
     n = T.length t
-    bigN = S.fromList (reverseZAlgorithmSpec t)
+    bigN = S.fromList $ reverseZAlgorithmSpec t
+
+    loop :: Int -> State (S.Seq Int) ()
+    loop j = do
+      bigL' <- get
+      let i = n - bigN `index1` j + 1
+      put (update1 i j bigL')
+
+filterWithIndex :: (Int -> a -> Bool) -> S.Seq a -> S.Seq a
+filterWithIndex p s = snd <$> S.filter (uncurry p) indexedSeq
+  where indexedSeq = S.zip (S.fromList [0 .. S.length s]) s
+
+maximumMay :: (Ord a, Foldable t) => t a -> Maybe a
+maximumMay t | null t    = Nothing
+             | otherwise = Just (maximum t)
+
+maximumDef :: (Ord a, Foldable t) => a -> t a -> a
+maximumDef def = fromMaybe def . maximumMay
 
 buildL' :: T.Text -> S.Seq Int
-buildL' t = S.fromList $
-  (flip fmap) [1 .. n] $ \i -> maximum $
-    (flip fmap) [1 .. n - i + 1] $ \j ->
-      if bigN `S.index` j == j then j else 0
-  where
-    n = T.length t
-    bigN = S.fromList (reverseZAlgorithmSpec t)
+buildL' t =
+  let n = T.length t
+      bigN = S.fromList $ reverseZAlgorithmSpec t
+      js   = filterWithIndex (\ix x -> (ix + 1) == x) bigN
+  in (flip fmap) (S.fromList [1..n]) $ \i ->
+       maximumDef 0 $ S.filter (<= n - i + 1) js
 
 strongGoodSuffixPreprocessingSpec :: T.Text -> (S.Seq Int, S.Seq Int)
 strongGoodSuffixPreprocessingSpec t = (buildBigL' t, buildL' t)
@@ -93,12 +113,12 @@ data Match = Match | Mismatch Int
 
 strongGoodSuffixShiftSpec :: (S.Seq Int, S.Seq Int) -> Match -> Int
 strongGoodSuffixShiftSpec (_, l') Match =
-  S.length l' - l' `S.index` 2
+  S.length l' - l' `index1` 2
 strongGoodSuffixShiftSpec (bigL', l') (Mismatch j)
   | bigL'i >  0 = n - bigL'i
-  | bigL'i == 0 = n - l' `S.index` i
+  | bigL'i == 0 = n - l' `index1` i
   | i == 1      = 1
-  where bigL'i = bigL' `S.index` i
+  where bigL'i = bigL' `index1` i
         n = S.length l'
         i = j + 1
 
