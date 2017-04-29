@@ -1,0 +1,616 @@
+
+==================== FINAL INTERFACE ====================
+2017-04-29 03:50:39.691177 UTC
+
+interface haskell-impl-0.1.0.0-5QZQUPOQJel4VPmddVin6V:Haskell 8002
+  interface hash: f37a49e0a07eb4dd1b81e0fa5095b283
+  ABI hash: 78765105fa255adf55b6cefa7da7e52e
+  export-list hash: f8fe488d56efa0143f356cb9b0cda0e0
+  orphan hash: 693e9af84d3dfcc71e640e005bdc5e2e
+  flag hash: 986d9bbc29fd4511f536a0f6b7ba892b
+  sig of: Nothing
+  used TH splices: False
+  where
+exports:
+  Haskell.indexedTails
+  Haskell.matchIndex
+  Haskell.naive
+  Haskell.Input{Haskell.Input inputPattern inputText}
+  Haskell.Output{Haskell.Output comparisons positions}
+  Haskell.Pat
+  Haskell.Search
+  Haskell.Txt
+module dependencies:
+package dependencies: array-0.5.1.1@array-0.5.1.1 base-4.9.1.0*
+                      binary-0.8.3.0@binary-0.8.3.0
+                      bytestring-0.10.8.1@bytestring-0.10.8.1
+                      containers-0.5.7.1@containers-0.5.7.1
+                      deepseq-1.4.2.0@deepseq-1.4.2.0 ghc-prim-0.5.0.0
+                      integer-gmp-1.0.0.1
+                      text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR*
+orphans: base-4.9.1.0:GHC.Base base-4.9.1.0:GHC.Float
+         binary-0.8.3.0@binary-0.8.3.0:Data.Binary.Generic
+         bytestring-0.10.8.1@bytestring-0.10.8.1:Data.ByteString.Builder
+         text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR:Data.Text
+         text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR:Data.Text.Show
+family instance modules: base-4.9.1.0:Control.Applicative
+                         base-4.9.1.0:Data.Complex base-4.9.1.0:Data.Either
+                         base-4.9.1.0:Data.Functor.Const base-4.9.1.0:Data.Functor.Identity
+                         base-4.9.1.0:Data.List.NonEmpty base-4.9.1.0:Data.Monoid
+                         base-4.9.1.0:Data.Semigroup base-4.9.1.0:Data.Type.Equality
+                         base-4.9.1.0:Data.Version base-4.9.1.0:Data.Void
+                         base-4.9.1.0:GHC.Exts base-4.9.1.0:GHC.Generics
+                         base-4.9.1.0:GHC.IO.Exception base-4.9.1.0:GHC.TypeLits
+                         containers-0.5.7.1@containers-0.5.7.1:Data.IntMap.Base
+                         containers-0.5.7.1@containers-0.5.7.1:Data.IntSet.Base
+                         containers-0.5.7.1@containers-0.5.7.1:Data.Map.Base
+                         containers-0.5.7.1@containers-0.5.7.1:Data.Sequence
+                         containers-0.5.7.1@containers-0.5.7.1:Data.Set.Base
+                         text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR:Data.Text
+import  -/  base-4.9.1.0:Data.Maybe d876c4ffe4b3c43755a781e8ad860d88
+import  -/  base-4.9.1.0:GHC.Base c4231c43c07e46080a26bf94094c7aa1
+import  -/  base-4.9.1.0:GHC.List ab8c4e523e6c479c549d3bcd5fc4a439
+import  -/  base-4.9.1.0:GHC.Show a027f5ac24879eaba752f44aa90fe511
+import  -/  base-4.9.1.0:Prelude 22dd289b8469a8fa8dc81cab7b237771
+import  -/  ghc-prim-0.5.0.0:GHC.Classes 0bdf3d057a415ec1b84a7b1994efbe47
+import  -/  text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR:Data.Text 9ba4693a108b74a0b1eb8f7d38f1abee
+import  -/  text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR:Data.Text.Internal a2f6f66c5bb1247458d9fa25257ab188
+99c08531bd7421e3dc67f425a80b9133
+  $fEqInput :: GHC.Classes.Eq Haskell.Input
+  DFunId
+  {- HasNoCafRefs, Strictness: m, Inline: [ALWAYS] CONLIKE,
+     Unfolding: DFun:.
+                  @ Haskell.Input Haskell.$fEqInput_$c== Haskell.$fEqInput_$c/= -}
+99c08531bd7421e3dc67f425a80b9133
+  $fEqInput_$c/= :: Haskell.Input -> Haskell.Input -> GHC.Types.Bool
+  {- Arity: 2, HasNoCafRefs,
+     Strictness: <S(S(LLS)L),1*U(1*U(U,U,U),1*U(U,U,U))><S(S(LLS)L),1*U(1*U(U,U,U),1*U(U,U,U))>,
+     Unfolding: InlineRule (2, True, False)
+                (\ (a :: Haskell.Input) (b :: Haskell.Input) ->
+                 case Haskell.$fEqInput_$c== a b of wild {
+                   GHC.Types.False -> GHC.Types.True
+                   GHC.Types.True -> GHC.Types.False }) -}
+99c08531bd7421e3dc67f425a80b9133
+  $fEqInput_$c== :: Haskell.Input -> Haskell.Input -> GHC.Types.Bool
+  {- Arity: 2, HasNoCafRefs,
+     Strictness: <S(S(LLS)L),1*U(1*U(U,U,U),1*U(U,U,U))><S(S(LLS)L),1*U(1*U(U,U,U),1*U(U,U,U))>,
+     Inline: INLINE[0],
+     Unfolding: InlineRule (2, True, False)
+                (\ (w :: Haskell.Input) (w1 :: Haskell.Input) ->
+                 case w of ww { Haskell.Input ww1 ww2 ->
+                 case ww1 of ww3 { Data.Text.Internal.Text ww4 ww5 ww6 ->
+                 case w1 of ww7 { Haskell.Input ww8 ww9 ->
+                 case ww8 of ww10 { Data.Text.Internal.Text ww11 ww12 ww13 ->
+                 Haskell.$w$c== ww4 ww5 ww6 ww2 ww11 ww12 ww13 ww9 } } } }) -}
+7a4bf44ef1adc15752eaf6f2378d9442
+  $fEqOutput :: GHC.Classes.Eq Haskell.Output
+  DFunId
+  {- HasNoCafRefs, Strictness: m, Inline: [ALWAYS] CONLIKE,
+     Unfolding: DFun:.
+                  @ Haskell.Output Haskell.$fEqOutput_$c== Haskell.$fEqOutput_$c/= -}
+7a4bf44ef1adc15752eaf6f2378d9442
+  $fEqOutput_$c/= ::
+    Haskell.Output -> Haskell.Output -> GHC.Types.Bool
+  {- Arity: 2, HasNoCafRefs,
+     Strictness: <S(SL),1*U(1*U,1*U(U))><S(SL),1*U(1*U,1*U(U))>,
+     Inline: INLINE[0],
+     Unfolding: InlineRule (2, True, False)
+                (\ (w :: Haskell.Output) (w1 :: Haskell.Output) ->
+                 case w of ww { Haskell.Output ww1 ww2 ->
+                 case w1 of ww3 { Haskell.Output ww4 ww5 ->
+                 Haskell.$w$c/= ww1 ww2 ww4 ww5 } }) -}
+7a4bf44ef1adc15752eaf6f2378d9442
+  $fEqOutput_$c== ::
+    Haskell.Output -> Haskell.Output -> GHC.Types.Bool
+  {- Arity: 2, HasNoCafRefs,
+     Strictness: <S(SL),1*U(1*U,1*U(U))><S(SL),1*U(1*U,1*U(U))>,
+     Inline: INLINE[0],
+     Unfolding: InlineRule (2, True, False)
+                (\ (w :: Haskell.Output) (w1 :: Haskell.Output) ->
+                 case w of ww { Haskell.Output ww1 ww2 ->
+                 case w1 of ww3 { Haskell.Output ww4 ww5 ->
+                 Haskell.$w$c==1 ww1 ww2 ww4 ww5 } }) -}
+99c08531bd7421e3dc67f425a80b9133
+  $fShowInput :: GHC.Show.Show Haskell.Input
+  DFunId
+  {- Strictness: m, Inline: [ALWAYS] CONLIKE,
+     Unfolding: DFun:.
+                  @ Haskell.Input
+                  Haskell.$fShowInput_$cshowsPrec
+                  Haskell.$fShowInput_$cshow
+                  Haskell.$fShowInput_$cshowList -}
+99c08531bd7421e3dc67f425a80b9133
+  $fShowInput1 :: Haskell.Input -> GHC.Show.ShowS
+  {- Arity: 2,
+     Unfolding: (\ (w :: Haskell.Input) (w1 :: GHC.Base.String) ->
+                 case w of ww { Haskell.Input ww1 ww2 ->
+                 Haskell.$w$cshowsPrec 0# ww1 ww2 w1 }) -}
+cd9923b71f641844d1fd08132d884f10
+  $fShowInput2 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# "Input {"#) -}
+381398640f0f67b88b8daf7d78cd1a5b
+  $fShowInput3 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# "}"#) -}
+32cff45c1a8c8faa05044aa05d7c17b9
+  $fShowInput4 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# "inputPattern = "#) -}
+e1f4e5c9ab933a4a8a2edc29a06db401
+  $fShowInput5 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# ", "#) -}
+f08cd2aa61ae59c91427566adee1dcbd
+  $fShowInput6 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# "inputText = "#) -}
+99c08531bd7421e3dc67f425a80b9133
+  $fShowInput_$cshow :: Haskell.Input -> GHC.Base.String
+  {- Arity: 1, Strictness: <S,1*U(1*U(U,U,U),1*U(U,U,U))>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (x :: Haskell.Input) ->
+                 Haskell.$fShowInput_$cshowsPrec
+                   GHC.Show.shows22
+                   x
+                   (GHC.Types.[] @ GHC.Types.Char)) -}
+99c08531bd7421e3dc67f425a80b9133
+  $fShowInput_$cshowList :: [Haskell.Input] -> GHC.Show.ShowS
+  {- Arity: 2,
+     Unfolding: (GHC.Show.showList__
+                   @ Haskell.Input
+                   Haskell.$fShowInput1) -}
+99c08531bd7421e3dc67f425a80b9133
+  $fShowInput_$cshowsPrec ::
+    GHC.Types.Int -> Haskell.Input -> GHC.Show.ShowS
+  {- Arity: 3,
+     Strictness: <S(S),1*U(U)><S,1*U(1*U(U,U,U),1*U(U,U,U))><L,U>,
+     Inline: INLINE[0],
+     Unfolding: InlineRule (3, True, False)
+                (\ (w :: GHC.Types.Int)
+                   (w1 :: Haskell.Input)
+                   (w2 :: GHC.Base.String) ->
+                 case w of ww { GHC.Types.I# ww1 ->
+                 case w1 of ww2 { Haskell.Input ww3 ww4 ->
+                 Haskell.$w$cshowsPrec ww1 ww3 ww4 w2 } }) -}
+7a4bf44ef1adc15752eaf6f2378d9442
+  $fShowOutput :: GHC.Show.Show Haskell.Output
+  DFunId
+  {- Strictness: m, Inline: [ALWAYS] CONLIKE,
+     Unfolding: DFun:.
+                  @ Haskell.Output
+                  Haskell.$fShowOutput_$cshowsPrec
+                  Haskell.$fShowOutput_$cshow
+                  Haskell.$fShowOutput_$cshowList -}
+7a4bf44ef1adc15752eaf6f2378d9442
+  $fShowOutput1 :: Haskell.Output -> GHC.Show.ShowS
+  {- Arity: 2,
+     Unfolding: (\ (w :: Haskell.Output) (w1 :: GHC.Base.String) ->
+                 case w of ww { Haskell.Output ww1 ww2 ->
+                 Haskell.$w$cshowsPrec1 0# ww1 ww2 w1 }) -}
+5b78610298e805b4f1344dfd499c9a25
+  $fShowOutput2 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# "comparisons = "#) -}
+cf8dd5b71c2cfbca2e4ba32791f05808
+  $fShowOutput3 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# "positions = "#) -}
+d3d090c2f67c8a5cfdb47120d2e2e6ca
+  $fShowOutput4 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# "Output {"#) -}
+7a4bf44ef1adc15752eaf6f2378d9442
+  $fShowOutput_$cshow :: Haskell.Output -> GHC.Base.String
+  {- Arity: 1, Strictness: <S,1*U(1*U,1*U(U))>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (x :: Haskell.Output) ->
+                 Haskell.$fShowOutput_$cshowsPrec
+                   GHC.Show.shows22
+                   x
+                   (GHC.Types.[] @ GHC.Types.Char)) -}
+7a4bf44ef1adc15752eaf6f2378d9442
+  $fShowOutput_$cshowList :: [Haskell.Output] -> GHC.Show.ShowS
+  {- Arity: 2,
+     Unfolding: (GHC.Show.showList__
+                   @ Haskell.Output
+                   Haskell.$fShowOutput1) -}
+7a4bf44ef1adc15752eaf6f2378d9442
+  $fShowOutput_$cshowsPrec ::
+    GHC.Types.Int -> Haskell.Output -> GHC.Show.ShowS
+  {- Arity: 3, Strictness: <S(S),1*U(U)><S,1*U(1*U,1*U(U))><L,U>,
+     Inline: INLINE[0],
+     Unfolding: InlineRule (3, True, False)
+                (\ (w :: GHC.Types.Int)
+                   (w1 :: Haskell.Output)
+                   (w2 :: GHC.Base.String) ->
+                 case w of ww { GHC.Types.I# ww1 ->
+                 case w1 of ww2 { Haskell.Output ww3 ww4 ->
+                 Haskell.$w$cshowsPrec1 ww1 ww3 ww4 w2 } }) -}
+86196809cf89d132a949e8f9470a74f8
+  $tc'Input :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   18108656012596891580##
+                   9824931528041801087##
+                   Haskell.$trModule
+                   Haskell.$tc'Input1) -}
+4d29c601c2cbc4357b2ff26a67a6c5f3
+  $tc'Input1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS "'Input"#) -}
+ea078f58dd87d8c2e1a3a31415010191
+  $tc'Output :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   7189531565578767593##
+                   14989214280428555182##
+                   Haskell.$trModule
+                   Haskell.$tc'Output1) -}
+252b860c29429c367941d70ffeec85f5
+  $tc'Output1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS "'Output"#) -}
+872a51fc6900de1918b24ebc5321105d
+  $tcInput :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   6069992920838590567##
+                   10060204973928197740##
+                   Haskell.$trModule
+                   Haskell.$tcInput1) -}
+b2773bb01480506bf3cb7f9ecf709a57
+  $tcInput1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS "Input"#) -}
+48f04e9b2a87e683a4f9ece554401c4e
+  $tcOutput :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   18327043441305872170##
+                   7185264943923565057##
+                   Haskell.$trModule
+                   Haskell.$tcOutput1) -}
+afe2eb5ce7a702469cb7d4221de72a6a
+  $tcOutput1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS "Output"#) -}
+0e38fe9e0199f80d2c80a6695a990df7
+  $trModule :: GHC.Types.Module
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.Module
+                   Haskell.$trModule2
+                   Haskell.$trModule1) -}
+6ee3ec5e4bf11a176beabb17bffb256b
+  $trModule1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS "Haskell"#) -}
+7a738c791277928762292c6ae6cbfba7
+  $trModule2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS
+                   "haskell-impl-0.1.0.0-5QZQUPOQJel4VPmddVin6V"#) -}
+e4f5c8308e1e7ecfea4e9cfb35ab642b
+  $w$c/= ::
+    [GHC.Types.Int]
+    -> GHC.Types.Int
+    -> [GHC.Types.Int]
+    -> GHC.Types.Int
+    -> GHC.Types.Bool
+  {- Arity: 4, HasNoCafRefs,
+     Strictness: <S,1*U><L,1*U(U)><S,1*U><L,1*U(U)>, Inline: [0],
+     Unfolding: (\ (ww :: [GHC.Types.Int])
+                   (ww1 :: GHC.Types.Int)
+                   (ww2 :: [GHC.Types.Int])
+                   (ww3 :: GHC.Types.Int) ->
+                 case GHC.Classes.$fEq[]_$s$c== ww ww2 of wild {
+                   GHC.Types.False -> GHC.Types.True
+                   GHC.Types.True
+                   -> case ww1 of wild1 { GHC.Types.I# x ->
+                      case ww3 of wild2 { GHC.Types.I# y ->
+                      case GHC.Prim.tagToEnum#
+                             @ GHC.Types.Bool
+                             (GHC.Prim.==# x y) of wild3 {
+                        GHC.Types.False -> GHC.Types.True
+                        GHC.Types.True -> GHC.Types.False } } } }) -}
+761fb52cc5ab49e490ef85106c113fc5
+  $w$c== ::
+    GHC.Prim.ByteArray#
+    -> GHC.Prim.Int#
+    -> GHC.Prim.Int#
+    -> Haskell.Pat
+    -> GHC.Prim.ByteArray#
+    -> GHC.Prim.Int#
+    -> GHC.Prim.Int#
+    -> Haskell.Pat
+    -> GHC.Types.Bool
+  {- Arity: 8, HasNoCafRefs,
+     Strictness: <L,U><L,U><S,U><L,1*U(U,U,U)><L,U><L,U><S,U><L,1*U(U,U,U)>,
+     Inline: [0],
+     Unfolding: (\ (ww :: GHC.Prim.ByteArray#)
+                   (ww1 :: GHC.Prim.Int#)
+                   (ww2 :: GHC.Prim.Int#)
+                   (ww3 :: Haskell.Pat)
+                   (ww4 :: GHC.Prim.ByteArray#)
+                   (ww5 :: GHC.Prim.Int#)
+                   (ww6 :: GHC.Prim.Int#)
+                   (ww7 :: Haskell.Pat) ->
+                 case GHC.Prim.tagToEnum#
+                        @ GHC.Types.Bool
+                        (GHC.Prim.==# ww2 ww6) of wild2 {
+                   GHC.Types.False -> GHC.Types.False
+                   GHC.Types.True
+                   -> case {__pkg_ccall text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR _hs_text_memcmp GHC.Prim.ByteArray#
+                                                                                                         -> GHC.Prim.Word#
+                                                                                                         -> GHC.Prim.ByteArray#
+                                                                                                         -> GHC.Prim.Word#
+                                                                                                         -> GHC.Prim.Word#
+                                                                                                         -> GHC.Prim.State#
+                                                                                                              GHC.Prim.RealWorld
+                                                                                                         -> (# GHC.Prim.State#
+                                                                                                                 GHC.Prim.RealWorld,
+                                                                                                               GHC.Prim.Int# #)}
+                             ww
+                             (GHC.Prim.int2Word# ww1)
+                             ww4
+                             (GHC.Prim.int2Word# ww5)
+                             (GHC.Prim.int2Word# ww2)
+                             GHC.Prim.realWorld# of wild { (#,#) ds11 ds12 ->
+                      case GHC.Prim.narrow32Int# ds12 of wild1 {
+                        DEFAULT -> GHC.Types.False
+                        0# -> Data.Text.$fEqText_$c== ww3 ww7 } } }) -}
+1351840e8ba03ca2ac42d1f1d0c58efe
+  $w$c==1 ::
+    [GHC.Types.Int]
+    -> GHC.Types.Int
+    -> [GHC.Types.Int]
+    -> GHC.Types.Int
+    -> GHC.Types.Bool
+  {- Arity: 4, HasNoCafRefs,
+     Strictness: <S,1*U><L,1*U(U)><S,1*U><L,1*U(U)>, Inline: [0],
+     Unfolding: (\ (ww :: [GHC.Types.Int])
+                   (ww1 :: GHC.Types.Int)
+                   (ww2 :: [GHC.Types.Int])
+                   (ww3 :: GHC.Types.Int) ->
+                 case GHC.Classes.$fEq[]_$s$c== ww ww2 of wild {
+                   GHC.Types.False -> GHC.Types.False
+                   GHC.Types.True -> GHC.Classes.eqInt ww1 ww3 }) -}
+e9ca5a5ce363002a8a79481d9bc470d7
+  $w$cshowsPrec ::
+    GHC.Prim.Int#
+    -> Haskell.Txt -> Haskell.Pat -> GHC.Base.String -> GHC.Base.String
+  {- Arity: 4, Strictness: <S,U><L,1*U(U,U,U)><L,1*U(U,U,U)><L,U>,
+     Inline: [0],
+     Unfolding: (\ (ww :: GHC.Prim.Int#)
+                   (ww1 :: Haskell.Txt)
+                   (ww2 :: Haskell.Pat)
+                   (w :: GHC.Base.String) ->
+                 let {
+                   g :: GHC.Base.String -> GHC.Base.String
+                     {- Arity: 1, Strictness: <L,1*U> -}
+                   = \ (x :: GHC.Base.String)[OneShot] ->
+                     GHC.Base.++
+                       @ GHC.Types.Char
+                       Haskell.$fShowInput6
+                       (case Data.Text.Show.$w$cshowsPrec
+                               ww1
+                               (GHC.Base.++
+                                  @ GHC.Types.Char
+                                  Haskell.$fShowInput5
+                                  (GHC.Base.++
+                                     @ GHC.Types.Char
+                                     Haskell.$fShowInput4
+                                     (case Data.Text.Show.$w$cshowsPrec
+                                             ww2
+                                             (GHC.Base.++
+                                                @ GHC.Types.Char
+                                                Haskell.$fShowInput3
+                                                x) of ww3 { (#,#) ww4 ww5 ->
+                                      GHC.Types.:
+                                        @ GHC.Types.Char
+                                        ww4
+                                        ww5 }))) of ww3 { (#,#) ww4 ww5 ->
+                        GHC.Types.: @ GHC.Types.Char ww4 ww5 })
+                 } in
+                 case GHC.Prim.tagToEnum#
+                        @ GHC.Types.Bool
+                        (GHC.Prim.>=# ww 11#) of wild {
+                   GHC.Types.False
+                   -> GHC.Base.++ @ GHC.Types.Char Haskell.$fShowInput2 (g w)
+                   GHC.Types.True
+                   -> GHC.Types.:
+                        @ GHC.Types.Char
+                        GHC.Show.shows7
+                        (GHC.Base.++
+                           @ GHC.Types.Char
+                           Haskell.$fShowInput2
+                           (g (GHC.Types.: @ GHC.Types.Char GHC.Show.shows4 w))) }) -}
+a80fa8df80d4f7d6c8fdf46cd2c1022c
+  $w$cshowsPrec1 ::
+    GHC.Prim.Int#
+    -> [GHC.Types.Int]
+    -> GHC.Types.Int
+    -> GHC.Base.String
+    -> GHC.Base.String
+  {- Arity: 4, Strictness: <S,U><L,1*U><L,1*U(U)><L,U>, Inline: [0],
+     Unfolding: (\ (ww :: GHC.Prim.Int#)
+                   (ww1 :: [GHC.Types.Int])
+                   (ww2 :: GHC.Types.Int)
+                   (w :: GHC.Base.String) ->
+                 let {
+                   p :: GHC.Show.ShowS {- Arity: 1, Strictness: <L,1*U> -}
+                   = \ (x :: GHC.Base.String)[OneShot] ->
+                     GHC.Base.++
+                       @ GHC.Types.Char
+                       Haskell.$fShowOutput4
+                       (GHC.Base.++
+                          @ GHC.Types.Char
+                          Haskell.$fShowOutput3
+                          (let {
+                             s :: GHC.Base.String
+                             = GHC.Base.++
+                                 @ GHC.Types.Char
+                                 Haskell.$fShowInput5
+                                 (GHC.Base.++
+                                    @ GHC.Types.Char
+                                    Haskell.$fShowOutput2
+                                    (case ww2 of ww3 { GHC.Types.I# ww4 ->
+                                     case GHC.Show.$wshowSignedInt
+                                            0#
+                                            ww4
+                                            (GHC.Base.++
+                                               @ GHC.Types.Char
+                                               Haskell.$fShowInput3
+                                               x) of ww5 { (#,#) ww6 ww7 ->
+                                     GHC.Types.: @ GHC.Types.Char ww6 ww7 } }))
+                           } in
+                           case ww1 of wild {
+                             [] -> GHC.CString.unpackAppendCString# "[]"# s
+                             : x1 xs
+                             -> GHC.Types.:
+                                  @ GHC.Types.Char
+                                  GHC.Show.showList__2
+                                  (case x1 of ww3 { GHC.Types.I# ww4 ->
+                                   case GHC.Show.$wshowSignedInt
+                                          0#
+                                          ww4
+                                          (let {
+                                             lvl27 :: [GHC.Types.Char]
+                                             = GHC.Types.: @ GHC.Types.Char GHC.Show.showList__1 s
+                                           } in
+                                           letrec {
+                                             showl :: [GHC.Types.Int] -> GHC.Base.String
+                                               {- Arity: 1, Strictness: <S,1*U> -}
+                                             = \ (ds2 :: [GHC.Types.Int]) ->
+                                               case ds2 of wild1 {
+                                                 [] -> lvl27
+                                                 : y ys
+                                                 -> GHC.Types.:
+                                                      @ GHC.Types.Char
+                                                      GHC.Show.shows5
+                                                      (case y of ww5 { GHC.Types.I# ww6 ->
+                                                       case GHC.Show.$wshowSignedInt
+                                                              0#
+                                                              ww6
+                                                              (showl ys) of ww7 { (#,#) ww8 ww9 ->
+                                                       GHC.Types.: @ GHC.Types.Char ww8 ww9 } }) }
+                                           } in
+                                           showl xs) of ww5 { (#,#) ww6 ww7 ->
+                                   GHC.Types.: @ GHC.Types.Char ww6 ww7 } }) }))
+                 } in
+                 case GHC.Prim.tagToEnum#
+                        @ GHC.Types.Bool
+                        (GHC.Prim.>=# ww 11#) of wild {
+                   GHC.Types.False -> p w
+                   GHC.Types.True
+                   -> GHC.Types.:
+                        @ GHC.Types.Char
+                        GHC.Show.shows7
+                        (p (GHC.Types.: @ GHC.Types.Char GHC.Show.shows4 w)) }) -}
+6353a61568dc8c6920cf8d2dee230c8c
+  $wmatchIndex ::
+    GHC.Prim.ByteArray#
+    -> GHC.Prim.Int#
+    -> GHC.Prim.Int#
+    -> (GHC.Types.Int, Data.Text.Internal.Text)
+    -> GHC.Base.Maybe GHC.Types.Int
+  {- Arity: 4, Strictness: <L,U><L,U><S,U><L,1*U(U,1*U(U,U,U))>,
+     Inline: [0] -}
+99c08531bd7421e3dc67f425a80b9133
+  data Input
+    = Input {inputText :: Haskell.Txt, inputPattern :: Haskell.Pat}
+7a4bf44ef1adc15752eaf6f2378d9442
+  data Output
+    = Output {positions :: [GHC.Types.Int],
+              comparisons :: GHC.Types.Int}
+bf9b29bc549c7a77d93af827dd146968
+  type Pat = Haskell.Txt
+0a5608d365b3f56ee1eb75915bdfabee
+  type Search = Haskell.Input -> Haskell.Output
+4e5a6158f438be53bb5b72796ee0d1bd
+  type Txt = Data.Text.Internal.Text
+568f1ff4a38d03caebc27f7c7ca104e2
+  comparisons :: Haskell.Output -> GHC.Types.Int
+  RecSel Left Haskell.Output
+  {- Arity: 1, HasNoCafRefs, Strictness: <S(LS),1*U(A,1*U(U))>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (ds :: Haskell.Output) ->
+                 case ds of wild { Haskell.Output ds1 ds2 -> ds2 }) -}
+774b86cab7782d9a4dee94bfe5916e5a
+  indexedTails ::
+    Data.Text.Internal.Text
+    -> [(GHC.Types.Int, Data.Text.Internal.Text)]
+  {- Arity: 1, Strictness: <L,1*U(U,U,U)>,
+     Unfolding: (\ (x :: Data.Text.Internal.Text) ->
+                 case GHC.List.zip
+                        @ GHC.Types.Int
+                        @ Data.Text.Internal.Text
+                        Haskell.indexedTails1
+                        (case x of ww { Data.Text.Internal.Text ww1 ww2 ww3 ->
+                         case Data.Text.$wtails ww1 ww2 ww3 of ww4 { (#,#) ww5 ww6 ->
+                         GHC.Types.: @ Data.Text.Internal.Text ww5 ww6 } }) of wild {
+                   [] -> GHC.List.init2 @ (GHC.Types.Int, Data.Text.Internal.Text)
+                   : x1 xs
+                   -> GHC.List.init1
+                        @ (GHC.Types.Int, Data.Text.Internal.Text)
+                        x1
+                        xs }) -}
+cb9def7aa3e0daff7d170bbf1dfc5c85
+  indexedTails1 :: [GHC.Types.Int]
+  {- Unfolding: (GHC.Enum.eftInt 0# 9223372036854775807#) -}
+d5d9af0bf0bf723e9c669da22eea5c31
+  inputPattern :: Haskell.Input -> Haskell.Pat
+  RecSel Left Haskell.Input
+  {- Arity: 1, HasNoCafRefs, Strictness: <S(LS),1*U(A,1*U(U,U,U))>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (ds :: Haskell.Input) ->
+                 case ds of wild { Haskell.Input ds1 ds2 -> ds2 }) -}
+a20c332db098c50aa201c9c27865d027
+  inputText :: Haskell.Input -> Haskell.Txt
+  RecSel Left Haskell.Input
+  {- Arity: 1, HasNoCafRefs, Strictness: <S(SL),1*U(1*U(U,U,U),A)>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (ds :: Haskell.Input) ->
+                 case ds of wild { Haskell.Input ds1 ds2 -> ds1 }) -}
+ede3bdb66505c5f37fd4251003e846a0
+  matchIndex ::
+    Data.Text.Internal.Text
+    -> (GHC.Types.Int, Data.Text.Internal.Text)
+    -> GHC.Base.Maybe GHC.Types.Int
+  {- Arity: 2, Strictness: <S(LLS),1*U(U,U,U)><L,1*U(U,1*U(U,U,U))>,
+     Inline: INLINE[0],
+     Unfolding: InlineRule (2, True, False)
+                (\ (w :: Data.Text.Internal.Text)
+                   (w1 :: (GHC.Types.Int, Data.Text.Internal.Text)) ->
+                 case w of ww { Data.Text.Internal.Text ww1 ww2 ww3 ->
+                 Haskell.$wmatchIndex ww1 ww2 ww3 w1 }) -}
+daa1533ee30ca41014827d6d8d947447
+  naive :: Haskell.Search
+  {- Arity: 1, Strictness: <S,1*U(1*U(U,U,U),U(U,U,U))>m,
+     Inline: INLINE[0],
+     Unfolding: InlineRule (1, True, False)
+                (\ (w :: Haskell.Input) ->
+                 case w of ww { Haskell.Input ww1 ww2 ->
+                 Haskell.Output
+                   (Data.Maybe.mapMaybe
+                      @ (GHC.Types.Int, Data.Text.Internal.Text)
+                      @ GHC.Types.Int
+                      (Haskell.matchIndex ww2)
+                      (Haskell.indexedTails ww1))
+                   Haskell.naive1 }) -}
+1c415a72b6b490064d337647c124f549
+  naive1 :: GHC.Types.Int
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.I# 0#) -}
+9b97a89b64cc58c74c8778fc63df3c0c
+  positions :: Haskell.Output -> [GHC.Types.Int]
+  RecSel Left Haskell.Output
+  {- Arity: 1, HasNoCafRefs, Strictness: <S(SL),1*U(1*U,A)>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (ds :: Haskell.Output) ->
+                 case ds of wild { Haskell.Output ds1 ds2 -> ds1 }) -}
+instance [safe] GHC.Classes.Eq [Haskell.Input] = Haskell.$fEqInput
+instance [safe] GHC.Classes.Eq [Haskell.Output]
+  = Haskell.$fEqOutput
+instance [safe] GHC.Show.Show [Haskell.Input] = Haskell.$fShowInput
+instance [safe] GHC.Show.Show [Haskell.Output]
+  = Haskell.$fShowOutput
+vectorised variables:
+vectorised tycons:
+vectorised reused tycons:
+parallel variables:
+parallel tycons:
+trusted: safe
+require own pkg trusted: False
+

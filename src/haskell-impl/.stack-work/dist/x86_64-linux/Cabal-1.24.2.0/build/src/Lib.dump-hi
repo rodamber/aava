@@ -1,0 +1,262 @@
+
+==================== FINAL INTERFACE ====================
+2017-04-29 03:52:08.956896 UTC
+
+interface haskell-impl-0.1.0.0-5QZQUPOQJel4VPmddVin6V:Lib 8002
+  interface hash: e38a282621aff41fbdf7e27785b86e5b
+  ABI hash: e097b2621f88b47407fdb16c561301bf
+  export-list hash: 82ae32e3ff46ac7df0487ee86e9e0f20
+  orphan hash: 693e9af84d3dfcc71e640e005bdc5e2e
+  flag hash: 60ae86f70b120acadb3fead9a4497d1a
+  sig of: Nothing
+  used TH splices: False
+  where
+exports:
+  Lib.addPosition
+  Lib.count
+  Lib.mkOutput
+  Lib.runSearch
+  Lib.StringMatch{Lib.match}
+module dependencies: C Haskell
+package dependencies: array-0.5.1.1@array-0.5.1.1 base-4.9.1.0
+                      binary-0.8.3.0@binary-0.8.3.0
+                      bytestring-0.10.8.1@bytestring-0.10.8.1
+                      containers-0.5.7.1@containers-0.5.7.1
+                      deepseq-1.4.2.0@deepseq-1.4.2.0 ghc-prim-0.5.0.0
+                      integer-gmp-1.0.0.1
+                      text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR
+orphans: base-4.9.1.0:GHC.Base base-4.9.1.0:GHC.Float
+         binary-0.8.3.0@binary-0.8.3.0:Data.Binary.Generic
+         bytestring-0.10.8.1@bytestring-0.10.8.1:Data.ByteString.Builder
+         text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR:Data.Text
+         text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR:Data.Text.Show
+family instance modules: base-4.9.1.0:Control.Applicative
+                         base-4.9.1.0:Data.Complex base-4.9.1.0:Data.Either
+                         base-4.9.1.0:Data.Functor.Const base-4.9.1.0:Data.Functor.Identity
+                         base-4.9.1.0:Data.List.NonEmpty base-4.9.1.0:Data.Monoid
+                         base-4.9.1.0:Data.Semigroup base-4.9.1.0:Data.Type.Equality
+                         base-4.9.1.0:Data.Version base-4.9.1.0:Data.Void
+                         base-4.9.1.0:GHC.Exts base-4.9.1.0:GHC.Generics
+                         base-4.9.1.0:GHC.IO.Exception base-4.9.1.0:GHC.TypeLits
+                         containers-0.5.7.1@containers-0.5.7.1:Data.IntMap.Base
+                         containers-0.5.7.1@containers-0.5.7.1:Data.IntSet.Base
+                         containers-0.5.7.1@containers-0.5.7.1:Data.Map.Base
+                         containers-0.5.7.1@containers-0.5.7.1:Data.Sequence
+                         containers-0.5.7.1@containers-0.5.7.1:Data.Set.Base
+                         text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR:Data.Text
+import  -/  base-4.9.1.0:Data.Functor 5ab1dc703df5b482e77efb697833ca3c
+import  -/  base-4.9.1.0:Foreign b4bee334aade4f33021057fdecf4a495
+import  -/  base-4.9.1.0:Foreign.C.String b924799565cbc1299cb1e113052a7304
+import  -/  base-4.9.1.0:Foreign.C.Types bf568ee9a3ec4aa42333a0da5f4345de
+import  -/  base-4.9.1.0:Foreign.ForeignPtr.Imp 983e41bceaf3a479584f5f15468ec17c
+import  -/  base-4.9.1.0:Foreign.Marshal.Alloc 702eda1ba8e8a26a0aa78866f5adb5ab
+import  -/  base-4.9.1.0:Foreign.Marshal.Array 63114b8be90ae825866d45b38d8798ce
+import  -/  base-4.9.1.0:GHC.Base c4231c43c07e46080a26bf94094c7aa1
+import  -/  base-4.9.1.0:GHC.IO.Unsafe 1c057c642b0e201f55a24585d3d94564
+import  -/  base-4.9.1.0:GHC.Num 00bfaa7b2f9d6084913c0697a8a49ec8
+import  -/  base-4.9.1.0:GHC.Ptr 427a6ad9312f04edb98e0f5b7c4e2596
+import  -/  base-4.9.1.0:GHC.Real 82e4e59051a13dba1da63e1e970a69e6
+import  -/  base-4.9.1.0:Prelude 22dd289b8469a8fa8dc81cab7b237771
+import  -/  base-4.9.1.0:System.IO.Unsafe 1e3c5b8dd8cf6850ae43cce967bb46cd
+import  -/  C 9f377b29a39da4b9d45ed9fe67808717
+  exports: a3c179b895b74966a09620a80786a539
+  Result 04448298c90fa8575b146957a9431d61
+  Search 629ad7b64c94eda629c2c630ee32867f
+  finalizerResult 40323cc008c8873ee47249a09e8efbf1
+  finalizerVectorChar a8ff361ad4cb0ccb94fa6fbd0ca538ee
+  get_comparisons 8a67a466c47020e09d73a4682dbaec60
+  get_positions 9519c78f57fb3cdf34313778faa4de78
+  get_positions_size 3da13c4b65e0bc9a99b3c0816c9c60d2
+  new_string d1c3f4c9e485561c27947ab1698ac2b0
+import  -/  Haskell 78765105fa255adf55b6cefa7da7e52e
+  exports: f8fe488d56efa0143f356cb9b0cda0e0
+  Input df64186ba0b3f1527df36524a122bedf
+  Output 657e2289b34ffc23f8c31ad4f222a5fb
+  Output 7a4bf44ef1adc15752eaf6f2378d9442
+  Search 0a5608d365b3f56ee1eb75915bdfabee
+import  -/  text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR:Data.Text 9ba4693a108b74a0b1eb8f7d38f1abee
+import  -/  text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR:Data.Text.Show 638b4149d86790151d6d4eeca215be94
+c76b926cb088d607db4009fea51097d8
+  $fStringMatch(->) :: Lib.StringMatch C.Search
+  DFunId
+  {- Arity: 2,
+     Strictness: <L,1*C1(C1(C1(U(U,1*U(U)))))><S,1*U(1*U(U,U,U),1*U(U,U,U))>,
+     Inline: INLINE (sat-args=0),
+     Unfolding: InlineRule (0, False, True)
+                Lib.runSearch `cast` (Sym (Lib.N:StringMatch[0] <C.Search>_N)) -}
+c76b926cb088d607db4009fea51097d8
+  $fStringMatch(->)0 :: Lib.StringMatch Haskell.Search
+  DFunId
+  {- Arity: 1, HasNoCafRefs, Strictness: <S,1*U>,
+     Inline: INLINE (sat-args=0),
+     Unfolding: InlineRule (0, False, True)
+                (GHC.Base.id @ Haskell.Search)
+                  `cast`
+                (Sym (Lib.N:StringMatch[0] <Haskell.Search>_N)) -}
+fa726d579b16aba0b53df17b79c14f6d
+  $tc'C:StringMatch :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   6724813133118892031##
+                   15830454845245412885##
+                   Lib.$trModule
+                   Lib.$tc'C:StringMatch1) -}
+85e724cb45d036d1e2aec2f6f411cbea
+  $tc'C:StringMatch1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS "'C:StringMatch"#) -}
+7cd4237636ada86d579e59c6258ca5cf
+  $tcStringMatch :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   10004482802681373572##
+                   18172135268150584831##
+                   Lib.$trModule
+                   Lib.$tcStringMatch1) -}
+1afd6891d6a4c8a9e13a2c20724658ab
+  $tcStringMatch1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS "StringMatch"#) -}
+97a46265ce65a8a21174957449df937f
+  $trModule :: GHC.Types.Module
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.Module Lib.$trModule2 Lib.$trModule1) -}
+7418b682606096e53cda2edde70c11c5
+  $trModule1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS "Lib"#) -}
+8072fa0d604396bb89f726266a6b51d1
+  $trModule2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS
+                   "haskell-impl-0.1.0.0-5QZQUPOQJel4VPmddVin6V"#) -}
+e077c155bf3661d2ea044f197c745d7d
+  $wmkOutput ::
+    GHC.Ptr.Ptr C.Result -> (# [GHC.Types.Int], GHC.Types.Int #)
+  {- Arity: 1, Strictness: <L,U(U)>, Inline: [0],
+     Unfolding: (\ (w :: GHC.Ptr.Ptr C.Result) ->
+                 (# case GHC.Magic.runRW#
+                           @ 'GHC.Types.PtrRepLifted
+                           @ [Foreign.C.Types.CInt]
+                           (\ (s :: GHC.Prim.State# GHC.Prim.RealWorld)[OneShot] ->
+                            case GHC.Prim.noDuplicate# s of s' { DEFAULT ->
+                            case w of ds1 { GHC.Ptr.Ptr ds2 ->
+                            case {__pkg_ccall haskell-impl-0.1.0.0-5QZQUPOQJel4VPmddVin6V get_positions GHC.Prim.Addr#
+                                                                                                        -> GHC.Prim.State#
+                                                                                                             GHC.Prim.RealWorld
+                                                                                                        -> (# GHC.Prim.State#
+                                                                                                                GHC.Prim.RealWorld,
+                                                                                                              GHC.Prim.Addr# #)}
+                                   ds2
+                                   s' of wild { (#,#) ds3 ds4 ->
+                            case GHC.Prim.newMutVar#
+                                   @ GHC.ForeignPtr.Finalizers
+                                   @ GHC.Prim.RealWorld
+                                   GHC.ForeignPtr.NoFinalizers
+                                   ds3 of ds7 { (#,#) ipv ipv1 ->
+                            case GHC.ForeignPtr.$winsertCFinalizer
+                                   @ ()
+                                   ipv1
+                                   __label "free" (function)
+                                   0#
+                                   __NULL
+                                   ds4
+                                   GHC.Tuple.()
+                                   ipv of ds8 { (#,#) ipv2 ipv3 ->
+                            case {__pkg_ccall haskell-impl-0.1.0.0-5QZQUPOQJel4VPmddVin6V get_positions_size GHC.Prim.Addr#
+                                                                                                             -> GHC.Prim.State#
+                                                                                                                  GHC.Prim.RealWorld
+                                                                                                             -> (# GHC.Prim.State#
+                                                                                                                     GHC.Prim.RealWorld,
+                                                                                                                   GHC.Prim.Int# #)}
+                                   ds2
+                                   GHC.Prim.realWorld# of wild1 { (#,#) ds9 ds10 ->
+                            case Foreign.Marshal.Array.$wpeekArray
+                                   @ Foreign.C.Types.CInt
+                                   Foreign.C.Types.$fStorableCInt
+                                   (GHC.Prim.narrow32Int# ds10)
+                                   (GHC.Ptr.Ptr @ Foreign.C.Types.CInt ds4)
+                                   ipv2 of ds11 { (#,#) ipv4 ipv5 ->
+                            case GHC.Prim.touch#
+                                   @ 'GHC.Types.PtrRepLifted
+                                   @ GHC.ForeignPtr.ForeignPtrContents
+                                   (GHC.ForeignPtr.PlainForeignPtr ipv1)
+                                   ipv4 of s'1 { DEFAULT ->
+                            (# s'1, ipv5 #) } } } } } } } }) of ds { (#,#) ipv ipv1 ->
+                    GHC.Base.map
+                      @ Foreign.C.Types.CInt
+                      @ GHC.Types.Int
+                      Lib.mkOutput1
+                      ipv1 },
+                    case w of ds1 { GHC.Ptr.Ptr ds2 ->
+                    case {__pkg_ccall haskell-impl-0.1.0.0-5QZQUPOQJel4VPmddVin6V get_comparisons GHC.Prim.Addr#
+                                                                                                  -> GHC.Prim.State#
+                                                                                                       GHC.Prim.RealWorld
+                                                                                                  -> (# GHC.Prim.State#
+                                                                                                          GHC.Prim.RealWorld,
+                                                                                                        GHC.Prim.Int# #)}
+                           ds2
+                           GHC.Prim.realWorld# of wild { (#,#) ds3 ds4 ->
+                    GHC.Types.I# (GHC.Prim.narrow32Int# ds4) } } #)) -}
+c460b47efd325b0fd586ed0630b72301
+  $wrunSearch ::
+    C.Search -> Haskell.Txt -> Haskell.Pat -> Haskell.Output
+  {- Arity: 3,
+     Strictness: <L,1*C1(C1(C1(U(U,1*U(U)))))><L,1*U(U,U,U)><L,1*U(U,U,U)>,
+     Inline: [0] -}
+c76b926cb088d607db4009fea51097d8
+  class StringMatch a where
+    match :: a -> Haskell.Search
+    {-# MINIMAL match #-}
+bee1645dc40ee176a47e07386d34394a
+  addPosition :: Haskell.Output -> GHC.Types.Int -> Haskell.Output
+  {- Arity: 2, HasNoCafRefs, Strictness: <S,1*U(U,U)><L,U>m,
+     Unfolding: InlineRule (2, True, False)
+                (\ (ds :: Haskell.Output) (p :: GHC.Types.Int) ->
+                 case ds of wild { Haskell.Output ps c ->
+                 Haskell.Output (GHC.Types.: @ GHC.Types.Int p ps) c }) -}
+05ac5381fd6b92a3dc0612d842d0abe0
+  count :: Haskell.Output -> Haskell.Output
+  {- Arity: 1, HasNoCafRefs, Strictness: <S,1*U(U,1*U(U))>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (ds :: Haskell.Output) ->
+                 case ds of wild { Haskell.Output ps c ->
+                 Haskell.Output
+                   ps
+                   (case c of wild1 { GHC.Types.I# x ->
+                    GHC.Types.I# (GHC.Prim.+# x 1#) }) }) -}
+4142a59f7d283c8637194317148ef83a
+  mkOutput :: GHC.Ptr.Ptr C.Result -> Haskell.Output
+  {- Arity: 1, Strictness: <L,U(U)>m, Inline: INLINE[0],
+     Unfolding: InlineRule (1, True, False)
+                (\ (w :: GHC.Ptr.Ptr C.Result) ->
+                 case Lib.$wmkOutput w of ww { (#,#) ww1 ww2 ->
+                 Haskell.Output ww1 ww2 }) -}
+cee93aebd6d47d48088d0356ec95de57
+  mkOutput1 :: Foreign.C.Types.CInt -> GHC.Types.Int
+  {- Arity: 1, HasNoCafRefs, Strictness: <S(S),1*U(U)>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (ds :: Foreign.C.Types.CInt) ->
+                 case ds
+                        `cast`
+                      (Foreign.C.Types.N:CInt[0]) of wild { GHC.Int.I32# x# ->
+                 GHC.Types.I# x# }) -}
+48b4f7830eb8ce40b345ff54a3682ffc
+  runSearch :: C.Search -> Haskell.Search
+  {- Arity: 2,
+     Strictness: <L,1*C1(C1(C1(U(U,1*U(U)))))><S,1*U(1*U(U,U,U),1*U(U,U,U))>,
+     Inline: INLINE[0],
+     Unfolding: InlineRule (2, True, False)
+                (\ (w :: C.Search) (w1 :: Haskell.Input) ->
+                 case w1 of ww { Haskell.Input ww1 ww2 ->
+                 Lib.$wrunSearch w ww1 ww2 }) -}
+instance Lib.StringMatch [(->)] = Lib.$fStringMatch(->)
+instance Lib.StringMatch [(->)] = Lib.$fStringMatch(->)0
+vectorised variables:
+vectorised tycons:
+vectorised reused tycons:
+parallel variables:
+parallel tycons:
+trusted: none
+require own pkg trusted: False
+

@@ -1,4 +1,39 @@
-* Project
+* Second try
+** Haskell
+- [-] Implementation of:
+  - [X] Naive
+    - [X] Tests
+  - [ ] Knuth-Morris-Pratt
+    - [ ] Tests
+  - [ ] Boyer-Moore
+    - [ ] Simple bad character rule
+      - [ ] Tests
+    - [ ] Strong good suffix rule
+      - [ ] Z algorithm
+        - [ ] Tests
+      - [ ] suffix rule
+        - [ ] Tests
+      - [ ] Tests
+    - [ ] Combine everything
+    - [ ] Tests
+** C
+- [ ] Match against haskell specs:
+  - [X] Naive
+  - [ ] Knuth-Morris-Pratt
+  - [ ] Boyer-Moore
+    - [ ] Simple bad character rule
+    - [ ] Strong good suffix rule
+      - [ ] Z algorithm
+      - [ ] suffix rule
+      - [ ] Tests
+    - [ ] Combine everything
+    
+** FFI
+- [ ] FFI Bindings
+- [ ] QuickCheck tests of C implementations against Haskell implementations
+
+* First try
+** Project
 Fails tests 11, 12, 17, 18, 19, 20.
 
 11 e 12 boyer moore
@@ -18,8 +53,9 @@ Fails tests 11, 12, 17, 18, 19, 20.
     - [X] Suffix rule itself
   - [X] Combine everything
 - [X] Shell test script
-* test
-** 01.in
+
+** test
+*** 01.in
 R = 0 | 2 | 1 | 0
 L = <0 0>
 l = <0 0>
@@ -48,7 +84,7 @@ T TCGCAGGGCG
 P         TC
            ^
 cmps: 7; bc: 2; gs: 1
-** 02.in
+*** 02.in
 R = 3 | 0 | 0 | 0
 L = <0 2 0>
 l = <0 2 0>
@@ -92,7 +128,7 @@ T AAAAAAAAAA
 P        AAA
         ^
 cmps: 24; bc: 1; gs: 1
-** 05.in
+*** 05.in
 R = 2 | 1 | 0 | 0
 L = <0 0>
 l = <0 0>
@@ -127,7 +163,7 @@ P        CA
          ^
 cmps: 9; bc: 1; gs: 2
 
-** 06.in
+*** 06.in
 R = 3 | 0 | 0 | 0
 L = <0 2 0>
 l = <0 2 0>
