@@ -48,7 +48,7 @@ zMatchCount t a b = length $ takeWhile (uncurry (==)) $ setup
 zAlgorithmSpec :: T.Text -> [Int]
 zAlgorithmSpec txt = 0 : (zMatchCount txt 1 <$> [2 .. T.length txt])
 
-reverseZAlgorithmSpec = zAlgorithmSpec . T.reverse
+reverseZAlgorithmSpec = reverse . zAlgorithmSpec . T.reverse
 
 --------------------------------------------------------------------------------
 

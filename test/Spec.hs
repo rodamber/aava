@@ -122,7 +122,7 @@ test_search msg search =
 --------------------------------------------------------------------------------
 
 main = do
-  traverse_ (quickCheckWith stdArgs { maxSuccess = 200 } . prop_searchPositions)
+  traverse_ (quickCheckWith stdArgs { maxSuccess = 50 } . prop_searchPositions)
             [naive, knuthMorrisPratt, boyerMoore]
 
   hspec $ do

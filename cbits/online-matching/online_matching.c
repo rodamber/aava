@@ -375,9 +375,14 @@ vector_int *z_algorithm(string const *const str) {
 
 vector_int *reverse_z_algorithm(string const *const str) {
   string *const rev_str = reverse_char(str);
+
   vector_int *const z = z_algorithm(rev_str);
   free_vector_char(rev_str);
-  return (vector_int*) z;
+
+  vector_int *const rev_z = reverse_int(z);
+  free_vector_int(z);
+
+  return rev_z;
 }
 
 /* ************************************************************************** */

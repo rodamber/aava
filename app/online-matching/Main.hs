@@ -14,4 +14,5 @@ search :: [Search] -> Txt -> Pat -> IO ()
 search ss txt pat = print $ fmap (\s -> s (Input txt pat)) ss
 
 main = do
+  print $ HS.reverseZAlgorithmSpec "cabdabdab"
   C.main_
