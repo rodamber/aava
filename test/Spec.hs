@@ -1,5 +1,6 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE Strict                    #-}
+{-# LANGUAGE ViewPatterns              #-}
 
 import Data.Foldable
 import Data.List
@@ -11,6 +12,7 @@ import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck
 import Test.QuickCheck.Arbitrary
+import Test.QuickCheck.Gen
 
 import Lib
 
@@ -123,22 +125,46 @@ test_zAlgorithm = do
 -- Boyer Moore
 --------------------------------------------------------------------------------
 
-prop_strongGoodSuffixPreprocessingSpec t =
-  let (bigL', l') = HS.strongGoodSuffixPreprocessingSpec t
-  in T.length t == S.length bigL' && S.length bigL' == S.length l'
+prop_L'HasSameLengthAsPattern buildL t =
+  let bigN = S.fromList $ HS.reverseZAlgorithmSpec t
+  in T.length t == length (buildL bigN)
+
+prop_bigL'HasSameLengthAsPattern = prop_L'HasSameLengthAsPattern HS.buildBigL'Spec
+prop_smallL'HasSameLengthAsPattern = prop_L'HasSameLengthAsPattern HS.buildSmallL'Spec
 
 test_strongGoodSuffixRule =
   describe "strong good suffix rule" $ do
-    prop "tables and input have the same length" prop_strongGoodSuffixPreprocessingSpec
+    describe "unit tests" $ do
+      let s = "AAAAAAAAA"
+      let bigN = S.fromList $ HS.reverseZAlgorithmSpec s
 
-    it "..." $ do
-      HS.strongGoodSuffixPreprocessingSpec "AAAAAAAAA"
-        `shouldBe` (S.fromList [0,8,7,6,5,4,3,2,1], S.fromList [8,8,7,6,5,4,3,2,1])
-      HS.strongGoodSuffixPreprocessingSpec "cabdabdab"
-        `shouldBe` (S.fromList [0,0,0,0,6,0,0,3,0], S.fromList [0,0,0,0,0,0,0,0,0])
+      specify "test 01" $ do
+        HS.buildBigL'Spec   bigN `shouldBe` S.fromList [0,8,7,6,5,4,3,2,1]
+      specify "test 02" $ do
+        HS.buildSmallL'Spec bigN `shouldBe` S.fromList [8,8,7,6,5,4,3,2,1]
 
-    matchSpec $ \t -> HS.strongGoodSuffixPreprocessingSpec t ==
-                      strongGoodSuffixPreprocessing t
+      let s = "cabdabdab"
+      let bigN = S.fromList $ HS.reverseZAlgorithmSpec s
+
+      specify "test 03" $ do
+        HS.buildBigL'Spec   bigN `shouldBe` S.fromList [0,0,0,0,6,0,0,3,0]
+      specify "test 04" $ do
+        HS.buildSmallL'Spec bigN `shouldBe` S.fromList [0,0,0,0,0,0,0,0,0]
+
+    describe "Big L'" $ do
+      prop "tables and input have the same length" $ do
+        prop_bigL'HasSameLengthAsPattern
+      matchSpec prop_bigL'MatchesSpec
+
+    describe "Small l'" $ do
+      prop "tables and input have the same length" $ do
+        prop_smallL'HasSameLengthAsPattern
+      matchSpec prop_smallL'MatchesSpec
+
+prop_bigL'MatchesSpec s = HS.buildBigL'Spec bigN == buildBigL' bigN
+  where bigN = S.fromList $ reverseZAlgorithm s
+prop_smallL'MatchesSpec s = HS.buildSmallL'Spec bigN == buildSmallL' bigN
+  where bigN = S.fromList $ reverseZAlgorithm s
 
 --------------------------------------------------------------------------------
 -- Haskell naive spec
@@ -170,22 +196,49 @@ test_matchIndex =
 --------------------------------------------------------------------------------
 
 main = do
-  traverse_ (quickCheckWith stdArgs { maxSuccess = 50 } . prop_searchPositions)
-            [naive, knuthMorrisPratt, boyerMoore]
+  -- traverse_ (quickCheckWith stdArgs { maxSuccess = 200 } . prop_searchPositions)
+  --   [ naive
+  --   , knuthMorrisPratt
+  --   , boyerMoore
+  --   ]
+
+  traverse_ (quickCheckWith stdArgs { maxSuccess = 200 })
+    [  prop_bigL'MatchesSpec
+     , prop_smallL'MatchesSpec
+    ]
+
+  -- hspec $ do
+  --   describe "Haskell" $ do
+  --     test_indexedTails
+  --     test_matchIndex
+  --     describe "naive" $ matchTests HS.naive
+
+  --     test_zMatchCount
+
+  --   describe "C" $ do
+  --     test_search "naive" naive
+  --     test_search "knuth_morris_pratt" knuthMorrisPratt
+
+  --     describe "Boyer Moore" $ do
+  --       test_zAlgorithm
+  --       test_strongGoodSuffixRule
+  --       test_search "boyer_moore" boyerMoore
+
+  -- quickCheckWith stdArgs { maxSuccess = 100 } $ prop_searchPositions boyerMoore
 
   hspec $ do
-    describe "Haskell" $ do
-      test_indexedTails
-      test_matchIndex
-      describe "naive" $ matchTests HS.naive
+    describe "Boyer Moore Unit Tests" $ do
+      let test (n,input) = it (show n) $ boyerMoore input `shouldBe` HS.naive input
+      traverse_ test $ zip [0..]
+        [ Input "CCTTT" "CTTT"
+        , Input "AAAAA" "A"
+        , Input {inputText = "CGGGCCACAGCTGCTTCTCTTCAAATGGACGCCTACGCGAATTACATGAGCAGATG",
+                inputPattern = "A"}
+        , Input {inputText = "TCAAA", inputPattern = "A"}
+        , Input {inputText = "AGACTGAATCCCTGCAACATTAAGG", inputPattern = "A"}
+        , Input {inputText = "GTTGAGCCTTCACGGTAG", inputPattern = "T"}
+        , Input {inputText = "ATTTAACAAGG", inputPattern = "AGG"}
+        , Input {inputText = "GG", inputPattern = "G"}
+        ]
 
-      test_zMatchCount
 
-    describe "C" $ do
-      test_search "naive" naive
-      test_search "knuth_morris_pratt" knuthMorrisPratt
-
-      describe "Boyer Moore" $ do
-        test_zAlgorithm
-        test_strongGoodSuffixRule
-        test_search "boyer_moore" boyerMoore

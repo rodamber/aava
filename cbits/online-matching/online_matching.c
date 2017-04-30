@@ -494,9 +494,8 @@ int bad_char_shift(int const *const R, int const i, char const c) {
   return max(1, i - *R_at(R, c));
 }
 
-vector_int *build_big_l_prime(string const *const str, vector_int const *const N) {
-  // FIXME: WE DON'T THE STR...
-  int const n = str->size;
+vector_int *build_big_l_prime(vector_int const *const N) {
+  int const n = N->size;
   vector_int *const big_l_prime = new_vector_init_int(0, n);
 
   int j;
@@ -511,10 +510,11 @@ vector_int *build_big_l_prime(string const *const str, vector_int const *const N
   return big_l_prime;
 }
 
-vector_int *build_small_l_prime(string const *const str, vector_int const *const N) {
-  int const n = str->size;
+vector_int *build_small_l_prime(vector_int const *const N) {
+  int const n = N->size;
   vector_int *const l_prime = new_vector_init_int(0, n);
 
+  // FIXME: Implement a linear time solution
   int i;
   for (i = 1; i <= n; i++) {
     int j;
@@ -553,8 +553,8 @@ result *boyer_moore(string const * const txt, string const * const pat) {
   /* Preprocessing */
   int *const R = bad_char_preprocessing(pat);
   vector_int *const N = reverse_z_algorithm(pat);
-  vector_int *const big_l_prime = build_big_l_prime(pat, N);
-  vector_int *const small_l_prime = build_small_l_prime(pat, N);
+  vector_int *const big_l_prime = build_big_l_prime(N);
+  vector_int *const small_l_prime = build_small_l_prime(N);
 
   /* Search */
   int t; /* txt index */

@@ -4,7 +4,7 @@ module Haskell where
 
 import Debug.Trace
 
-import Control.Monad.State
+import Control.Monad.State.Strict
 import Data.Foldable
 import qualified Data.Map as M
 import Data.Maybe
@@ -78,18 +78,15 @@ update1 i = S.update (i - 1)
 buildBigL'Spec :: S.Seq Int -> S.Seq Int
 buildBigL'Spec bigN = execState (traverse_ loop [1 .. n - 1]) (S.replicate n 0)
   where
-    n = T.length t
-    bigN = S.fromList $ reverseZAlgorithmSpec t
+    n = length bigN
 
     loop :: Int -> State (S.Seq Int) ()
-    loop j = do
-      bigL' <- get
-      let i = n - bigN `index1` j + 1
-      put (update1 i j bigL')
+    loop j = modify' (update1 i j )
+      where i = n - bigN `index1` j + 1
 
 filterWithIndex :: (Int -> a -> Bool) -> S.Seq a -> S.Seq a
 filterWithIndex p s = snd <$> S.filter (uncurry p) indexedSeq
-  where indexedSeq = S.zip (S.fromList [0 .. S.length s]) s
+  where indexedSeq = S.zip (S.fromList [0 .. length s]) s
 
 maximumMay :: (Ord a, Foldable t) => t a -> Maybe a
 maximumMay t | null t    = Nothing
@@ -100,7 +97,7 @@ maximumDef def = fromMaybe def . maximumMay
 
 buildSmallL'Spec :: S.Seq Int -> S.Seq Int
 buildSmallL'Spec bigN =
-  let n  = S.length bigN
+  let n  = length bigN
       js = filterWithIndex (\ix x -> (ix + 1) == x) bigN
   in (flip fmap) (S.fromList [1..n]) $ \i ->
        maximumDef 0 $ S.filter (<= n - i + 1) js
@@ -109,13 +106,13 @@ data Match = Match | Mismatch Int
 
 strongGoodSuffixShiftSpec :: (S.Seq Int, S.Seq Int) -> Match -> Int
 strongGoodSuffixShiftSpec (_, l') Match =
-  S.length l' - l' `index1` 2
+  length l' - l' `index1` 2
 strongGoodSuffixShiftSpec (bigL', l') (Mismatch j)
   | bigL'i >  0 = n - bigL'i
   | bigL'i == 0 = n - l' `index1` i
   | i == 1      = 1
   where bigL'i = bigL' `index1` i
-        n = S.length l'
+        n = length l'
         i = j + 1
 
 --------------------------------------------------------------------------------

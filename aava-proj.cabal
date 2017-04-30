@@ -18,6 +18,7 @@ executable online-matching
   main-is:             Main.hs
   build-depends:       base
                      , aava-proj
+                     , containers
                      , text
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   default-extensions:  BangPatterns, OverloadedStrings

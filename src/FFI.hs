@@ -1,4 +1,5 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE Strict                   #-}
 module FFI where
 
 import Foreign
@@ -41,6 +42,10 @@ foreign import ccall unsafe "&free_vector_char"
 
 foreign import ccall unsafe "&free_vector_int"
     finalizerVectorInt :: FunPtr (Ptr (Vector CInt) -> IO ())
+
+foreign import ccall unsafe "dynamic"
+    mkFreeVectorInt :: (FunPtr (Ptr (Vector CInt) -> IO ()))
+                    -> (Ptr (Vector CInt) -> IO ())
 
 foreign import ccall unsafe "&free_result"
     finalizerResult :: FunPtr (Ptr Result -> IO ())
@@ -87,15 +92,11 @@ foreign import ccall unsafe "bad_char_preprocessing"
 foreign import ccall unsafe "bad_char_shift"
     bad_char_shift :: Ptr CInt -> CInt -> CChar
 
--- foreign import ccall unsafe "strong_good_suffix_preprocessing"
---     strong_good_suffix_preprocessing :: Ptr (Vector CChar)
---                                      -> IO (Ptr (Ptr (Vector CInt)))
-
 foreign import ccall unsafe "build_big_l_prime"
-    build_big_l' :: Ptr (Vector CChar) -> Ptr (Vector CInt) -> IO (Ptr (Vector CInt))
+    build_big_l' :: Ptr (Vector CInt) -> IO (Ptr (Vector CInt))
 
 foreign import ccall unsafe "build_small_l_prime"
-    build_small_l' :: Ptr (Vector CChar) -> Ptr (Vector CInt) -> IO (Ptr (Vector CInt))
+    build_small_l' :: Ptr (Vector CInt) -> IO (Ptr (Vector CInt))
 
 foreign import ccall unsafe "strong_good_suffix_shift"
     strong_good_suffix_shift :: Ptr (Ptr (Vector CInt)) -> CInt -> CInt

@@ -4,6 +4,7 @@
 
 module Lib where
 
+import Control.Monad
 import Data.Foldable
 import qualified Data.Sequence as S
 import qualified Data.Text as T
@@ -93,64 +94,52 @@ reverseChar txt =
 
 --------------------------------------------------------------------------------
 
-withText :: T.Text -> (Ptr (Vector CChar) -> IO a)-> IO a
-withText t f = do
-  txt_fp <- newVCForeignPtr t
-  withForeignPtr txt_fp f
-
-class FromVectorOf a where
-  getSize :: Ptr (Vector a) -> Int
-  getArray :: Ptr (Vector a) -> Ptr a
-
-instance FromVectorOf CChar where
-  getSize = fromIntegral . C.get_size_char
-  getArray = C.get_array_char
-
-instance FromVectorOf CInt where
-  getSize = fromIntegral . C.get_size_int
-  getArray = C.get_array_int
-
-class Storable a => ToVectorOf a where
+class Storable a => MkVector a where
+  getSize   :: Ptr (Vector a) -> Int
+  getArray  :: Ptr (Vector a) -> Ptr a
   fromArray :: Ptr a -> CInt -> IO (Ptr (Vector a))
+  finalizer :: FunPtr (Ptr (Vector a) -> IO ())
 
-  toVector :: [a] -> IO (Ptr (Vector a))
-  toVector xs = do
-    withArray xs $ \ptr -> do
-      fromArray ptr (fromIntegral $ length xs)
-
-instance ToVectorOf CInt where
-  fromArray = C.from_array_int
-
-instance ToVectorOf CChar where
+instance MkVector CChar where
+  getSize   = fromIntegral . C.get_size_char
+  getArray  = C.get_array_char
   fromArray = C.from_array_char
+  finalizer = C.finalizerVectorChar
 
-withVectorPtr :: (FromVectorOf a, Storable a)
-              => Ptr (Vector a)
-              -> ([a] -> IO b)
-              -> IO b
-withVectorPtr v_ptr f = do
-  v_fp <- newForeignPtr finalizerFree v_ptr
-  withForeignPtr v_fp $ \v_ptr -> do
-      f =<< peekArray (getSize v_ptr) (getArray v_ptr)
+instance MkVector CInt where
+  getSize   = fromIntegral . C.get_size_int
+  getArray  = C.get_array_int
+  fromArray = C.from_array_int
+  finalizer = C.finalizerVectorInt
 
-build :: (Ptr (Vector CChar) -> Ptr (Vector CInt) -> IO (Ptr (Vector CInt)))
-      -> T.Text
-      -> S.Seq Int
-      -> S.Seq Int
-build cbuild t bigN =
+fromVector :: MkVector a => Ptr (Vector a) -> IO [a]
+fromVector ptr = do
+  fp <- newForeignPtr finalizer ptr
+  withForeignPtr fp $ \ptr' ->
+    peekArray (getSize ptr') (getArray ptr')
+
+toVector :: MkVector a => [a] -> IO (ForeignPtr (Vector a))
+toVector xs =
+  withArray xs $ \ptr -> newForeignPtr finalizer =<<
+    fromArray ptr (fromIntegral $ length xs)
+
+withText :: T.Text -> (Ptr (Vector CChar) -> IO a)-> IO a
+withText t f = (flip withForeignPtr) f =<< newVCForeignPtr t
+
+withList :: MkVector a => [a] -> (Ptr (Vector a) -> IO b) -> IO b
+withList xs f = (flip withForeignPtr) f =<< toVector xs
+
+withSeq :: MkVector a => S.Seq a -> (Ptr (Vector a) -> IO b) -> IO b
+withSeq s = withList (toList s)
+
+build :: (Ptr (Vector CInt) -> IO (Ptr (Vector CInt))) -> S.Seq Int -> S.Seq Int
+build cbuild bigN =
   unsafePerformIO $ do
-    withText t $ \t_ptr -> do
-      withList (fromIntegral <$> toList bigN) $ \bigN_ptr -> do
-        bigL'_ptr <- cbuild t_ptr bigN_ptr
-        withVectorPtr bigL'_ptr (return . fmap fromIntegral . S.fromList)
-  where
-    withList :: [CInt] -> (Ptr (Vector CInt) -> IO b) -> IO b
-    withList xs f = do
-      v_fp <- newForeignPtr C.finalizerVectorInt =<< toVector xs
-      withForeignPtr v_fp f
+    withSeq (fromIntegral <$> bigN) $ \bigN_ptr -> do
+      l <- fromVector =<< cbuild bigN_ptr
+      return $ fromIntegral <$> S.fromList l
 
 buildBigL' = build C.build_big_l'
 buildSmallL' = build C.build_small_l'
-
 
 --------------------------------------------------------------------------------
