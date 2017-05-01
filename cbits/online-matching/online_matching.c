@@ -278,19 +278,21 @@ int const left_right = 1;
 int const right_left = -1;
 
 typedef struct {
-  int const found; // whether the substring was found or not
-  int const index; // if not, this is the index where the mismatch occurred
+  int found; // whether the substring was found or not
+  int index; // if not, this is the index where the mismatch occurred
 } match;
 
-match make_match(int const found, int const index) {
-  const match m = { .found = found, .index = index };
+match *new_match(int const found, int const index) {
+  match *m = malloc(sizeof(match));
+  m->found = found;
+  m->index = index;
   return m;
 }
 
-int match_found(match const m) { return m.found; }
-int match_index(match const m) { return m.index; }
+int match_found(match const *const m) { return m->found; }
+int match_index(match const *const m) { return m->index; }
 
-match ncmp(char const *const s1, char const *const s2, int const n,
+match *ncmp(char const *const s1, char const *const s2, int const n,
          int const direction, result *const res) {
   int i;
   for (i = 0; i < n; i++) {
@@ -300,11 +302,12 @@ match ncmp(char const *const s1, char const *const s2, int const n,
     }
   }
 
-  return make_match((i == n), direction * (i + 1));
+  return new_match((i == n), direction * (i + 1));
 }
 
-match change_direction(int const n, match const m, int const direction) {
-  return make_match(m.found, m.index + direction * (n + 1));
+match *change_direction(int const n, match *const m, int const direction) {
+  m->index = m->index + direction * (n + 1);
+  return m;
 }
 
 // Note: Investigate this Stack/GHC bug, where this function is run for no reason.
@@ -333,10 +336,12 @@ result *naive (string const * const T, string const * const P) {
 
   int t;
   for (t = 1; t <= m - n + 1; t++) {
-    if (ncmp(at_char(T, t), at_char(P, 1), 
-             n, left_right, res).found) {
+    match *const m = ncmp(at_char(T, t), at_char(P, 1), 
+                          n, left_right, res);
+    if (m->found) {
       add(res, t);
     }
+    free(m);
   }
   return res;
 }
@@ -507,8 +512,8 @@ int *bad_char_preprocessing(string const *const pat) {
   return R;
 }
 
-int bad_char_shift(int const *const R, match const m, char const c) {
-  return max(1, m.index - *R_at(R, c));
+int bad_char_shift(int const *const R, match const *const m, char const c) {
+  return max(1, m->index - *R_at(R, c));
 }
 
 vector_int *build_big_l_prime(vector_int const *const N) {
@@ -546,14 +551,14 @@ vector_int *build_small_l_prime(vector_int const *const N) {
 }
 
 int strong_good_suffix_shift(vector_int const *const big_l_prime,
-                             vector_int const *const small_l_prime, 
-                             match const m) {
+                             vector_int const *const small_l_prime,
+                             match const *const m) {
   int const n = big_l_prime->size;
 
-  if (n == 1 || m.index == 1)  return 1;
-  if (m.found) return n - *at_int(small_l_prime, 2);
+  if (n == 1 || m->index == n)  return 1;
+  if (m->found) return n - *at_int(small_l_prime, 2);
 
-  int const i = m.index + 1;
+  int const i = m->index + 1;
   int const x = *at_int(big_l_prime, i);
 
   if (x >  0) return n - x;
@@ -576,18 +581,19 @@ result *boyer_moore(string const * const txt, string const * const pat) {
   int t; /* txt index */
   int shift = 0;
   for (t = n; t <= m; t += shift) {
-    const match m = 
+    match *const m = 
       change_direction(n, 
                        ncmp(at_char(txt, t), at_back_char(pat, 1), 
                             n, right_left, res),
                        left_right);
 
-    if (m.found) add(res, t - n + 1);
+    if (m->found) add(res, t - n + 1);
 
     int const bc = bad_char_shift(R, m, *at_char(txt, t));
     int const gs = strong_good_suffix_shift(big_l_prime, small_l_prime, m);
 
-    shift = m.found ? gs : max(bc, gs);
+    shift = m->found ? gs : max(bc, gs);
+    free(m);
   }
 
   free(R);

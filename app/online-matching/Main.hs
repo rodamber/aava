@@ -26,8 +26,8 @@ extra = do
   print ls
   print (buildBigL' n, buildSmallL' n)
 
-  print $ HS.strongGoodSuffixShiftSpec ls m
   print $ strongGoodSuffixShift ls m
+  print $ HS.strongGoodSuffixShiftSpec ls m
 
 main = do
   extra

@@ -105,5 +105,14 @@ data Match = Match | Mismatch Int
   deriving (Eq, Show)
 
 strongGoodSuffixShiftSpec :: (S.Seq Int, S.Seq Int) -> Match -> Int
-strongGoodSuffixShiftSpec = undefined
+strongGoodSuffixShiftSpec (length -> 1, _) _ = 1
+strongGoodSuffixShiftSpec (_, l') Match = length l' - index1 l' 2
+strongGoodSuffixShiftSpec (bigL', l') (Mismatch ix)
+  | ix == n     = 1
+  | bigL'i >  0 = n - bigL'i
+  | bigL'i == 0 = n - l'i
+  where
+    n = length l'
+    i = ix + 1
+    (bigL'i, l'i) = (index1 bigL' i, index1 l' i)
 --------------------------------------------------------------------------------

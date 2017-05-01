@@ -1,7 +1,8 @@
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE Strict                #-}
-{-# LANGUAGE TypeSynonymInstances  #-}
-{-# LANGUAGE ViewPatterns          #-}
+{-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE ScopedTypeVariables  #-}
+{-# LANGUAGE Strict               #-}
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE ViewPatterns         #-}
 
 module Lib where
 
@@ -22,7 +23,7 @@ import qualified FFI as C
 import FFI (Result, Vector)
 
 import qualified Haskell as HS
-import Haskell (Txt, Pat, Input(..), Output(..), Match(..))
+import Haskell (Txt, Pat, Input(..), Output(..))
 
 --------------------------------------------------------------------------------
 -- FFI General
@@ -149,12 +150,14 @@ badCharPreprocessing t =
 badCharShift :: M.Map Char Int -> Int -> Char -> Int
 badCharShift m ix c =
   unsafePerformIO $ do
-    withMap m $ \ptr -> return $ fromIntegral $
-      C.bad_char_shift ptr (fromIntegral ix) (castCharToCChar c)
+    withMap m $ \ptr -> do
+      cm <- C.new_match 0 (fromIntegral ix) 
+      let res = C.bad_char_shift ptr cm (castCharToCChar c)
+      free cm
+      return $ fromIntegral res
   where
     withMap :: M.Map Char Int -> (Ptr CInt -> IO a) -> IO a
     withMap m f = do
-      -- arr <- newArray (fromIntegral <$> toList m) -- error!
       arr <- newArray $ fromIntegral . fromJust . (flip M.lookup m) <$>
              ['A','C','T','G']
       res <- f arr
@@ -171,17 +174,18 @@ build cbuild bigN =
 buildBigL' = build C.build_big_l'
 buildSmallL' = build C.build_small_l'
 
-strongGoodSuffixShift :: (S.Seq Int, S.Seq Int) -> Match -> Int
+strongGoodSuffixShift :: (S.Seq Int, S.Seq Int) -> HS.Match -> Int
 strongGoodSuffixShift (bigL', l') m =
   unsafePerformIO $ do
     withSeq (fromIntegral <$> bigL') $ \big_l'_ptr -> do
       withSeq (fromIntegral <$> l') $ \l'_ptr -> do
-        return $ fromIntegral $ C.strong_good_suffix_shift big_l'_ptr l'_ptr ix
+        cm <- C.new_match found index
+        let res = C.strong_good_suffix_shift big_l'_ptr l'_ptr cm
+        free cm
+        return $ fromIntegral res
   where
-    ix = fromIntegral $
-      case m of
-        Match -> length l' + 1
-        Mismatch x -> x
+    found = case m of HS.Match -> 1 ; _ -> 0
+    index = fromIntegral $ case m of HS.Match -> 0 ; HS.Mismatch x -> x
 
   
   

@@ -1,5 +1,4 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
-{-# LANGUAGE ScopedTypeVariables      #-}
 {-# LANGUAGE Strict                   #-}
 module FFI where
 
@@ -7,77 +6,62 @@ import Foreign
 import Foreign.C.Types
 import Foreign.C.String
 
-import Haskell (Match(..))
-
+data Match
+type MatchPtr = Ptr Match
 data Result
+type ResultPtr = Ptr Result
 data Vector a
+type VectorPtr a = Ptr (Vector a)
 
-instance Storable Match where
-  alignment _ = #{alignment match}
-  sizeOf _ = #{size match}
-  peek ptr = do
-    found <- #{peek match, found} ptr
-    index <- #{peek match, index} ptr
-    if found /= 0
-      then return Match
-      else return Mismatch index
-  poke ptr Match = do
-    #{poke match, found} ptr 1
-    #{poke match, index} ptr 0
-  poke ptr (Mismatch i) = do
-    #{poke match, found} ptr 0
-    #{poke match, index} ptr i
-     
-
-type Search =  Ptr (Vector CChar) -- text
-            -> Ptr (Vector CChar) -- pattern
-            -> IO (Ptr Result)
+type Search =  VectorPtr CChar -- text
+            -> VectorPtr CChar -- pattern
+            -> IO ResultPtr
 
 left_right = 1
 right_left = -1
 
 foreign import ccall unsafe "get_array_int"
-    get_array_int :: Ptr (Vector CInt) -> Ptr CInt
+    get_array_int :: VectorPtr CInt -> Ptr CInt
 
 foreign import ccall unsafe "get_size_int"
-    get_size_int :: Ptr (Vector CInt) -> CInt
+    get_size_int :: VectorPtr CInt -> CInt
 
 foreign import ccall unsafe "get_array_char"
-    get_array_char :: Ptr (Vector CChar) -> Ptr CChar
+    get_array_char :: VectorPtr CChar -> Ptr CChar
 
 foreign import ccall unsafe "get_size_char"
-    get_size_char :: Ptr (Vector CChar) -> CInt
+    get_size_char :: VectorPtr CChar -> CInt
 
 foreign import ccall unsafe "from_array_int"
-    from_array_int :: Ptr CInt -> CInt -> IO (Ptr (Vector CInt))
+    from_array_int :: Ptr CInt -> CInt -> IO (VectorPtr CInt)
 
 foreign import ccall unsafe "from_array_char"
-    from_array_char :: Ptr CChar -> CInt -> IO (Ptr (Vector CChar))
+    from_array_char :: Ptr CChar -> CInt -> IO (VectorPtr CChar)
 
 foreign import ccall unsafe "new_string"
-    new_string :: CString -> IO (Ptr (Vector CChar))
+    new_string :: CString -> IO (VectorPtr CChar)
 
 foreign import ccall unsafe "&free_vector_char"
-    finalizerVectorChar :: FunPtr (Ptr (Vector CChar) -> IO ())
+    finalizerVectorChar :: FunPtr (VectorPtr CChar -> IO ())
 
 foreign import ccall unsafe "&free_vector_int"
-    finalizerVectorInt :: FunPtr (Ptr (Vector CInt) -> IO ())
+    finalizerVectorInt :: FunPtr (VectorPtr CInt -> IO ())
 
 foreign import ccall unsafe "dynamic"
-    mkFreeVectorInt :: (FunPtr (Ptr (Vector CInt) -> IO ()))
-                    -> (Ptr (Vector CInt) -> IO ())
+    mkFreeVectorInt :: (FunPtr (VectorPtr CInt -> IO ()))
+                    -> (VectorPtr CInt -> IO ())
 
 foreign import ccall unsafe "&free_result"
-    finalizerResult :: FunPtr (Ptr Result -> IO ())
+    finalizerResult :: FunPtr (ResultPtr -> IO ())
 
 foreign import ccall unsafe "get_positions"
-    get_positions :: Ptr Result -> IO (Ptr CInt)
+    get_positions :: ResultPtr -> IO (Ptr CInt)
 
 foreign import ccall unsafe "get_positions_size"
-    get_positions_size :: Ptr Result -> CInt
+    get_positions_size :: ResultPtr -> CInt
 
 foreign import ccall unsafe "get_comparisons"
-    get_comparisons :: Ptr Result -> CInt
+    get_comparisons :: ResultPtr -> CInt
 
 foreign import ccall unsafe "naive"
     naive :: Search
@@ -88,39 +72,48 @@ foreign import ccall unsafe "knuth_morris_pratt"
 foreign import ccall unsafe "boyer_moore"
     boyer_moore :: Search
 
+foreign import ccall unsafe "new_match"
+    new_match :: CInt -> CInt -> IO MatchPtr
+
+foreign import ccall unsafe "match_found"
+    match_found :: MatchPtr -> CInt
+
+foreign import ccall unsafe "match_index"
+    match_index :: MatchPtr -> CInt
+
 foreign import ccall unsafe "ncmp"
-    ncmp :: CString -> CString -> CInt -> CInt -> Ptr Result -> CInt
+    ncmp :: CString -> CString -> CInt -> CInt -> ResultPtr -> CInt
 
 foreign import ccall unsafe "reverse_char"
-    reverse_char :: Ptr (Vector CChar) -> IO (Ptr (Vector CChar))
+    reverse_char :: VectorPtr CChar -> IO (VectorPtr CChar)
 
 foreign import ccall unsafe "match_count"
     match_count :: CString -> CString -> CInt
 
 foreign import ccall unsafe "z_algorithm"
-    z_algorithm :: Ptr (Vector CChar) -> IO (Ptr (Vector CInt))
+    z_algorithm :: VectorPtr CChar -> IO (VectorPtr CInt)
 
 foreign import ccall unsafe "reverse_z_algorithm"
-    reverse_z_algorithm :: Ptr (Vector CChar) -> IO (Ptr (Vector CInt))
+    reverse_z_algorithm :: VectorPtr CChar -> IO (VectorPtr CInt)
 
 foreign import ccall unsafe "compute_prefix_function"
-    compute_prefix_function :: Ptr (Vector CChar) -> IO (Ptr (Vector CInt))
+    compute_prefix_function :: VectorPtr CChar -> IO (VectorPtr CInt)
 
 foreign import ccall unsafe "bad_char_preprocessing"
-    bad_char_preprocessing :: Ptr (Vector CChar) -> IO (Ptr CInt)
+    bad_char_preprocessing :: VectorPtr CChar -> IO (Ptr CInt)
 
 foreign import ccall unsafe "bad_char_shift"
-    bad_char_shift :: Ptr CInt -> CInt -> CChar -> CInt
+    bad_char_shift :: Ptr CInt -> MatchPtr -> CChar -> CInt
 
 foreign import ccall unsafe "build_big_l_prime"
-    build_big_l' :: Ptr (Vector CInt) -> IO (Ptr (Vector CInt))
+    build_big_l' :: VectorPtr CInt -> IO (VectorPtr CInt)
 
 foreign import ccall unsafe "build_small_l_prime"
-    build_small_l' :: Ptr (Vector CInt) -> IO (Ptr (Vector CInt))
+    build_small_l' :: VectorPtr CInt -> IO (VectorPtr CInt)
 
 foreign import ccall unsafe "strong_good_suffix_shift"
-    strong_good_suffix_shift :: Ptr (Vector CInt)
-                             -> Ptr (Vector CInt) -> CInt -> CInt
+    strong_good_suffix_shift :: VectorPtr CInt
+                             -> VectorPtr CInt -> MatchPtr -> CInt
 
 foreign import ccall unsafe "main_"
     main_ :: IO ()
