@@ -1,5 +1,4 @@
 {-# LANGUAGE Strict       #-}
-{-# LANGUAGE ViewPatterns #-}
 module Haskell where
 
 import Debug.Trace

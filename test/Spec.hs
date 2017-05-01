@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleInstances         #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE Strict                    #-}
-{-# LANGUAGE ViewPatterns              #-}
 
 import Data.Foldable
 import Data.List

@@ -2,7 +2,6 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE Strict               #-}
 {-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE ViewPatterns         #-}
 
 module Lib where
 
