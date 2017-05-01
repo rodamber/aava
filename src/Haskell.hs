@@ -38,7 +38,6 @@ matchIndex "" _ = Nothing
 matchIndex _ (_,"") = Nothing
 matchIndex x (ix, y) = if x `T.isPrefixOf` y then Just ix else Nothing
 
--- in the naive algorithm we don't care about the number of comparisons
 naive :: Search
 naive (Input txt pat) = Output positions 0
   where positions = mapMaybe (matchIndex pat) (indexedTails txt)

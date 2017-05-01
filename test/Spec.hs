@@ -243,12 +243,11 @@ test_matchIndex =
 -- Main
 --------------------------------------------------------------------------------
 
+qcSearch (s,i) =
+  quickCheckWith stdArgs { maxSuccess = i } (prop_searchPositions s)
+
 main = do
-  traverse_ (quickCheckWith stdArgs { maxSuccess = 5000 } . prop_searchPositions)
-    [ naive
-    , knuthMorrisPratt
-    , boyerMoore
-    ]
+  traverse_ qcSearch [(naive, 1000), (knuthMorrisPratt, 1000), (boyerMoore, 1000)]
 
   hspec $ do
     describe "Haskell" $ do

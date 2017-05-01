@@ -336,7 +336,7 @@ result *naive (string const * const T, string const * const P) {
 
   int t;
   for (t = 1; t <= m - n + 1; t++) {
-    match *const m = ncmp(at_char(T, t), at_char(P, 1), 
+    match *const m = ncmp(at_char(T, t), at_char(P, 1),
                           n, left_right, res);
     if (m->found) {
       add(res, t);
@@ -417,9 +417,9 @@ vector_int *reverse_z_algorithm(string const *const str) {
 
 #define P(i) *at_char(pat, (i))
 #define PI(i) *at_int(pi, (i))
+#define T(i) *at_char(txt, (i))
 
 vector_int *compute_prefix_function(string const *const pat) {
-
   int const m = pat->size;
   vector_int *const pi = new_vector_init_int(0, m);
 
@@ -429,23 +429,13 @@ vector_int *compute_prefix_function(string const *const pat) {
     while (k > 0 && P(k + 1) != P(q)) {
       k = PI(k);
     }
-
     if (P(k + 1) == P(q)) {
       k++;
     }
-
     PI(q) = k;
   }
-
   return pi;
 }
-
-#undef P
-#undef PI
-
-#define P(i) *at_char(pat, (i))
-#define T(i) *at_char(txt, (i))
-#define PI(i) *at_int(pi, (i))
 
 result *knuth_morris_pratt(string const *const txt, string const *const pat) {
   result *const res = new_result();
@@ -462,11 +452,9 @@ result *knuth_morris_pratt(string const *const txt, string const *const pat) {
       inc(res);
       q = PI(q);
     }
-
     if (inc(res), P(q + 1) == T(i)) {
       q++;
     }
-
     if (q == m) {
       if (i != n) {
         inc(res);
@@ -536,17 +524,15 @@ vector_int *build_small_l_prime(vector_int const *const N) {
   int const n = N->size;
   vector_int *const l_prime = new_vector_init_int(0, n);
 
-  /* FIXME: Implement a linear time solution */
   int i;
-  for (i = 1; i <= n; i++) {
-    int j;
-    for (j = 1; j <= n - 1; j++) {
-      if (j <= n - i + 1 && *at_int(N, j) == j) {
-        *at_int(l_prime, i) = j;
-      }
-    }
-  }
+  int x;
 
+  for (i = 1, x = 0; i <= n; i++) {
+    if (i == *at_int(N, i)) {
+      x = i;
+    }
+    *at_int(l_prime, n - i + 1) = x;
+  }
   return l_prime;
 }
 
@@ -581,9 +567,9 @@ result *boyer_moore(string const * const txt, string const * const pat) {
   int t; /* txt index */
   int shift = 0;
   for (t = n; t <= m; t += shift) {
-    match *const m = 
-      change_direction(n, 
-                       ncmp(at_char(txt, t), at_back_char(pat, 1), 
+    match *const m =
+      change_direction(n,
+                       ncmp(at_char(txt, t), at_back_char(pat, 1),
                             n, right_left, res),
                        left_right);
 
@@ -655,4 +641,4 @@ int main_() {
   return 0;
 }
 
-int main() { return main_(); }
+/* int main() { return main_(); } */
