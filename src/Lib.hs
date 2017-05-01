@@ -176,13 +176,11 @@ strongGoodSuffixShift (bigL', l') m =
   unsafePerformIO $ do
     withSeq (fromIntegral <$> bigL') $ \big_l'_ptr -> do
       withSeq (fromIntegral <$> l') $ \l'_ptr -> do
-        fp <- newForeignPtr finalizerFree =<< newArray [big_l'_ptr, l'_ptr]
-        withForeignPtr fp $ \ptr ->
-          return $ fromIntegral $ C.strong_good_suffix_shift ptr ix
+        return $ fromIntegral $ C.strong_good_suffix_shift big_l'_ptr l'_ptr ix
   where
     ix = fromIntegral $
       case m of
-        Match -> -1 * (length l' + 1)
+        Match -> length l' + 1
         Mismatch x -> x
 
   

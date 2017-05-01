@@ -106,6 +106,11 @@ professorTests search = do
 
 prop_zMatchCount t x = HS.zMatchCount t x x == T.length (T.drop (x - 1) t)
 
+prop_reverseChar t = reverseChar t == T.reverse t
+
+prop_zAlgorithm t = zAlgorithm t == HS.zAlgorithmSpec t
+prop_reverseZAlgorithm t = reverseZAlgorithm t == HS.reverseZAlgorithmSpec t
+
 test_zMatchCount = do
   describe "zMatchCount" $ do
     prop "..." $ prop_zMatchCount
@@ -115,12 +120,7 @@ test_zMatchCount = do
       HS.zMatchCount s 1 5 `shouldBe` 3
       HS.zMatchCount s 1 9 `shouldBe` 2
 
-prop_reverseChar t = reverseChar t == T.reverse t
-
 test_reverseChar = prop "reverses text correctly" prop_reverseChar
-
-prop_zAlgorithm t = zAlgorithm t == HS.zAlgorithmSpec t
-prop_reverseZAlgorithm t = reverseZAlgorithm t == HS.reverseZAlgorithmSpec t
 
 test_zAlgorithm = do
   describe "zAlgorithm" $ do
@@ -162,12 +162,25 @@ test_badCharRule =
     describe "Shift" $ do
       matchSpec prop_badCharShiftMatchesSpec
 
+--------------------------------------------------------------------------------
+
 prop_L'HasSameLengthAsPattern buildL t =
   let bigN = S.fromList $ HS.reverseZAlgorithmSpec t
   in T.length t == length (buildL bigN)
 
 prop_bigL'HasSameLengthAsPattern = prop_L'HasSameLengthAsPattern HS.buildBigL'Spec
 prop_smallL'HasSameLengthAsPattern = prop_L'HasSameLengthAsPattern HS.buildSmallL'Spec
+
+prop_bigL'MatchesSpec s = HS.buildBigL'Spec bigN == buildBigL' bigN
+  where bigN = S.fromList $ reverseZAlgorithm s
+prop_smallL'MatchesSpec s = HS.buildSmallL'Spec bigN == buildSmallL' bigN
+  where bigN = S.fromList $ reverseZAlgorithm s
+
+prop_strongGoodSuffixShift (GoodSuffixInput t m) =
+  HS.strongGoodSuffixShiftSpec ls m == strongGoodSuffixShift ls m
+  where
+    ls = (buildBigL' bigN, buildSmallL' bigN)
+    bigN = S.fromList $ reverseZAlgorithm t
 
 test_strongGoodSuffixRule =
   describe "Strong Good Suffix Rule" $ do
@@ -200,17 +213,6 @@ test_strongGoodSuffixRule =
 
     describe "Shift rule" $ do
       matchSpec prop_strongGoodSuffixShift
-
-prop_bigL'MatchesSpec s = HS.buildBigL'Spec bigN == buildBigL' bigN
-  where bigN = S.fromList $ reverseZAlgorithm s
-prop_smallL'MatchesSpec s = HS.buildSmallL'Spec bigN == buildSmallL' bigN
-  where bigN = S.fromList $ reverseZAlgorithm s
-
-prop_strongGoodSuffixShift (GoodSuffixInput t m) =
-  HS.strongGoodSuffixShiftSpec ls m == strongGoodSuffixShift ls m
-  where
-    ls = (buildBigL' bigN, buildSmallL' bigN)
-    bigN = S.fromList $ reverseZAlgorithm t
 
 --------------------------------------------------------------------------------
 -- Haskell naive spec

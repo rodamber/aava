@@ -1,4 +1,5 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE ScopedTypeVariables      #-}
 {-# LANGUAGE Strict                   #-}
 module FFI where
 
@@ -6,8 +7,27 @@ import Foreign
 import Foreign.C.Types
 import Foreign.C.String
 
+import Haskell (Match(..))
+
 data Result
 data Vector a
+
+instance Storable Match where
+  alignment _ = #{alignment match}
+  sizeOf _ = #{size match}
+  peek ptr = do
+    found <- #{peek match, found} ptr
+    index <- #{peek match, index} ptr
+    if found /= 0
+      then return Match
+      else return Mismatch index
+  poke ptr Match = do
+    #{poke match, found} ptr 1
+    #{poke match, index} ptr 0
+  poke ptr (Mismatch i) = do
+    #{poke match, found} ptr 0
+    #{poke match, index} ptr i
+     
 
 type Search =  Ptr (Vector CChar) -- text
             -> Ptr (Vector CChar) -- pattern
@@ -99,7 +119,8 @@ foreign import ccall unsafe "build_small_l_prime"
     build_small_l' :: Ptr (Vector CInt) -> IO (Ptr (Vector CInt))
 
 foreign import ccall unsafe "strong_good_suffix_shift"
-    strong_good_suffix_shift :: Ptr (Ptr (Vector CInt)) -> CInt -> CInt
+    strong_good_suffix_shift :: Ptr (Vector CInt)
+                             -> Ptr (Vector CInt) -> CInt -> CInt
 
 foreign import ccall unsafe "main_"
     main_ :: IO ()
