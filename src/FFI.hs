@@ -90,7 +90,7 @@ foreign import ccall unsafe "bad_char_preprocessing"
     bad_char_preprocessing :: Ptr (Vector CChar) -> IO (Ptr CInt)
 
 foreign import ccall unsafe "bad_char_shift"
-    bad_char_shift :: Ptr CInt -> CInt -> CChar
+    bad_char_shift :: Ptr CInt -> CInt -> CChar -> CInt
 
 foreign import ccall unsafe "build_big_l_prime"
     build_big_l' :: Ptr (Vector CInt) -> IO (Ptr (Vector CInt))

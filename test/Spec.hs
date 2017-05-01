@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances         #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE Strict                    #-}
 {-# LANGUAGE ViewPatterns              #-}
@@ -5,6 +6,7 @@
 import Data.Foldable
 import Data.List
 import Data.Maybe
+import qualified Data.Map as M
 import qualified Data.Sequence as S
 import qualified Data.Text as T
 
@@ -45,6 +47,16 @@ instance Arbitrary EqualInput where
 
 instance Arbitrary T.Text where
   arbitrary = T.pack <$> myGen
+
+data BadCharInput = BadCharInput T.Text Int Char
+  deriving (Eq, Show)
+
+instance Arbitrary BadCharInput where
+  arbitrary = do
+    txt <- arbitrary
+    int <- choose (1, T.length txt)
+    char <- elements ['A','C','T','G']
+    return $ BadCharInput txt int char
 
 --------------------------------------------------------------------------------
 -- General
@@ -125,6 +137,20 @@ test_zAlgorithm = do
 -- Boyer Moore
 --------------------------------------------------------------------------------
 
+prop_badCharPreprocessingMatchesSpec t =
+  HS.badCharPreprocessingSpec t == badCharPreprocessing t
+
+prop_badCharShiftMatchesSpec (BadCharInput t i c) =
+  HS.badCharShiftSpec r i c == badCharShift r i c
+  where r = badCharPreprocessing t
+
+test_badCharRule =
+  describe "Bad Char Rule" $ do
+    describe "Processing" $ do
+      matchSpec prop_badCharPreprocessingMatchesSpec
+    describe "Shift" $ do
+      matchSpec prop_badCharShiftMatchesSpec
+
 prop_L'HasSameLengthAsPattern buildL t =
   let bigN = S.fromList $ HS.reverseZAlgorithmSpec t
   in T.length t == length (buildL bigN)
@@ -133,7 +159,7 @@ prop_bigL'HasSameLengthAsPattern = prop_L'HasSameLengthAsPattern HS.buildBigL'Sp
 prop_smallL'HasSameLengthAsPattern = prop_L'HasSameLengthAsPattern HS.buildSmallL'Spec
 
 test_strongGoodSuffixRule =
-  describe "strong good suffix rule" $ do
+  describe "Strong Good Suffix Rule" $ do
     describe "unit tests" $ do
       let s = "AAAAAAAAA"
       let bigN = S.fromList $ HS.reverseZAlgorithmSpec s
@@ -202,10 +228,10 @@ main = do
   --   , boyerMoore
   --   ]
 
-  traverse_ (quickCheckWith stdArgs { maxSuccess = 200 })
-    [  prop_bigL'MatchesSpec
-     , prop_smallL'MatchesSpec
-    ]
+  -- traverse_ (quickCheckWith stdArgs { maxSuccess = 200 })
+  --   [  prop_bigL'MatchesSpec
+  --    , prop_smallL'MatchesSpec
+  --   ]
 
   -- hspec $ do
   --   describe "Haskell" $ do
@@ -219,14 +245,16 @@ main = do
   --     test_search "naive" naive
   --     test_search "knuth_morris_pratt" knuthMorrisPratt
 
-  --     describe "Boyer Moore" $ do
-  --       test_zAlgorithm
-  --       test_strongGoodSuffixRule
-  --       test_search "boyer_moore" boyerMoore
 
   -- quickCheckWith stdArgs { maxSuccess = 100 } $ prop_searchPositions boyerMoore
 
   hspec $ do
+    describe "Boyer Moore" $ do
+      test_badCharRule
+      test_zAlgorithm
+      test_strongGoodSuffixRule
+      test_search "boyer_moore" boyerMoore
+
     describe "Boyer Moore Unit Tests" $ do
       let test (n,input) = it (show n) $ boyerMoore input `shouldBe` HS.naive input
       traverse_ test $ zip [0..]
