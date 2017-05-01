@@ -60,9 +60,8 @@ badCharPreprocessingSpec :: T.Text -> M.Map Char Int
 badCharPreprocessingSpec t =
   (flip foldMap) ['A','C','T','G'] $ \c ->
     case T.findIndex (== c) (T.reverse t) of
-      Just ix -> M.singleton c (len - 1 - ix)
-      Nothing -> M.empty
-  where len = T.length t
+      Just ix -> M.singleton c (T.length t - ix)
+      Nothing -> M.singleton c 0
 
 badCharShiftSpec :: M.Map Char Int -> Int -> Char -> Int
 badCharShiftSpec r ix c = max 1 (ix - x)

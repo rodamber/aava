@@ -28,13 +28,14 @@ import Haskell (Txt, Pat, Input(..), Output(..), Match(..))
 -- QuickCheck
 --------------------------------------------------------------------------------
 
-myGen = listOf1 (elements ['A', 'C', 'T', 'G'])
+charGen = elements ['A', 'C', 'T', 'G']
+textGen = listOf1 charGen
 
 instance Arbitrary Input where
   arbitrary = do
-    txt <- myGen
+    txt <- textGen
     let len = length txt
-    pat <- myGen `suchThat` \p -> length p <= len
+    pat <- textGen `suchThat` \p -> length p <= len
     return $ Input (T.pack txt) (T.pack pat)
 
 newtype EqualInput = EqualInput Input
@@ -42,21 +43,21 @@ newtype EqualInput = EqualInput Input
 
 instance Arbitrary EqualInput where
   arbitrary = do
-    txt <- T.pack <$> myGen
+    txt <- T.pack <$> textGen
     return $ EqualInput $ Input txt txt
 
 instance Arbitrary T.Text where
-  arbitrary = T.pack <$> myGen
+  arbitrary = T.pack <$> textGen
 
 data BadCharInput = BadCharInput T.Text Int Char
   deriving (Eq, Show)
 
 instance Arbitrary BadCharInput where
   arbitrary = do
-    txt <- arbitrary
-    int <- choose (1, T.length txt)
-    char <- elements ['A','C','T','G']
-    return $ BadCharInput txt int char
+    t <- arbitrary
+    i <- choose (1, T.length t)
+    c <- charGen `suchThat` (/= t `T.index` (i - 1))
+    return $ BadCharInput t i c
 
 data GoodSuffixInput = GoodSuffixInput T.Text Match
   deriving (Eq, Show)

@@ -7,6 +7,7 @@ module Lib where
 
 import Control.Monad
 import Data.Foldable
+import Data.Maybe
 import qualified Data.Map as M
 import qualified Data.Sequence as S
 import qualified Data.Text as T
@@ -153,7 +154,9 @@ badCharShift m ix c =
   where
     withMap :: M.Map Char Int -> (Ptr CInt -> IO a) -> IO a
     withMap m f = do
-      arr <- newArray (fromIntegral <$> toList m)
+      -- arr <- newArray (fromIntegral <$> toList m) -- error!
+      arr <- newArray $ fromIntegral . fromJust . (flip M.lookup m) <$>
+             ['A','C','T','G']
       res <- f arr
       free arr
       return res

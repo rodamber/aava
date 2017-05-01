@@ -17,8 +17,14 @@ search :: [Search] -> Txt -> Pat -> IO ()
 search ss txt pat = print $ fmap (\s -> s (Input txt pat)) ss
 
 extra = do
-  print $ and $ (flip fmap) [1 .. ceiling 1e4] $ \i ->
-    trace (show i) buildBigL' (S.fromList [-20,26,-2,29,-1,22]) == buildBigL' (S.fromList [-20,26,-2,29,-1,22])
+  let t = "CGTGCGG"
+  let r = badCharPreprocessing t
+  let (i,c) = (7,'T')
+
+  putStr "HS R: " >> print r
+
+  print $ HS.badCharShiftSpec r i c
+  print $ badCharShift r i c
 
 main = do
   extra
