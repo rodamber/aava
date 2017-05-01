@@ -278,8 +278,8 @@ int const left_right = 1;
 int const right_left = -1;
 
 typedef struct {
-  int found; // whether the substring was found or not
-  int index; // if not, this is the index where the mismatch occurred
+  int found; /* whether the substring was found or not */
+  int index; /* if not, this is the index where the mismatch occurred */
 } match;
 
 match *new_match(int const found, int const index) {
@@ -310,7 +310,7 @@ match *change_direction(int const n, match *const m, int const direction) {
   return m;
 }
 
-// Note: Investigate this Stack/GHC bug, where this function is run for no reason.
+/* Note: Investigate this Stack/GHC bug, where this function is run for no reason. */
 /* void read() { static int i = 1; printf("Call %d\n", i++); } */
 
 void read_(string * const vec) {
@@ -536,7 +536,7 @@ vector_int *build_small_l_prime(vector_int const *const N) {
   int const n = N->size;
   vector_int *const l_prime = new_vector_init_int(0, n);
 
-  // FIXME: Implement a linear time solution
+  /* FIXME: Implement a linear time solution */
   int i;
   for (i = 1; i <= n; i++) {
     int j;
@@ -655,4 +655,4 @@ int main_() {
   return 0;
 }
 
-/* int main() { return main_(); } */
+int main() { return main_(); }
