@@ -244,52 +244,42 @@ test_matchIndex =
 --------------------------------------------------------------------------------
 
 main = do
-  -- traverse_ (quickCheckWith stdArgs { maxSuccess = 200 } . prop_searchPositions)
-  --   [ naive
-  --   , knuthMorrisPratt
-  --   , boyerMoore
-  --   ]
-
-  -- traverse_ (quickCheckWith stdArgs { maxSuccess = 200 })
-  --   [  prop_bigL'MatchesSpec
-  --    , prop_smallL'MatchesSpec
-  --   ]
-
-  -- hspec $ do
-  --   describe "Haskell" $ do
-  --     test_indexedTails
-  --     test_matchIndex
-  --     describe "naive" $ matchTests HS.naive
-
-  --     test_zMatchCount
-
-  --   describe "C" $ do
-  --     test_search "naive" naive
-  --     test_search "knuth_morris_pratt" knuthMorrisPratt
-
-
-  -- quickCheckWith stdArgs { maxSuccess = 100 } $ prop_searchPositions boyerMoore
+  traverse_ (quickCheckWith stdArgs { maxSuccess = 5000 } . prop_searchPositions)
+    [ naive
+    , knuthMorrisPratt
+    , boyerMoore
+    ]
 
   hspec $ do
+    describe "Haskell" $ do
+      test_indexedTails
+      test_matchIndex
+      describe "naive" $ matchTests HS.naive
+
+      test_zMatchCount
+
+    describe "C" $ do
+      test_search "naive" naive
+      test_search "knuth_morris_pratt" knuthMorrisPratt
+
     describe "Boyer Moore" $ do
-      -- FIXME: Check that we're producing correct arbitraries for chars in the bad char rule
       test_badCharRule
       test_zAlgorithm
       test_strongGoodSuffixRule
       test_search "boyer_moore" boyerMoore
 
-    describe "Boyer Moore Unit Tests" $ do
-      let test (n,input) = it (show n) $ boyerMoore input `shouldBe` HS.naive input
-      traverse_ test $ zip [0..]
-        [ Input "CCTTT" "CTTT"
-        , Input "AAAAA" "A"
-        , Input {inputText = "CGGGCCACAGCTGCTTCTCTTCAAATGGACGCCTACGCGAATTACATGAGCAGATG",
-                inputPattern = "A"}
-        , Input {inputText = "TCAAA", inputPattern = "A"}
-        , Input {inputText = "AGACTGAATCCCTGCAACATTAAGG", inputPattern = "A"}
-        , Input {inputText = "GTTGAGCCTTCACGGTAG", inputPattern = "T"}
-        , Input {inputText = "ATTTAACAAGG", inputPattern = "AGG"}
-        , Input {inputText = "GG", inputPattern = "G"}
-        ]
+      describe "Unit tests" $ do
+        let test (n,input) = it (show n) $ positions (boyerMoore input) `shouldBe` positions (HS.naive input)
+        traverse_ test $ zip [0..]
+          [ Input "CCTTT" "CTTT"
+          , Input "AAAAA" "A"
+          , Input {inputText = "CGGGCCACAGCTGCTTCTCTTCAAATGGACGCCTACGCGAATTACATGAGCAGATG",
+                  inputPattern = "A"}
+          , Input {inputText = "TCAAA", inputPattern = "A"}
+          , Input {inputText = "AGACTGAATCCCTGCAACATTAAGG", inputPattern = "A"}
+          , Input {inputText = "GTTGAGCCTTCACGGTAG", inputPattern = "T"}
+          , Input {inputText = "ATTTAACAAGG", inputPattern = "AGG"}
+          , Input {inputText = "GG", inputPattern = "G"}
+          ]
 
 
