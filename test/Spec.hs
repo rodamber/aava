@@ -22,7 +22,7 @@ import qualified FFI as C
 import FFI (Result, Vector)
 
 import qualified Haskell as HS
-import Haskell (Txt, Pat, Input(..), Output(..))
+import Haskell (Txt, Pat, Input(..), Output(..), Match(..))
 
 --------------------------------------------------------------------------------
 -- QuickCheck
@@ -57,6 +57,16 @@ instance Arbitrary BadCharInput where
     int <- choose (1, T.length txt)
     char <- elements ['A','C','T','G']
     return $ BadCharInput txt int char
+
+data GoodSuffixInput = GoodSuffixInput T.Text Match
+  deriving (Eq, Show)
+
+instance Arbitrary GoodSuffixInput where
+  arbitrary = do
+    t <- arbitrary
+    match <- choose (True,False) >>= \x ->
+      if x then return Match else Mismatch <$> choose (1, T.length t)
+    return $ GoodSuffixInput t match
 
 --------------------------------------------------------------------------------
 -- General
@@ -187,10 +197,19 @@ test_strongGoodSuffixRule =
         prop_smallL'HasSameLengthAsPattern
       matchSpec prop_smallL'MatchesSpec
 
+    describe "Shift rule" $ do
+      matchSpec prop_strongGoodSuffixShift
+
 prop_bigL'MatchesSpec s = HS.buildBigL'Spec bigN == buildBigL' bigN
   where bigN = S.fromList $ reverseZAlgorithm s
 prop_smallL'MatchesSpec s = HS.buildSmallL'Spec bigN == buildSmallL' bigN
   where bigN = S.fromList $ reverseZAlgorithm s
+
+prop_strongGoodSuffixShift (GoodSuffixInput t m) =
+  HS.strongGoodSuffixShiftSpec ls m == strongGoodSuffixShift ls m
+  where
+    ls = (buildBigL' bigN, buildSmallL' bigN)
+    bigN = S.fromList $ reverseZAlgorithm t
 
 --------------------------------------------------------------------------------
 -- Haskell naive spec
@@ -250,6 +269,7 @@ main = do
 
   hspec $ do
     describe "Boyer Moore" $ do
+      -- FIXME: Check that we're producing correct arbitraries for chars in the bad char rule
       test_badCharRule
       test_zAlgorithm
       test_strongGoodSuffixRule

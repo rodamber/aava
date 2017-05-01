@@ -103,6 +103,7 @@ buildSmallL'Spec bigN =
        maximumDef 0 $ S.filter (<= n - i + 1) js
 
 data Match = Match | Mismatch Int
+  deriving (Eq, Show)
 
 strongGoodSuffixShiftSpec :: (S.Seq Int, S.Seq Int) -> Match -> Int
 strongGoodSuffixShiftSpec (_, l') Match =
