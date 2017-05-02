@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 
 /* MinUnit */
@@ -16,6 +17,8 @@ int tests_run = 0;
 
 #endif
 
-int main() {
+int main_() {
   return 0;
 }
+
+int main() { return main_(); }

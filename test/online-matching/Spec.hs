@@ -82,22 +82,23 @@ matchTests search = do
     \(EqualInput x) -> positions (search x) `shouldBe` [0]
   professorTests search
 
-test_search msg search =
-  describe msg $ do
-    matchTests search
-    -- matchSpec $ prop_searchPositions search
+test_search search maxSuccess = do
+  matchTests search
+  modifyMaxSuccess (const maxSuccess) $
+    matchSpec $ prop_searchPositions search
 
 professorTests search = do
-  it "passes test 01" $ do
-    positions (search (Input "TCGCAGGGCG" "TC")) `shouldBe` [0]
-  it "passes test 02" $ do
-    positions (search (Input "AAAAAAAAAA" "AAA")) `shouldBe` [0,1,2,3,4,5,6,7]
-  it "passes test 03" $ do
-    positions (search (Input "AGGTACCCAT" "CA")) `shouldBe` [7]
-  -- test 04 is the same as test 02
-  it "passes test 05" $ do
-    positions (search (Input "GCCCAAAGAC" "CA")) `shouldBe` [3]
-  -- test 06 is the same as test 02
+  describe "Professor Tests" $ do
+    it "passes test 01" $ do
+      positions (search (Input "TCGCAGGGCG" "TC")) `shouldBe` [0]
+    it "passes test 02" $ do
+      positions (search (Input "AAAAAAAAAA" "AAA")) `shouldBe` [0,1,2,3,4,5,6,7]
+    it "passes test 03" $ do
+      positions (search (Input "AGGTACCCAT" "CA")) `shouldBe` [7]
+    -- test 04 is the same as test 02
+    it "passes test 05" $ do
+      positions (search (Input "GCCCAAAGAC" "CA")) `shouldBe` [3]
+    -- test 06 is the same as test 02
 
 --------------------------------------------------------------------------------
 -- Z Algorithm
@@ -242,42 +243,27 @@ test_matchIndex =
 -- Main
 --------------------------------------------------------------------------------
 
-qcSearch (s,i) =
-  quickCheckWith stdArgs { maxSuccess = i } (prop_searchPositions s)
+spec = hspec $ do
+  describe "Haskell" $ do
+    test_indexedTails
+    test_matchIndex
 
-main = do
-  traverse_ qcSearch [(naive, 100), (knuthMorrisPratt, 100), (boyerMoore, 1000)]
+    describe "naive" $ do
+      matchTests HS.naive
 
-  hspec $ do
-    describe "Haskell" $ do
-      test_indexedTails
-      test_matchIndex
-      describe "naive" $ matchTests HS.naive
+    test_zMatchCount
 
-      test_zMatchCount
+  describe "C" $ do
+    describe "Naive" $ do
+      test_search naive 1000
 
-    describe "C" $ do
-      test_search "naive" naive
-      test_search "knuth_morris_pratt" knuthMorrisPratt
+    describe "Knuth-Morris-Pratt" $ do
+      test_search knuthMorrisPratt 1000
 
-    describe "Boyer Moore" $ do
+    describe "Boyer-Moore" $ do
       test_badCharRule
       test_zAlgorithm
       test_strongGoodSuffixRule
-      test_search "boyer_moore" boyerMoore
+      test_search boyerMoore 1000
 
-      describe "Unit tests" $ do
-        let test (n,input) = it (show n) $ positions (boyerMoore input) `shouldBe` positions (HS.naive input)
-        traverse_ test $ zip [0..]
-          [ Input "CCTTT" "CTTT"
-          , Input "AAAAA" "A"
-          , Input {inputText = "CGGGCCACAGCTGCTTCTCTTCAAATGGACGCCTACGCGAATTACATGAGCAGATG",
-                  inputPattern = "A"}
-          , Input {inputText = "TCAAA", inputPattern = "A"}
-          , Input {inputText = "AGACTGAATCCCTGCAACATTAAGG", inputPattern = "A"}
-          , Input {inputText = "GTTGAGCCTTCACGGTAG", inputPattern = "T"}
-          , Input {inputText = "ATTTAACAAGG", inputPattern = "AGG"}
-          , Input {inputText = "GG", inputPattern = "G"}
-          ]
-
-
+main = spec
