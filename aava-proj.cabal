@@ -40,7 +40,8 @@ executable link-cut-exe
   default-language:    Haskell2010
 
 library
-  hs-source-dirs:      src
+  hs-source-dirs:      src/online-matching
+                     , src/link-cut
   exposed-modules:     Lib, FFI, Haskell
   build-depends:       base >= 4.7 && < 5
                      , containers >= 0.5
@@ -49,9 +50,12 @@ library
                      , QuickCheck >= 2.8
                      , hspec
                      , safe
-  default-extensions:  BangPatterns, OverloadedStrings, ViewPatterns
+  default-extensions:  BangPatterns
+                     , OverloadedStrings
+                     , ViewPatterns
   default-language:    Haskell2010
   C-Sources:           cbits/online-matching/online_matching.c
+                     , cbits/online-matching/link_cut.c
 
 test-suite online-matching-test
   type:                exitcode-stdio-1.0
