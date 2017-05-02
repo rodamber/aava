@@ -464,7 +464,6 @@ result *knuth_morris_pratt(string const *const txt, string const *const pat) {
     }
   }
   free_vector_int(pi);
-
   return res;
 }
 
@@ -501,7 +500,7 @@ int *bad_char_preprocessing(string const *const pat) {
 }
 
 int bad_char_shift(int const *const R, match const *const m, char const c) {
-  return max(1, m->index - *R_at(R, c));
+  return m->found ? 1 : max(1, m->index - *R_at(R, c));
 }
 
 vector_int *build_big_l_prime(vector_int const *const N) {
@@ -573,12 +572,14 @@ result *boyer_moore(string const * const txt, string const * const pat) {
                             n, right_left, res),
                        left_right);
 
-    if (m->found) add(res, t - n + 1);
+    if (m->found) {
+      add(res, t - n + 1);
+    }
 
-    int const bc = bad_char_shift(R, m, *at_char(txt, t));
+    int const bc = bad_char_shift(R, m, *at_char(txt, t - n + m->index));
     int const gs = strong_good_suffix_shift(big_l_prime, small_l_prime, m);
+    shift = max(bc, gs);
 
-    shift = m->found ? gs : max(bc, gs);
     free(m);
   }
 

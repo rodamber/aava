@@ -246,7 +246,7 @@ qcSearch (s,i) =
   quickCheckWith stdArgs { maxSuccess = i } (prop_searchPositions s)
 
 main = do
-  traverse_ qcSearch [(naive, 1000), (knuthMorrisPratt, 1000), (boyerMoore, 1000)]
+  traverse_ qcSearch [(naive, 100), (knuthMorrisPratt, 100), (boyerMoore, 1000)]
 
   hspec $ do
     describe "Haskell" $ do
