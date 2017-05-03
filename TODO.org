@@ -1,11 +1,166 @@
-* First try
-** Project
-*** Fails tests 11, 12, 17, 18, 19, 20.
+* Connectivity in Forests
+** Operations
+- Link(u,v) : node -> node -> *effect*
+- Cut(u,v)  : node -> node -> *effect*
+- ConnectedQ(u,v) : node -> node -> bool
 
-11 e 12 boyer moore
-12 so encontra de 4 em 4 quando devia ser em todas as posicoes
+They should all be implemented in O(log |V|) by using Link-Cut trees.
+** Link-Cut Trees
+*** Recommended API
+#+BEGIN_SRC c
+typedef struct { // Represents a node in the lct.
+  LCT left; // Child
+  LCT right; // Child
+  LCT *hook; // General parent pointer
+  int sum; // The size of this sub-tree. Negative values are used to indicate
+           // that left and right pointers should be swapped on the sub-tree.
+} *LCT;
 
-12 T CCCCCCCCCCCCCCCCC... B CCCC
+// Professor recommended API
+LCT allocLCT(int n); // allocates space for a link-cut tree with n vertexes
+void freeLCT(LCT t); // frees the link-cut structure
+void access(LCT t, int v); // makes the path from the root to v selected
+void reRoot(LCT t, int v); // makes v the root of the represented tree
+                           // this is the same as the evert op. in the paper
+int connectedQ(LCT t, int u, int v); // returns if there is a path from u to v
+void link(LCT, int r, int v); // adds the edge from r to v to the represented
+                              // tree. Before linking, the node r is made the
+                              // root of its represented tree.
+void cut(LCT t, int r, intv); // removes the edge (r,v) from the represented
+                              // tree. The node r becomes the root of the
+                              // resulting sub-tree.
 
-*** Fails (at least) 11, 17, 19 and 20
+// possibly interesting operations are:
+LCT apex(LCT p1, LCT p2);
+LCT nadir(LCT p1, LCT p2);
 
+// The connectedQ can be computed by applying reRoot to u and then computing
+// access on v. If u and v end up in the same preferred path, then the two are
+// connected; otherwise, they're not.
+#+END_SRC
+** A Data Structure for Dynamic Trees
+Each tree of the forest has its edges partitioned into two classes: *solid* and
+*broken*.
+
+*Invariant*: At most one of the edges entering each vertex is solid (they assume
+the edges are directed from children to parents).
+
+- only allow link(v,w) when v is a tree root
+- only allow cut(v,w) when w is the parent of v
+- n = |V|, m = |E|
+
+*** Terminology
+- apex :: *shallowest* vertex on a solid path
+- nadir :: *deepest* vertex on a solid path
+- root path :: solid path whose apex is a tree root
+  - by def, a rooted tree contains only one root path
+- internal path :: solid path that's not a root path
+  - by def, a rooted tree may contain zero or noe internal paths
+
+*** Operations
+- link(v,w) :: Link the trees containing vertices v and w by adding edge
+               (v,w), making vertex w the parent of vertex v. A link is only
+               allowed if v and w are in different trees and v is a tree root.
+
+               We carry out link(v,w) by performing expose(w) followed by a type
+               1 concatenation of the path whose apex is v and the path whose
+               nadir is w.
+- cut(v,w) :: Cut the tree containing vertices v and w into two trees by
+              deleting edge (v,w). A cut is only allowed if (v,w) is an edge.
+
+              We carry out cut(v,w) by performing expose(v) followed by a
+              split(w) of type 1.
+- root(v) :: Return the root of the tree containing vertex v.
+
+             We carry out root(v) by performing expose(v) and finding the apex
+             of the path containing v.
+- evert(v) :: Modify the tree containing vertex v by making v the root.
+
+              We carry out evert(v) by performing expose(v) and then reverse the
+              solid path whose nadir is v with reverse(v).
+
+**** Path operations
+- concatenate :: Combine paths p1 and p2 into a single path by constructing a
+                 solid edge leading from the apex of p1 to the nadir of p2.
+  - concatenate1 :: p1 is a root path; the concatenate has the effect of linking
+                    the trees containing p1 and p2, carrying out link(apex(p1),
+                    nadir(p2)).
+  - concatenate2 :: In a type 2 concatenate, p1 and p2 are in the same tree and a
+                    broken edge leads from apex(p1) to nadir(p2); the effect of
+                    this operation is to convert this broken edge to solid. To
+                    specify this op. we only need to give the apex of p1.
+- split :: Split the path containing vertex v into two paths, one of which has v
+           as its nadir. It's only allowed if a solid edge(u,v) enters vertex v.
+  - split1 :: Deletes the edge from the forest.
+  - split2 :: Converts the edge to a broken edge.
+
+**** Solid path operations
+- splice :: Vertex v must have an exiting broken edge. Let w be the other end of
+            the broken edge exiting v. If w has an entering solid edge, perform
+            a split(w) of type 2. Once no solid edge enters w, perform a
+            concatenate(v) of type 2.
+- expose :: Construct a path whose nadir is v and whose apex is the root of the
+            tree containing v.
+            
+            If v has an entering solid edge, perform a split(v) of type 2. Now
+            repeat the following step until the apex of the path containing v is
+            a tree root: Let w be the apex of the path containing v; perform
+            splice(w). 
+
+            _Remark_: Notice that the expose operation requires the ability,
+            given a vertex, of finding the apex of the path containing the
+            vertex.
+- reverse :: reverse the direction of every edge on the path p, thereby
+             exchanging the nadir and apex of p.
+
+
+** Self-Adjusting Binary Search Trees
+(Application of splay trees to link/cut trees start in page 26)
+
+*** Splaying
+Repeat the splaying step until the accessed node is the root of the tree.
+*** Update Operations
+- access(i,t) :: If item i is in tree t, return a pointer to its location;
+                 otherwise, return a pointer to the null node.
+
+                 To perform access(i,t), we search down from the root of t,
+                 looking for i. If the search reaches a node x containing i, we
+                 complete the access by splaying at x and returning a pointer to
+                 x. If the search reaches the null node, indicating that i is
+                 not in the tree, we complete the access by splaying at the last
+                 nonnull node reached during the search and returning a pointer
+                 to null. If the tree is empty, we omit the splaying operation.
+- insert(i,t) :: Insert item i in tree t, assuming that it is not there
+                 already.
+
+                 To carry out insert, we perform split(i,t) and then replace t
+                 by a tree consisting of a new root node containing i, whose
+                 left and right subtrees are the trees t1 and t2 returned by the
+                 split.
+
+                 Check the other (better) implementation on page 11.
+- delete(i,t) :: Delete item i from tree t, assuming that it is present.
+
+                 To carry out delete(i,t), we perform access(i,t) and then
+                 replace t by the join of its left and right subtrees.
+
+                 Check the other (better) implementation on page 11.
+- join(t1,t2) :: Combine trees t1 and t2 into a single tree containing all
+                 items from both trees and return the resulting tree. This
+                 operation assumes that all items in t1 are less than all
+                 those in t2 and destroys both t1 and t2.
+
+                 To carry out join(t1,t2), we begin by accessing the largest
+                 item, say i, in t1. After the access, the root of t1, contains
+                 i and thus has a null right child. We complete the join by
+                 making t2 the right subtree of this root and returning the
+                 resulting tree. We must deal explicitly with empty input trees.
+- split(i,t) :: Construct and return two trees t1 and t2, where t1 contains all
+                items in t less than or equal to i, and t2 contains all items in
+                t greater than i. This operation destroys t.
+
+                To carry out split(i,t), we perform access(i,t) and then return
+                the two trees formed by breaking either the left link or the
+                right link from the new root of t, depending on whether the root
+                contains an item greater than i or not greater than i. We must
+                deal explicitly with the case of an empty input tree.
