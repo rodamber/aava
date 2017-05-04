@@ -17,8 +17,8 @@ int tests_run = 0;
 
 #endif
 
-int main_() {
+int main_link_cut() {
   return 0;
 }
 
-int main() { return main_(); }
+/* int main() { return main_link_cut(); } */
