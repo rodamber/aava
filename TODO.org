@@ -16,7 +16,6 @@ typedef struct { // Represents a node in the lct.
            // that left and right pointers should be swapped on the sub-tree.
 } *LCT;
 
-// Professor recommended API
 LCT allocLCT(int n); // allocates space for a link-cut tree with n vertexes
 void freeLCT(LCT t); // frees the link-cut structure
 void access(LCT t, int v); // makes the path from the root to v selected
@@ -29,11 +28,6 @@ void link(LCT, int r, int v); // adds the edge from r to v to the represented
 void cut(LCT t, int r, intv); // removes the edge (r,v) from the represented
                               // tree. The node r becomes the root of the
                               // resulting sub-tree.
-
-// possibly interesting operations are:
-LCT apex(LCT p1, LCT p2);
-LCT nadir(LCT p1, LCT p2);
-
 // The connectedQ can be computed by applying reRoot to u and then computing
 // access on v. If u and v end up in the same preferred path, then the two are
 // connected; otherwise, they're not.
@@ -113,7 +107,6 @@ the edges are directed from children to parents).
 - reverse :: reverse the direction of every edge on the path p, thereby
              exchanging the nadir and apex of p.
 
-
 ** Self-Adjusting Binary Search Trees
 (Application of splay trees to link/cut trees start in page 26)
 
@@ -164,3 +157,5 @@ Repeat the splaying step until the accessed node is the root of the tree.
                 right link from the new root of t, depending on whether the root
                 contains an item greater than i or not greater than i. We must
                 deal explicitly with the case of an empty input tree.
+*** Implementations of Splaying and Its Variants
+*** Application to Link/cut trees
