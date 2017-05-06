@@ -1,5 +1,5 @@
 CC				= gcc-4.7
-CC_FLAGS	= -O0 -ansi -Wall
+CC_FLAGS	= -O0 -ansi -Wall -Wfatal-errors
 
 .PHONY: clean
 

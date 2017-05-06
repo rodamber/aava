@@ -159,3 +159,222 @@ Repeat the splaying step until the accessed node is the root of the tree.
                 deal explicitly with the case of an empty input tree.
 *** Implementations of Splaying and Its Variants
 *** Application to Link/cut trees
+* First try
+
+/*----------------------------------------------------------------------------*/
+/* Link/Cut tree internal represetation                                       */
+/*----------------------------------------------------------------------------*/
+
+typedef struct node {
+  struct node *left;
+  struct node *right;
+  struct node *parent;
+} *node;
+
+/* Is it the root of the virtual tree? */
+bool is_root(node n) { return n && n->parent == NULL; }
+
+bool is_left_child(node n)  { return n && n->parent->left  == n; }
+bool is_right_child(node n) { return n && n->parent->right == n; }
+
+bool is_middle_child(node n) {
+  return n
+    && not(is_root(n))
+    && not(is_left_child(n->parent))
+    && not(is_right_child(n->parent));
+}
+
+/* Is it the root of a solid subtree? */
+bool is_solid_root(node n) { return is_root(n) || is_middle_child(n); }
+
+void swap(node a, node b) { struct node t = *a; *a = *b; *b = t; }
+
+void splice(node n) {
+  if (is_middle_child(n) && is_solid_root(n->parent)) {
+    swap(n, n->left);
+  }
+}
+
+/**
+ * Rotates the edge joining y and its right child.
+ */
+void rotate_left(node y) {
+  node x = y->right, z = y->parent;
+
+  if (z) {
+    if (z->left == y) {
+      *z->left  = *x;
+    } else if (z->right == y) {
+      *z->right = *x;
+    }
+  }
+
+  *y->right = *x->left;
+  *x->left  = *y;
+
+  *x->parent = *z;
+  *y->parent = *x;
+
+  if (y->right) {
+    *y->right->parent = *y;
+  }
+}
+
+/**
+ * Rotates the edge joining y and its left child.
+ */
+void rotate_right(node y) {
+  node x = y->left, z = y->parent;
+
+  if (z) {
+    if (z->right == y) {
+      *z->right  = *x;
+    } else if (z->left == y) {
+      *z->left = *x;
+    }
+  }
+
+  *y->left = *x->right;
+  *x->right  = *y;
+
+  *x->parent = *z;
+  *y->parent = *x;
+
+  if (y->left) {
+    *y->left->parent = *y;
+  }
+}
+
+/**
+ * Splaying Step
+ *
+ * Case 1 (zig). If x->parent, the parent of x, is the tree root, rotate the edge
+ * joining x with x->parent. (This case is terminal.)
+ *
+ * Case 2 (zig-zig). If x->parent is not the root and x and x->parent are both left or
+ * both right children, rotate the edge joining x->parent with its grandparent x->parent->parent
+ * and then rotate the edge joining x with x->parent.
+ *
+ * Case 3 (zig-zag). If x->parent is not the root and x is a left child and x->parent a
+ * right child, or vice-versa, rotate the edge joining x with x->parent and then
+ * rotate the edge joining x with the new x->parent.
+ */
+void splay_step(node x) {
+  if (is_left_child(x)) {
+    if (is_solid_root(x->parent)) {
+      rotate_right(x->parent);
+    } else if (is_left_child(x->parent)) {
+      rotate_right(x->parent->parent); rotate_right(x->parent);
+    } else if (is_right_child(x->parent)) {
+      rotate_right(x->parent);
+      rotate_left(x->parent);
+    }
+  } else if (is_right_child(x)) {
+    if (is_solid_root(x->parent)) {
+      rotate_left(x->parent);
+    } else if (is_right_child(x->parent)) {
+      rotate_left(x->parent->parent);
+      rotate_left(x->parent);
+    } else if (is_left_child(x->parent)) {
+      rotate_left(x->parent);
+      rotate_right(x->parent);
+    }
+  }
+}
+
+/**
+ * Splaying as a three-pass bottom-up process.
+ */
+void splay(node x) {
+  node v;
+  for (v = x; v && not(is_root(v));) {
+    splay_step(v);
+    if (is_middle_child(v)) v = v->parent;
+  }
+  for (v = x; v && not(is_root(v)); v = v->parent)
+    splice(v->parent);
+  for (; x && not(is_root(x)); x = x->parent)
+    splay_step(x);
+}
+
+/*----------------------------------------------------------------------------*/
+/* Fundamental Path Operations                                                */
+/*----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*/
+/* Link/Cut operations                                                        */
+/*----------------------------------------------------------------------------*/
+
+/**
+ * Return the root of the tree containing node v.
+ */
+node find_root(node v) {
+  splay(v);
+
+  node last;
+  { /* Follow right pointers until reaching the last node. */
+    node r = v->right;
+    node rr = r->right;
+
+    if (r == NULL) {
+      last = v;
+    }
+
+    while (rr) {
+      r = rr;
+      rr = rr->right;
+    }
+
+    last = r;
+  }
+
+  splay(last);
+  return last;
+}
+
+/**
+ * If v is a tree root and w is a vertex in another tree, link the trees
+ * containing v and w by adding the edge (v,w), making w the parent of v.
+ */
+void link(node v, node w) {
+  splay(v);
+  splay(w);
+  *v->parent = *w;
+}
+
+/**
+ * If node v is not a tree root, divide the tree containing v into two trees by
+ * deleting the edge from v to its parent.
+ */
+void cut(node v) {
+  splay(v);
+  v->right->parent = NULL;
+  v->right->parent = NULL;
+}
+
+/**
+ * Turn the tree containing vertex v "inside out" by making v the root of the
+ * tree.
+ */
+void evert(node v) {
+  reverse(expose(v));
+}
+
+/* /\*----------------------------------------------------------------------------*\/ */
+/* /\* Project operations                                                         *\/ */
+/* /\*----------------------------------------------------------------------------*\/ */
+
+/* void Link(node u, node v) { undefined("Link",u,v); } */
+/* void Cut(node u, node v) { undefined("Cut",u,v); } */
+/* void ConnectedQ(node u, node v) { undefined("ConnectedQ",u,v); } */
+
+/* /\*----------------------------------------------------------------------------*\/ */
+/* /\* Main                                                                       *\/ */
+/* /\*----------------------------------------------------------------------------*\/ */
+
+int main_link_cut() {
+  return 0;
+}
+
+int main() { undefined("main"); return main_link_cut(); }
+
