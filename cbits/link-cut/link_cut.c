@@ -27,12 +27,39 @@ struct node {
 typedef struct node node;
 typedef node path;
 
-node *left(node *x) { return undefined("left", x); }
-node *right(node *x) { return undefined("right", x); }
+node **left(node *x) { return undefined("left", x); }
+node **right(node *x) { return undefined("right", x); }
+node **sparent(node *x) { return undefined("sparent", x); }
 
 /* dparent(v): ("dashed parent") the parent of v (via an outgoing dashed edge)
                IF IT IS THE TAIL OF THE PATH. */
 node **dparent(node *x) { return undefined("dparent", x); }
+
+void rotr(node *x) {
+  node *y = *sparent(x);
+  node *z = *right(x);
+
+  *left(y) = z;
+  *sparent(z) = y;
+
+  *right(x) = y;
+  *sparent(x) = *sparent(y);
+
+  *sparent(y) = x;
+}
+
+void rotl(node *x) {
+  node *y = *sparent(x);
+  node *z = *left(x);
+
+  *right(y) = z;
+  *sparent(z) = y;
+
+  *left(x) = y;
+  *sparent(x) = *sparent(y);
+
+  *sparent(y) = x;
+}
 
 
 /*----------------------------------------------------------------------------*/
