@@ -61,6 +61,51 @@ void rotl(node *x) {
   *sparent(y) = x;
 }
 
+void splay_step(node *x, node *y) {
+  node *z = *sparent(y);
+
+  if (!z) { /* zig */
+    (x == *left(y)) ? rotr(x) : rotl(x);
+  } else {
+    if (x == *left(y) && y == *left(z)) { /* zig-zig */
+      rotr(y);
+      rotr(x);
+    } else if (x == *right(y) && y == *right(z)) { /* zig-zig */
+      rotl(y);
+      rotl(x);
+    } else if (x == *left(y)) { /* zig-zag */
+      rotr(x);
+      rotl(x);
+    } else {/* zig-zag */
+      rotl(x);
+      rotr(x);
+    }
+  }
+}
+
+/* FIXME: Check this. */
+void splay(node *u) {
+  node *x, *y;
+
+  /* First pass */
+  for (x = u, y = *sparent(x); y; x = y, y = *sparent(y)) {
+    if (x != *left(y) && x != *right(y)) {
+      /* If x is a middle child, we continue splaying from the its parent. */
+      continue;
+    }
+    splay_step(x, y);
+  }
+
+  /* Second pass */
+  for (x = u; x; x = *sparent(x)) {
+    *left(*sparent(x)) = x;
+  }
+
+  /* Third pass */
+  for (x = u, y = *sparent(x); y; x = y, y = *sparent(y)) {
+    splay_step(x, y);
+  }
+}
 
 /*----------------------------------------------------------------------------*/
 /* Primitive operations                                                       */
