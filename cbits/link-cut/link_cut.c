@@ -87,6 +87,9 @@ struct node {
 typedef struct node node;
 typedef node path;
 
+node *left(node *x) { return undefined("left", x); }
+node *right(node *x) { return undefined("right", x); }
+node *parent(node *x) { return undefined("parent", x); }
 node *dparent(node *x) { return undefined("dparent", x); }
 
 /*----------------------------------------------------------------------------*/
