@@ -28,8 +28,8 @@
 *.x86_64
 *.hex
 
-src/om
-src/lc
+cbits/link-cut/lc
+cbits/online-matching/om
 
 # Debug files
 *.dSYM/
