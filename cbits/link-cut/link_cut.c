@@ -11,6 +11,11 @@ void *undefined(const char *s, ...) {
   exit(-1);
 }
 
+void *fail(const char *s) {
+  fprintf(stderr, "*** %s\n", s);
+  exit(-1);
+}
+
 /*----------------------------------------------------------------------------*/
 /* Link/Cut tree internal representation                                       */
 /*----------------------------------------------------------------------------*/
@@ -18,40 +23,72 @@ void *undefined(const char *s, ...) {
 struct node {
   struct node *left;
   struct node *right;
+
+  /* FIXME: REVIEW */
   struct node *sparent;
   struct node *dparent;
+
+  /* FIXME: REVIEW */
   bool reversed;
 };
 
 typedef struct node node;
-typedef node path;
 
-node *new_node() {return calloc(1, sizeof(node));}
+node *new_node() {
+  return calloc(1, sizeof(node));
+}
+
 node **new_forest(int n) {
   node **f = malloc(n * sizeof(node*));
   int i = 0;
   for (; i < n; i++) f[i] = new_node();
   return f;
 }
-void free_forest(node **f, int n) {int i = 0; for (; i < n; i++) free(f[i]);}
+
+void free_forest(node **f, int n) {
+  int i = 0;
+  for (; i < n; i++)
+    free(f[i]);
+}
 
 node **left(node *x) {
+#ifdef DEBUG
+  if (!x) fail("left: null argument");
+#endif
   if (x->reversed) return x->right ? &(x->right) : NULL;
   else             return x->left  ? &(x->left)  : NULL;
 }
 
 node **right(node *x) {
+#ifdef DEBUG
+  if (!x) fail("right: null argument");
+#endif
   if (x->reversed) return x->left  ? &(x->left)  : NULL;
   else             return x->right ? &(x->right) : NULL;
 }
 
-/* FIXME: Check if we're dereferencing possible null pointers */
-node **sparent(node *x) {return x->sparent ? &(x->sparent) : NULL;}
-node **dparent(node *x) {return x->dparent ? &(x->dparent) : NULL;}
+/* FIXME: REVIEW */
+node **sparent(node *x) {
+#ifdef DEBUG
+  if (!x) fail("sparent: null argument");
+#endif
+  return x->sparent ? &(x->sparent) : NULL;
+}
+
+/* FIXME: REVIEW */
+node **dparent(node *x) {
+#ifdef DEBUG
+  if (!x) fail("dparent: null argument");
+#endif
+  return x->dparent ? &(x->dparent) : NULL;
+}
 /* dparent(v): ("dashed parent") the parent of v (via an outgoing dashed edge)
    IF IT IS THE TAIL OF THE PATH. */
 
 node *solid_root(node *x) {
+#ifdef DEBUG
+  if (!x) fail("solid_root: null argument");
+#endif
   node *y;
   for (y = *sparent(x);
        y && x != *left(y) && x != *right(y);
@@ -60,6 +97,9 @@ node *solid_root(node *x) {
 }
 
 node *leftmost(node *x) {
+#ifdef DEBUG
+  if (!x) fail("leftmost: null argument");
+#endif
   node **l = left(x);
   node *y = *l ? *l : NULL;
   while (y) {x = y; y = *left(y);}
@@ -67,13 +107,27 @@ node *leftmost(node *x) {
 }
 
 node *rightmost(node *x) {
+#ifdef DEBUG
+  if (!x) fail("rightmost: null argument");
+#endif
   node **r = right(x);
   node *y = *r ? *r : NULL;
   while (y) {x = y; y = *right(y);}
   return x;
 }
 
+/* FIXME: REVIEW */
+void reverse(node *x) {
+#ifdef DEBUG
+    if (!x) fail("reverse: null argument");
+#endif
+  x->reversed = !x->reversed;
+}
+
 void rotr(node *x) {
+#ifdef DEBUG
+  if (!x) fail("rotr: null argument");
+#endif
   node *y = *sparent(x);
   node *z = *right(x);
 
@@ -87,6 +141,9 @@ void rotr(node *x) {
 }
 
 void rotl(node *x) {
+#ifdef DEBUG
+  if (!x) fail("rotl: null argument");
+#endif
   node *y = *sparent(x);
   node *z = *left(x);
 
@@ -100,6 +157,10 @@ void rotl(node *x) {
 }
 
 void splay_step(node *x, node *y) {
+#ifdef DEBUG
+  if (!x) fail("splay_step: null x");
+  if (!y) fail("splay_step: null y");
+#endif
   node *z = *sparent(y);
 
   if (!z) { /* zig */
@@ -121,8 +182,11 @@ void splay_step(node *x, node *y) {
   }
 }
 
-/* FIXME: Check this. */
+/* FIXME: REVIEW */
 void splay(node *u) {
+#ifdef DEBUG
+  if (!u) fail("splay: null argument");
+#endif
   node *x, *y;
 
   /* First pass */
@@ -145,118 +209,77 @@ void splay(node *u) {
   }
 }
 
-/*----------------------------------------------------------------------------*/
-/* Primitive operations                                                       */
-/*----------------------------------------------------------------------------*/
-
-/* path(vertex v): return the path containing v */
-#define path_of(X) (X)
-
-/* head(path p): return the bottommost vertex of the path */
-node *head(path *p) {return leftmost(solid_root(p));}
-
-/* tail(path p): return the topmost vertex of the path */
-node *tail(path *p) {return rightmost(solid_root(p));}
-
-/* before(vertex v): return the vertex before v on path(v), or null if v is
-                     the head of the path */
-node *before(node *x) {return solid_root(x) ? rightmost(*left(x)) : *sparent(x);}
-
-/* after(vertex v): return vertex after v on path(v), or null if v is the tail
-                    of the path */
-node *after(node *x) {return solid_root(x) ? leftmost(*right(x)) : *sparent(x);}
-
-/* reverse(path p): reverse the direction of p, making the head the tail and
-                    vice versa */
-void reverse(path *p) {p->reversed = !p->reversed;}
-
-/* concatenate(path p, path q): combine p and q by adding the edge (tail(p),
-                                head(q)) and return the combined path */
-void concatenate(path *p, path *q) {*sparent(tail(p)) = head(q);}
-
-/* split(vertex v): divide path(v) into up to 3 parts: the vertices from
-                    head(path(v)) to before(v) (p), v, and those from after(v) to
-                    tail(path(v)) (q). (v = head(path(v)) => p = null &&
-                    v = tail(path(v)) => q = null); */
-void split(path **p, node *x, path **q) {
-  node *b = before(x), *a = after(x);
-  *sparent(b) = *sparent(x) = NULL;
-  *p = b; *q = a;
-}
-
-
-/* FIXME: "To make this program robust, an error should be added to ensure that
-   on entry dparent(tail(p)) /= null." */
-void splice(path *p) {
-  path *q, *r;
-  node *x = *dparent(tail(p));
-
-  split(&q, x, &r);
-  if (q) *dparent(tail(q)) = x;
-  concatenate(p, path_of(x));
+/* FIXME: REVIEW */
+void splice(node *x) {
+#ifdef DEBUG
+  if (!x) fail("splice: null argument");
+#endif
+  undefined("splice", x);
 }
 
 /* FIXME: We probably should splay here. */
+/* FIXME: REVIEW */
 void expose(node *x) {
-  if (!sparent(x)) return;
-
-  path *q, *r;
-  split(&q, x, &r);
-
-  if (q) *dparent(tail(q)) = x;
-  if (r) concatenate(path_of(x), r);
-  for (; dparent(tail(path_of(x))); splice(x));
+#ifdef DEBUG
+  if (!x) fail("expose: null argument");
+#endif
+  undefined("expose",x);
 }
 
-/*----------------------------------------------------------------------------*/
-/* Operations that do not change the forest                                   */
-/*----------------------------------------------------------------------------*/
-
-/* parent(vertex v): return the parent of v. if v has no parent (it is a tree
-   root), return null */
-node *parent(node *x) {
-  if (x == tail(path_of(x)))
-    return *dparent(x);
-  return after(x);
-}
-
-/* root(vertex v): return the root of the tree containing v */
+/* Return the root of the tree containing node x. */
 node *root(node *x) {
-  expose(x);
-  return tail(path_of(x));
+#ifdef DEBUG
+  if (!x) fail("root: null argument");
+#endif
+  splay(x);
+
+  node *y = rightmost(x);
+  splay(y);
+
+  return y;
 }
 
-/*----------------------------------------------------------------------------*/
-/* Operations that change the forest                                          */
-/*----------------------------------------------------------------------------*/
-
-/* link(vertex v, w): combine the trees containing v and w by adding the edge
-                      (v,w) of cost x, making w the parent of v. THIS OPERATION
-                      ASSUMES THAT V IS NOT A TREE ROOT. */
+/* Add an edge from x to y, thereby making x a child of y in the forest. This
+   operation assumes that x is the root of one tree and y is in another tree. */
+/* FIXME: REVIEW */
 void link(node *x, node *y) {
-  expose(y);
-  concatenate(path_of(x), path_of(y));
+#ifdef DEBUG
+  if (!x) fail("link: null x");
+  if (!y) fail("link: null y");
+#endif
+  splay(x);
+  splay(y);
+  *sparent(x) = y; /* FIXME: we're not changing the parent correctly */
 }
 
-/* cut(vertex v): divide the tree containing vertex v into two trees by deleting
-                  the edge(v,parent(v)); THIS OPERATION ASSUMES THAT V IS NOT A
-                  TREE ROOT. */
+/* Delete the edge from x to its parent, thereby dividing the tree containing v
+   into two trees. This operation assumes that x is not a tree root. */
+/* FIXME: REVIEW */
 void cut(node *x) {
-  path *p, *q;
-  expose(x);
-  split(&p, x, &q);
-  *dparent(x) = NULL;
+#ifdef DEBUG
+  if (!x) fail("cut: null argument");
+#endif
+  splay(x);
+
+  if (right(x)) {
+    *sparent(*right(x)) = NULL; /* FIXME: we're not changing the parent correctly */
+    *right(x) = NULL;
+  }
 }
 
 /* evert(vertex v): Modify the tree containing vertex v by making v the root.
                     (This operation can be regarded as reversing the direction
                     of everty edge on the path from v to the original root.) */
+/* FIXME: REVIEW */
 void evert(node *x) {
-  expose(x);
-  reverse(path_of(x));
-  *dparent(x) = NULL;
+#ifdef DEBUG
+  if (!x) fail("evert: null argument");
+#endif
+  undefined("evert", x);
+  /* expose(x); */
+  /* reverse(path_of(x)); */
+  /* *dparent(x) = NULL; */
 }
-
 
 /*----------------------------------------------------------------------------*/
 /* Project operations                                                         */
@@ -266,15 +289,18 @@ node **nodes;
 
 /* Adds an edge linking the node u to the node v. If such an edge already exists
    or this insertion would create a cycle then the operation has no effect. */
+/* FIXME: REVIEW */
 void Link(int u, int v) {printf("Link(%d,%d)\n", u, v);}
 
 /* Removes the edge linking the node u to the node v, if such an edge exists. If
 the edge does not exist this operation has no effect. */
+/* FIXME: REVIEW */
 void Cut(int u, int v) {printf("Cut(%d,%d)\n",u,v);}
 
 /* Returns true if there is a connection from u to v. If such a connection does
    not exist it returns false. A connection may consist of a single edge, or a
    sequence of edges, provided that it links u to v. */
+/* FIXME: REVIEW */
 void ConnectedQ(int u, int v) {printf("ConnectedQ(%d,%d)\n",u,v);}
 
 /*----------------------------------------------------------------------------*/
