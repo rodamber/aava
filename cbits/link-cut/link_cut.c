@@ -54,16 +54,14 @@ node **left(node *x) {
 #ifdef DEBUG
   if (!x) fail("left: null argument");
 #endif
-  if (x->reversed) return x->right ? &(x->right) : NULL;
-  else             return x->left  ? &(x->left)  : NULL;
+  return x->reversed ? &(x->right) : &(x->left);
 }
 
 node **right(node *x) {
 #ifdef DEBUG
   if (!x) fail("right: null argument");
 #endif
-  if (x->reversed) return x->left  ? &(x->left)  : NULL;
-  else             return x->right ? &(x->right) : NULL;
+  return x->reversed ? &(x->left) : &(x->right);
 }
 
 /* Parent in the auxiliary tree. */
