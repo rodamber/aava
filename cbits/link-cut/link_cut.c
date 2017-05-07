@@ -33,6 +33,29 @@ node **sparent(node *x) { return undefined("sparent", x); }
                IF IT IS THE TAIL OF THE PATH. */
 node **dparent(node *x) { return undefined("dparent", x); }
 
+node *solid_root(node *x) {
+  node *y;
+  for (y = *sparent(x);
+       y && x != *left(y) && x != *right(y);
+       x = y, y = *sparent(y));
+  return x;
+}
+
+/* FIXME: Does this work? */
+node **leftmost(node *x) {
+  node **y, **z = left(x);
+  if (!z) return NULL;
+  while (*z) {y = z; z = left(*z);}
+  return y;
+}
+
+node **rightmost(node *x) {
+  node **y, **z = right(x);
+  if (!z) return NULL;
+  while (*z) {y = z; z = right(*z);}
+  return y;
+}
+
 void rotr(node *x) {
   node *y = *sparent(x);
   node *z = *right(x);
@@ -109,46 +132,52 @@ void splay(node *u) {
 /* Primitive operations                                                       */
 /*----------------------------------------------------------------------------*/
 
+/* FIXME: When should we splay? */
+
 /* path(vertex v): return the path containing v */
-path *path_of(node *x) { return undefined("path_of", x); }
+path *path_of(node *x) {return x;}
 
 /* head(path p): return the bottommost vertex of the path */
-node *head(path *p) { return undefined("head", p); }
+node **head(path *p) {return leftmost(solid_root(p));}
 
 /* tail(path p): return the topmost vertex of the path */
-node *tail(path *p) { return undefined("tail", p); }
+node **tail(path *p) {return rightmost(solid_root(p));}
 
 /* before(vertex v): return the vertex before v on path(v), or null if v is
                      the head of the path */
-node *before(node *x) { return undefined("before", x); }
+node **before(node *x) {return solid_root(x) ? rightmost(*left(x)) : sparent(x);}
 
 /* after(vertex v): return vertex after v on path(v), or null if v is the tail
                     of the path */
-node *after(node *x) { return undefined("after", x); }
+node **after(node *x) {return solid_root(x) ? leftmost(*right(x)) : sparent(x);}
 
 /* reverse(path p): reverse the direction of p, making the head the tail and
                     vice versa */
-void reverse(path *p) { undefined("reverse", p); }
+void reverse(path *p) {p->reversed = !p->reversed;}
 
 /* concatenate(path p, path q): combine p and q by adding the edge (tail(p),
                                 head(q)) and return the combined path */
-void concatenate(path *p, path *q) { undefined("concatenate", p, q); }
+void concatenate(path *p, path *q) {*sparent(*tail(p)) = *head(q);}
 
 /* split(vertex v): divide path(v) into up to 3 parts: the vertices from
                     head(path(v)) to before(v) (p), v, and those from after(v) to
                     tail(path(v)) (q). (v = head(path(v)) => p = null &&
                     v = tail(path(v)) => q = null); */
-void split(path **p, node *x, path **q) { undefined("split", p, x, q); }
+void split(path **p, node *x, path **q) {
+  node *b = *before(x), *a = *after(x);
+  *sparent(b) = *sparent(x) = NULL;
+  *p = b; *q = a;
+}
 
 
 /* FIXME: "To make this program robust, an error should be added to ensure that
    on entry dparent(tail(p)) /= null." */
 void splice(path *p) {
   path *q, *r;
-  node *x = *dparent(tail(p));
+  node *x = *dparent(*tail(p));
 
   split(&q, x, &r);
-  if (q) *dparent(tail(q)) = x;
+  if (q) *dparent(*tail(q)) = x;
   concatenate(p, path_of(x));
 }
 
@@ -156,9 +185,9 @@ void expose(node *x) {
   path *q, *r;
   split(&q, x, &r);
 
-  if (q) *dparent(tail(q)) = x;
+  if (q) *dparent(*tail(q)) = x;
   if (r) concatenate(path_of(x), r);
-  for (; dparent(tail(path_of(x))); splice(x));
+  for (; dparent(*tail(path_of(x))); splice(x));
 }
 
 /*----------------------------------------------------------------------------*/
@@ -167,14 +196,14 @@ void expose(node *x) {
 
 /* parent(vertex v): return the parent of v. if v has no parent (it is a tree
    root), return null */
-node *parent(node *x) {
-  if (x == tail(path_of(x)))
-    return *dparent(x);
+node **parent(node *x) {
+  if (x == *tail(path_of(x)))
+    return dparent(x);
   return after(x);
 }
 
 /* root(vertex v): return the root of the tree containing v */
-node *root(node *x) {
+node **root(node *x) {
   expose(x);
   return tail(path_of(x));
 }
