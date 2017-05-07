@@ -50,63 +50,76 @@ void free_forest(node **f, int n) {
     free(f[i]);
 }
 
-node **left(node *x) {
+node **left__(node *x) {
 #ifdef DEBUG
   if (!x) fail("left: null argument");
 #endif
   return x->reversed ? &(x->right) : &(x->left);
 }
 
-node **right(node *x) {
+node **right__(node *x) {
 #ifdef DEBUG
   if (!x) fail("right: null argument");
 #endif
   return x->reversed ? &(x->left) : &(x->right);
 }
 
-/* Parent in the auxiliary tree. */
-node **sparent(node *x) {
+node *left(node *x) {return *left__(x);}
+void set_left(node *x, node *y) {*left__(x) = y;}
+node *right(node *x) {return *right__(x);}
+void set_right(node *x, node *y) {*right__(x) = y;}
+
+/* FIXME: REVIEW */
+/* Parent in the solid subtree of x. */
+node *solid_parent(node *x) {
 #ifdef DEBUG
   if (!x) fail("sparent: null argument");
 #endif
   if (x->hook == NULL)
     return NULL;
-  if (x != *right(x->hook) && x != *left(x->hook))
+  if (x != right(x->hook) && x != left(x->hook))
     return NULL;
-  return &(x->hook);
+  return x->hook;
 }
 
-/* Path-parent. */
-node **pparent(node *x) {
-#ifdef DEBUG
-  if (!x) fail("pparent: null argument");
-#endif
-  if (x->hook == NULL)
-    return NULL;
-  if (x == *right(x->hook) || x == *left(x->hook))
-    return NULL;
-  return &(x->hook);
+/* FIXME: REVIEW */
+void set_solid_parent(node *x, node* y) {
+  x->hook = y;
 }
 
 node *solid_root(node *x) {
 #ifdef DEBUG
   if (!x) fail("solid_root: null argument");
 #endif
-  node **sp = sparent(x);
-  node *y = sp ? *sp : NULL;
-
-  while (y) {x = y; y = *sparent(y);}
+  node *y = solid_parent(x);
+  while (y) {x = y; y = solid_parent(y);}
   return x;
+}
+
+/* FIXME: REVIEW */
+/* Path-parent. */
+node *path_parent(node *x) {
+#ifdef DEBUG
+  if (!x) fail("pparent: null argument");
+#endif
+  return solid_root(x)->hook;
+}
+
+/* FIXME: REVIEW */
+void set_path_parent(node *x, node* y) {
+#ifdef DEBUG
+  if (x != solid_root(x))
+    fail("set_pparent: x != solid_root(x)");
+#endif
+  x->hook = y;
 }
 
 node *leftmost(node *x) {
 #ifdef DEBUG
   if (!x) fail("leftmost: null argument");
 #endif
-  node **l = left(x);
-  node *y = l ? *l : NULL;
-
-  while (y) {x = y; y = *left(y);}
+  node *y = left(x);
+  while (y) {x = y; y = left(y);}
   return x;
 }
 
@@ -114,10 +127,8 @@ node *rightmost(node *x) {
 #ifdef DEBUG
   if (!x) fail("rightmost: null argument");
 #endif
-  node **r = right(x);
-  node *y = r ? *r : NULL;
-
-  while (y) {x = y; y = *right(y);}
+  node *y = right(x);
+  while (y) {x = y; y = right(y);}
   return x;
 }
 
@@ -134,16 +145,16 @@ void rotr(node *x) {
 #ifdef DEBUG
   if (!x) fail("rotr: null argument");
 #endif
-  node *y = *sparent(x);
-  node *z = *right(x);
+  node *y = solid_parent(x);
+  node *z = right(x);
 
-  *left(y) = z;
-  *sparent(z) = y;
+  set_left(y, z);
+  set_solid_parent(z, y);
 
-  *right(x) = y;
-  *sparent(x) = *sparent(y);
+  set_right(x, y);
+  set_solid_parent(x, solid_parent(y));
 
-  *sparent(y) = x;
+  set_solid_parent(y, x);
 }
 
 /* FIXME: REVIEW */
@@ -151,16 +162,16 @@ void rotl(node *x) {
 #ifdef DEBUG
   if (!x) fail("rotl: null argument");
 #endif
-  node *y = *sparent(x);
-  node *z = *left(x);
+  node *y = solid_parent(x);
+  node *z = left(x);
 
-  *right(y) = z;
-  *sparent(z) = y;
+  set_right(y, z);
+  set_solid_parent(z, y);
 
-  *left(x) = y;
-  *sparent(x) = *sparent(y);
+  set_left(x, y);
+  set_solid_parent(x, solid_parent(y));
 
-  *sparent(y) = x;
+  set_solid_parent(y, x);
 }
 
 /* FIXME: REVIEW */
@@ -169,18 +180,18 @@ void splay_step(node *x, node *y) {
   if (!x) fail("splay_step: null x");
   if (!y) fail("splay_step: null y");
 #endif
-  node *z = *sparent(y);
+  node *z = solid_parent(y);
 
   if (!z) { /* zig */
-    (x == *left(y)) ? rotr(x) : rotl(x);
+    (x == left(y)) ? rotr(x) : rotl(x);
   } else {
-    if (x == *left(y) && y == *left(z)) { /* zig-zig */
+    if (x == left(y) && y == left(z)) { /* zig-zig */
       rotr(y);
       rotr(x);
-    } else if (x == *right(y) && y == *right(z)) { /* zig-zig */
+    } else if (x == right(y) && y == right(z)) { /* zig-zig */
       rotl(y);
       rotl(x);
-    } else if (x == *left(y)) { /* zig-zag */
+    } else if (x == left(y)) { /* zig-zag */
       rotr(x);
       rotl(x);
     } else {/* zig-zag */
@@ -198,23 +209,17 @@ void splay(node *u) {
   node *x, *y;
 
   /* First pass */
-  for (x = u, y = *sparent(x); y; x = y, y = *sparent(y)) {
-    if (x != *left(y) && x != *right(y)) {
-      /* If x is a middle child, we continue splaying from the its parent. */
-      continue;
-    }
-    splay_step(x, y);
-  }
+  for (x = u; x; x = path_parent(x))
+    for (y = solid_parent(x); y; x = y, y = solid_parent(y))
+      splay_step(x, y);
 
   /* Second pass */
-  for (x = u; x; x = *sparent(x)) {
-    *left(*sparent(x)) = x;
-  }
+  for (x = u; x; x = solid_parent(x))
+    set_left(solid_parent(x), x);
 
   /* Third pass */
-  for (x = u, y = *sparent(x); y; x = y, y = *sparent(y)) {
+  for (x = u, y = solid_parent(x); y; x = y, y = solid_parent(y))
     splay_step(x, y);
-  }
 }
 
 /* FIXME: REVIEW */
@@ -257,7 +262,7 @@ void link(node *x, node *y) {
 #endif
   splay(x);
   splay(y);
-  *sparent(x) = y; /* FIXME: we're not changing the parent correctly */
+  set_solid_parent(x, y);
 }
 
 /* Delete the edge from x to its parent, thereby dividing the tree containing v
@@ -270,8 +275,8 @@ void cut(node *x) {
   splay(x);
 
   if (right(x)) {
-    *sparent(*right(x)) = NULL; /* FIXME: we're not changing the parent correctly */
-    *right(x) = NULL;
+    set_solid_parent(right(x), NULL);
+    set_right(x, NULL);
   }
 }
 
