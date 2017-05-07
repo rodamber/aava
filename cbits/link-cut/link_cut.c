@@ -27,6 +27,12 @@ typedef struct node node;
 typedef node path;
 
 node *new_node() {return calloc(1, sizeof(node));}
+node **new_forest(int n) {
+  node **f = malloc(n * sizeof(node*));
+  int i = 0;
+  for (; i < n; i++) f[i] = new_node();
+  return f;
+}
 void free_forest(node **f, int n) {int i = 0; for (; i < n; i++) free(f[i]);}
 
 node **left(node *x) {
@@ -39,6 +45,7 @@ node **right(node *x) {
   else             return x->right ? &(x->right) : NULL;
 }
 
+/* FIXME: Check if we're dereferencing possible null pointers */
 node **sparent(node *x) {return x->sparent ? &(x->sparent) : NULL;}
 node **dparent(node *x) {return x->dparent ? &(x->dparent) : NULL;}
 /* dparent(v): ("dashed parent") the parent of v (via an outgoing dashed edge)
@@ -142,10 +149,8 @@ void splay(node *u) {
 /* Primitive operations                                                       */
 /*----------------------------------------------------------------------------*/
 
-/* FIXME: When should we splay? */
-
 /* path(vertex v): return the path containing v */
-path *path_of(node *x) {return x;}
+#define path_of(X) (X)
 
 /* head(path p): return the bottommost vertex of the path */
 node *head(path *p) {return leftmost(solid_root(p));}
@@ -191,7 +196,10 @@ void splice(path *p) {
   concatenate(p, path_of(x));
 }
 
+/* FIXME: We probably should splay here. */
 void expose(node *x) {
+  if (!sparent(x)) return;
+
   path *q, *r;
   split(&q, x, &r);
 
@@ -254,16 +262,45 @@ void evert(node *x) {
 /* Project operations                                                         */
 /*----------------------------------------------------------------------------*/
 
-void Link(node u, node v) { undefined("Link",u,v); }
-void Cut(node u, node v) { undefined("Cut",u,v); }
-void ConnectedQ(node u, node v) { undefined("ConnectedQ",u,v); }
+node **nodes;
+
+/* Adds an edge linking the node u to the node v. If such an edge already exists
+   or this insertion would create a cycle then the operation has no effect. */
+void Link(int u, int v) {printf("Link(%d,%d)\n", u, v);}
+
+/* Removes the edge linking the node u to the node v, if such an edge exists. If
+the edge does not exist this operation has no effect. */
+void Cut(int u, int v) {printf("Cut(%d,%d)\n",u,v);}
+
+/* Returns true if there is a connection from u to v. If such a connection does
+   not exist it returns false. A connection may consist of a single edge, or a
+   sequence of edges, provided that it links u to v. */
+void ConnectedQ(int u, int v) {printf("ConnectedQ(%d,%d)\n",u,v);}
 
 /*----------------------------------------------------------------------------*/
 /* Main                                                                       */
 /*----------------------------------------------------------------------------*/
 
 int main_link_cut() {
+  int n;
+  scanf(" %d", &n);
+  nodes = new_forest(n);
+
+  int u, v;
+  while (true) {
+    if        (scanf(" L %d %d", &u, &v) == 2) {
+      Link(u,v);
+    } else if (scanf(" C %d %d", &u, &v) == 2) {
+      Cut(u,v);
+    } else if (scanf(" Q %d %d", &u, &v) == 2) {
+      ConnectedQ(u,v);
+    } else {
+      break;
+    }
+  }
+
+  free_forest(nodes, n);
   return 0;
 }
 
-int main() { undefined("main"); return main_link_cut(); }
+int main() { return main_link_cut(); }
