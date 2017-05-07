@@ -24,9 +24,8 @@ struct node {
   struct node *left;
   struct node *right;
 
-  /* FIXME: REVIEW */
-  struct node *sparent;
-  struct node *dparent;
+  /* FIXME: REVIEW: Why double pointer? */
+  struct node *hook;
 
   /* FIXME: REVIEW */
   bool reversed;
@@ -67,32 +66,38 @@ node **right(node *x) {
   else             return x->right ? &(x->right) : NULL;
 }
 
-/* FIXME: REVIEW */
+/* Parent in the auxiliary tree. */
 node **sparent(node *x) {
 #ifdef DEBUG
   if (!x) fail("sparent: null argument");
 #endif
-  return x->sparent ? &(x->sparent) : NULL;
+  if (x->hook == NULL)
+    return NULL;
+  if (x != *right(x->hook) && x != *left(x->hook))
+    return NULL;
+  return &(x->hook);
 }
 
-/* FIXME: REVIEW */
-node **dparent(node *x) {
+/* Path-parent. */
+node **pparent(node *x) {
 #ifdef DEBUG
-  if (!x) fail("dparent: null argument");
+  if (!x) fail("pparent: null argument");
 #endif
-  return x->dparent ? &(x->dparent) : NULL;
+  if (x->hook == NULL)
+    return NULL;
+  if (x == *right(x->hook) || x == *left(x->hook))
+    return NULL;
+  return &(x->hook);
 }
-/* dparent(v): ("dashed parent") the parent of v (via an outgoing dashed edge)
-   IF IT IS THE TAIL OF THE PATH. */
 
 node *solid_root(node *x) {
 #ifdef DEBUG
   if (!x) fail("solid_root: null argument");
 #endif
-  node *y;
-  for (y = *sparent(x);
-       y && x != *left(y) && x != *right(y);
-       x = y, y = *sparent(y));
+  node **sp = sparent(x);
+  node *y = sp ? *sp : NULL;
+
+  while (y) {x = y; y = *sparent(y);}
   return x;
 }
 
@@ -101,7 +106,8 @@ node *leftmost(node *x) {
   if (!x) fail("leftmost: null argument");
 #endif
   node **l = left(x);
-  node *y = *l ? *l : NULL;
+  node *y = l ? *l : NULL;
+
   while (y) {x = y; y = *left(y);}
   return x;
 }
@@ -111,7 +117,8 @@ node *rightmost(node *x) {
   if (!x) fail("rightmost: null argument");
 #endif
   node **r = right(x);
-  node *y = *r ? *r : NULL;
+  node *y = r ? *r : NULL;
+
   while (y) {x = y; y = *right(y);}
   return x;
 }
@@ -124,6 +131,7 @@ void reverse(node *x) {
   x->reversed = !x->reversed;
 }
 
+/* FIXME: REVIEW */
 void rotr(node *x) {
 #ifdef DEBUG
   if (!x) fail("rotr: null argument");
@@ -140,6 +148,7 @@ void rotr(node *x) {
   *sparent(y) = x;
 }
 
+/* FIXME: REVIEW */
 void rotl(node *x) {
 #ifdef DEBUG
   if (!x) fail("rotl: null argument");
@@ -156,6 +165,7 @@ void rotl(node *x) {
   *sparent(y) = x;
 }
 
+/* FIXME: REVIEW */
 void splay_step(node *x, node *y) {
 #ifdef DEBUG
   if (!x) fail("splay_step: null x");
@@ -278,7 +288,7 @@ void evert(node *x) {
   undefined("evert", x);
   /* expose(x); */
   /* reverse(path_of(x)); */
-  /* *dparent(x) = NULL; */
+  /* *pparent(x) = NULL; */
 }
 
 /*----------------------------------------------------------------------------*/
