@@ -18,20 +18,31 @@ void *undefined(const char *s, ...) {
 struct node {
   struct node *left;
   struct node *right;
-  struct node *hook;
+  struct node *sparent;
+  struct node *dparent;
   bool reversed;
 };
 
 typedef struct node node;
 typedef node path;
 
-node **left(node *x) { return undefined("left", x); }
-node **right(node *x) { return undefined("right", x); }
-node **sparent(node *x) { return undefined("sparent", x); }
+node *new_node() {return calloc(1, sizeof(node));}
+void free_forest(node **f, int n) {int i = 0; for (; i < n; i++) free(f[i]);}
 
+node **left(node *x) {
+  if (x->reversed) return x->right ? &(x->right) : NULL;
+  else             return x->left  ? &(x->left)  : NULL;
+}
+
+node **right(node *x) {
+  if (x->reversed) return x->left  ? &(x->left)  : NULL;
+  else             return x->right ? &(x->right) : NULL;
+}
+
+node **sparent(node *x) {return x->sparent ? &(x->sparent) : NULL;}
+node **dparent(node *x) {return x->dparent ? &(x->dparent) : NULL;}
 /* dparent(v): ("dashed parent") the parent of v (via an outgoing dashed edge)
-               IF IT IS THE TAIL OF THE PATH. */
-node **dparent(node *x) { return undefined("dparent", x); }
+   IF IT IS THE TAIL OF THE PATH. */
 
 node *solid_root(node *x) {
   node *y;
@@ -41,19 +52,18 @@ node *solid_root(node *x) {
   return x;
 }
 
-/* FIXME: Does this work? */
-node **leftmost(node *x) {
-  node **y, **z = left(x);
-  if (!z) return NULL;
-  while (*z) {y = z; z = left(*z);}
-  return y;
+node *leftmost(node *x) {
+  node **l = left(x);
+  node *y = *l ? *l : NULL;
+  while (y) {x = y; y = *left(y);}
+  return x;
 }
 
-node **rightmost(node *x) {
-  node **y, **z = right(x);
-  if (!z) return NULL;
-  while (*z) {y = z; z = right(*z);}
-  return y;
+node *rightmost(node *x) {
+  node **r = right(x);
+  node *y = *r ? *r : NULL;
+  while (y) {x = y; y = *right(y);}
+  return x;
 }
 
 void rotr(node *x) {
@@ -138,18 +148,18 @@ void splay(node *u) {
 path *path_of(node *x) {return x;}
 
 /* head(path p): return the bottommost vertex of the path */
-node **head(path *p) {return leftmost(solid_root(p));}
+node *head(path *p) {return leftmost(solid_root(p));}
 
 /* tail(path p): return the topmost vertex of the path */
-node **tail(path *p) {return rightmost(solid_root(p));}
+node *tail(path *p) {return rightmost(solid_root(p));}
 
 /* before(vertex v): return the vertex before v on path(v), or null if v is
                      the head of the path */
-node **before(node *x) {return solid_root(x) ? rightmost(*left(x)) : sparent(x);}
+node *before(node *x) {return solid_root(x) ? rightmost(*left(x)) : *sparent(x);}
 
 /* after(vertex v): return vertex after v on path(v), or null if v is the tail
                     of the path */
-node **after(node *x) {return solid_root(x) ? leftmost(*right(x)) : sparent(x);}
+node *after(node *x) {return solid_root(x) ? leftmost(*right(x)) : *sparent(x);}
 
 /* reverse(path p): reverse the direction of p, making the head the tail and
                     vice versa */
@@ -157,14 +167,14 @@ void reverse(path *p) {p->reversed = !p->reversed;}
 
 /* concatenate(path p, path q): combine p and q by adding the edge (tail(p),
                                 head(q)) and return the combined path */
-void concatenate(path *p, path *q) {*sparent(*tail(p)) = *head(q);}
+void concatenate(path *p, path *q) {*sparent(tail(p)) = head(q);}
 
 /* split(vertex v): divide path(v) into up to 3 parts: the vertices from
                     head(path(v)) to before(v) (p), v, and those from after(v) to
                     tail(path(v)) (q). (v = head(path(v)) => p = null &&
                     v = tail(path(v)) => q = null); */
 void split(path **p, node *x, path **q) {
-  node *b = *before(x), *a = *after(x);
+  node *b = before(x), *a = after(x);
   *sparent(b) = *sparent(x) = NULL;
   *p = b; *q = a;
 }
@@ -174,10 +184,10 @@ void split(path **p, node *x, path **q) {
    on entry dparent(tail(p)) /= null." */
 void splice(path *p) {
   path *q, *r;
-  node *x = *dparent(*tail(p));
+  node *x = *dparent(tail(p));
 
   split(&q, x, &r);
-  if (q) *dparent(*tail(q)) = x;
+  if (q) *dparent(tail(q)) = x;
   concatenate(p, path_of(x));
 }
 
@@ -185,9 +195,9 @@ void expose(node *x) {
   path *q, *r;
   split(&q, x, &r);
 
-  if (q) *dparent(*tail(q)) = x;
+  if (q) *dparent(tail(q)) = x;
   if (r) concatenate(path_of(x), r);
-  for (; dparent(*tail(path_of(x))); splice(x));
+  for (; dparent(tail(path_of(x))); splice(x));
 }
 
 /*----------------------------------------------------------------------------*/
@@ -196,14 +206,14 @@ void expose(node *x) {
 
 /* parent(vertex v): return the parent of v. if v has no parent (it is a tree
    root), return null */
-node **parent(node *x) {
-  if (x == *tail(path_of(x)))
-    return dparent(x);
+node *parent(node *x) {
+  if (x == tail(path_of(x)))
+    return *dparent(x);
   return after(x);
 }
 
 /* root(vertex v): return the root of the tree containing v */
-node **root(node *x) {
+node *root(node *x) {
   expose(x);
   return tail(path_of(x));
 }
