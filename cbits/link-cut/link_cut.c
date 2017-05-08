@@ -223,7 +223,6 @@ void splay(node *u) {
   node *x, *y;
 
   /* First pass */
-  /* FIXME: I think there's a bug here. rotations and changing x and y... hmm...*/
   for (x = u; x; x = x->hook)
     for (y = solid_parent(x); y; y = solid_parent(x))
       splay_step(x, y);
@@ -308,6 +307,15 @@ void reroot(node *x) { /* evert */
 
 node **nodes;
 
+void print_state(int n) {
+  int i = 0;
+  for (; i < n; i++) {
+    printf("(%d,%p): {left: %p, right: %p, hook: %p, reversed: %d}\n",
+           i+1, nodes[i], nodes[i]->left, nodes[i]->right, nodes[i]->hook,
+           nodes[i]->reversed);
+  }
+}
+
 /* Adds an edge linking the node u to the node v. If such an edge already exists
    or this insertion would create a cycle then the operation has no effect. */
 /* FIXME: REVIEW */
@@ -370,6 +378,9 @@ int main_link_cut() {
 
   int u, v;
   while (true) {
+#ifdef DEBUG
+    print_state(n);
+#endif
     if        (scanf(" L %d %d", &u, &v) == 2) {
       Link(u,v);
     } else if (scanf(" C %d %d", &u, &v) == 2) {
