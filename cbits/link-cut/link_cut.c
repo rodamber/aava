@@ -50,18 +50,20 @@ void free_forest(node **f, int n) {
     free(f[i]);
 }
 
+bool reversal_state(node *x);
+
 node **left__(node *x) {
 #ifdef DEBUG
   if (!x) fail("left: null argument");
 #endif
-  return x->reversed ? &(x->right) : &(x->left);
+  return reversal_state(x) ? &(x->right) : &(x->left);
 }
 
 node **right__(node *x) {
 #ifdef DEBUG
   if (!x) fail("right: null argument");
 #endif
-  return x->reversed ? &(x->left) : &(x->right);
+  return reversal_state(x) ? &(x->left) : &(x->right);
 }
 
 node *left(node *x) {return *left__(x);}
@@ -114,6 +116,24 @@ void set_path_parent(node *x, node* y) {
   x->hook = y;
 }
 
+void reverse(node *x) {
+#ifdef DEBUG
+  if (!x) fail("reverse: null argument");
+#endif
+  x->reversed = !(x->reversed);
+}
+
+/* FIXME: REVIEW */
+bool reversal_state(node *x) {
+#ifdef DEBUG
+  if (!x) fail("reversal_state: null argument");
+#endif
+  bool b;
+  for (; x; x = solid_parent(x))
+    b = (b != x->reversed); /* Exclusive OR */
+  return b;
+}
+
 node *leftmost(node *x) {
 #ifdef DEBUG
   if (!x) fail("leftmost: null argument");
@@ -130,14 +150,6 @@ node *rightmost(node *x) {
   node *y = right(x);
   while (y) {x = y; y = right(y);}
   return x;
-}
-
-/* FIXME: REVIEW */
-void reverse(node *x) {
-#ifdef DEBUG
-    if (!x) fail("reverse: null argument");
-#endif
-  x->reversed = !x->reversed;
 }
 
 /* FIXME: REVIEW */
@@ -209,6 +221,7 @@ void splay(node *u) {
   node *x, *y;
 
   /* First pass */
+  /* FIXME: I think there's a bug here. rotations and changing x and y... hmm...*/
   for (x = u; x; x = path_parent(x))
     for (y = solid_parent(x); y; x = y, y = solid_parent(y))
       splay_step(x, y);
@@ -220,23 +233,6 @@ void splay(node *u) {
   /* Third pass */
   for (x = u, y = solid_parent(x); y; x = y, y = solid_parent(y))
     splay_step(x, y);
-}
-
-/* FIXME: REVIEW */
-void splice(node *x) {
-#ifdef DEBUG
-  if (!x) fail("splice: null argument");
-#endif
-  undefined("splice", x);
-}
-
-/* FIXME: We probably should splay here. */
-/* FIXME: REVIEW */
-void expose(node *x) {
-#ifdef DEBUG
-  if (!x) fail("expose: null argument");
-#endif
-  undefined("expose",x);
 }
 
 /* Return the root of the tree containing node x. */
@@ -280,18 +276,25 @@ void cut(node *x) {
   }
 }
 
+/* FIXME: REVIEW */
+void expose(node *x) { /* access */
+#ifdef DEBUG
+  if (!x) fail("expose: null argument");
+#endif
+  for (x = solid_root(x); x; x = solid_root(x))
+    if (path_parent(x)) set_left(path_parent(x), x);
+}
+
 /* evert(vertex v): Modify the tree containing vertex v by making v the root.
                     (This operation can be regarded as reversing the direction
                     of everty edge on the path from v to the original root.) */
-/* FIXME: REVIEW */
-void evert(node *x) {
+void reroot(node *x) { /* evert */
 #ifdef DEBUG
   if (!x) fail("evert: null argument");
 #endif
-  undefined("evert", x);
-  /* expose(x); */
-  /* reverse(path_of(x)); */
-  /* *pparent(x) = NULL; */
+  expose(x);
+  reverse(x);
+  x->hook = NULL;
 }
 
 /*----------------------------------------------------------------------------*/
