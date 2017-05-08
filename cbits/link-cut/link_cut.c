@@ -378,7 +378,7 @@ void Cut(int u, int v) {
 /* FIXME: REVIEW */
 bool ConnectedQ(int u, int v) {
   node *x = nodes[u-1], *y = nodes[v-1];
-  printf("%c\n", connected(x,y) ? 'T' : 'F');
+  return connected(x,y);
 #ifdef DEBUG
   printf("Finished: ConnectedQ(%d,%d)\n", u, v);
 #endif
@@ -388,10 +388,15 @@ bool ConnectedQ(int u, int v) {
 /* Main                                                                       */
 /*----------------------------------------------------------------------------*/
 
+/* For QuickCheck */
+void init(int n) {nodes = new_forest(n);}
+void finish(int n) {free_forest(nodes, n);};
+
 int main_link_cut() {
   int n;
-  scanf(" %d", &n);
-  nodes = new_forest(n);
+  if (scanf(" %d", &n) != 1)
+    exit(-1);
+  init(n);
 
   int u, v;
   while (true) {
@@ -403,14 +408,14 @@ int main_link_cut() {
     } else if (scanf(" C %d %d", &u, &v) == 2) {
       Cut(u,v);
     } else if (scanf(" Q %d %d", &u, &v) == 2) {
-      ConnectedQ(u,v);
+      printf("%c\n", ConnectedQ(u,v) ? 'T' : 'F');
     } else {
       break;
     }
   }
 
-  free_forest(nodes, n);
+  finish(n);
   return 0;
 }
 
-int main() { return main_link_cut(); }
+/* int main() { return main_link_cut(); } */

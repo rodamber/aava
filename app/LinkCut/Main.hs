@@ -1,2 +1,8 @@
+{-# LANGUAGE ForeignFunctionInterface #-}
+module Main where
+
+foreign import ccall "main_link_cut"
+    c_mainLinkCut :: IO ()
+
 main = do
-  print "link-cut main"
+  c_mainLinkCut
