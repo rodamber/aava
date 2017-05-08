@@ -296,7 +296,6 @@ void reroot(node *x) { /* evert */
 #endif
   expose(x);
   reverse(x);
-  x->hook = NULL;
   splay(x);
 }
 
@@ -310,23 +309,30 @@ bool connected(node *x, node *y) {
 /*----------------------------------------------------------------------------*/
 
 node *nodes;
+int nodes_size;
 
-void print_state(int n) {
+void pnode(node *x) {
+  printf("    %ld: {left: %ld, right: %ld, hook: %ld, reversed: %d}\n",
+         x - nodes + 1,
+         x->left  ? x->left  - nodes + 1: 0,
+         x->right ? x->right - nodes + 1: 0,
+         x->hook  ? x->hook  - nodes + 1: 0,
+         x->reversed);
+}
+
+void pstate() {
+  puts("");
   int i = 0;
-  for (; i < n; i++) {
-    printf("%d: {left: %ld, right: %ld, hook: %ld, reversed: %d}\n",
-           i+1,
-           nodes[i].left  ? nodes[i].left  - nodes : 0,
-           nodes[i].right ? nodes[i].right - nodes : 0,
-           nodes[i].hook  ? nodes[i].hook  - nodes : 0,
-           nodes[i].reversed);
-  }
+  for (; i < nodes_size; i++)
+    pnode(&(nodes[i]));
 }
 
 /* Adds an edge linking the node u to the node v. If such an edge already exists
    or this insertion would create a cycle then the operation has no effect. */
 /* FIXME: REVIEW */
 void Link(int u, int v) {
+  if (u == v || u > nodes_size || v > nodes_size)
+    return;
   node *x = &(nodes[u-1]), *y = &(nodes[v-1]);
 
   if (x->hook == y || x == y->hook) /* edge already exists */
@@ -345,6 +351,8 @@ void Link(int u, int v) {
 the edge does not exist this operation has no effect. */
 /* FIXME: REVIEW */
 void Cut(int u, int v) {
+  if (u == v || u > nodes_size || v > nodes_size)
+    return;
   node *x = &(nodes[u-1]), *y = &(nodes[v-1]);
 
   if (x->hook != y && x != y->hook) /* edge does not exist */
@@ -367,6 +375,8 @@ void Cut(int u, int v) {
    sequence of edges, provided that it links u to v. */
 /* FIXME: REVIEW */
 bool ConnectedQ(int u, int v) {
+  if (u == v || u > nodes_size || v > nodes_size)
+    return false;
   node *x = &(nodes[u-1]), *y = &(nodes[v-1]);
   return connected(x,y);
 #ifdef DEBUG
@@ -383,16 +393,12 @@ void init(int n) {nodes = new_forest(n);}
 void finally() {free(nodes);};
 
 int main_link_cut() {
-  int n;
-  if (scanf(" %d", &n) != 1)
+  if (scanf(" %d", &nodes_size) != 1)
     exit(-1);
-  init(n);
+  init(nodes_size);
 
   int u, v;
   while (true) {
-#ifdef DEBUG
-    print_state(n);
-#endif
     if        (scanf(" L %d %d", &u, &v) == 2) {
       Link(u,v);
     } else if (scanf(" C %d %d", &u, &v) == 2) {
