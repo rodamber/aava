@@ -307,18 +307,44 @@ node **nodes;
 /* Adds an edge linking the node u to the node v. If such an edge already exists
    or this insertion would create a cycle then the operation has no effect. */
 /* FIXME: REVIEW */
-void Link(int u, int v) {printf("Link(%d,%d)\n", u, v);}
+void Link(int u, int v) {
+  node *x = nodes[u], *y = nodes[v];
+
+  if (x->hook == y || x == y->hook) /* edge already exists */
+    return;
+  if (root(x) == root(y)) /* cycle */
+    return;
+
+  reroot(x);
+  link(x,y);
+}
 
 /* Removes the edge linking the node u to the node v, if such an edge exists. If
 the edge does not exist this operation has no effect. */
 /* FIXME: REVIEW */
-void Cut(int u, int v) {printf("Cut(%d,%d)\n",u,v);}
+void Cut(int u, int v) {
+  node *x = nodes[u], *y = nodes[v];
+
+  if (x->hook != y && x != y->hook) /* edge does not exist */
+    return;
+
+  if (x->hook == y) {
+    cut(x);
+    splay(y);
+  } else {
+    cut(y);
+    splay(x);
+  }
+}
 
 /* Returns true if there is a connection from u to v. If such a connection does
    not exist it returns false. A connection may consist of a single edge, or a
    sequence of edges, provided that it links u to v. */
 /* FIXME: REVIEW */
-void ConnectedQ(int u, int v) {printf("ConnectedQ(%d,%d)\n",u,v);}
+void ConnectedQ(int u, int v) {
+  node *x = nodes[u], *y = nodes[v];
+  printf("%c\n", root(x) == root(y) ? 'T' : 'F');
+}
 
 /*----------------------------------------------------------------------------*/
 /* Main                                                                       */
