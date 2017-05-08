@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <signal.h>
 
 /*----------------------------------------------------------------------------*/
 /* Utilities                                                                  */
@@ -11,9 +12,9 @@ void *undefined(const char *s, ...) {
   exit(-1);
 }
 
-void *fail(const char *s) {
+void fail(const char *s) {
   fprintf(stderr, "*** %s\n", s);
-  exit(-1);
+  raise(SIGSEGV);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -34,7 +35,14 @@ struct node {
 typedef struct node node;
 
 node *new_node() {
-  return calloc(1, sizeof(node));
+  node *x = malloc(sizeof(node));
+
+  x->left = NULL;
+  x->right = NULL;
+  x->hook = NULL;
+  x->reversed = false;
+
+  return x;
 }
 
 node **new_forest(int n) {
@@ -85,7 +93,10 @@ node *solid_parent(node *x) {
 }
 
 /* FIXME: REVIEW */
-void set_solid_parent(node *x, node* y) {
+void set_hook(node *x, node* y) {
+#ifdef DEBUG
+  if (!x) fail("set_hook: null 1st argument");
+#endif
   x->hook = y;
 }
 
@@ -107,15 +118,6 @@ node *path_parent(node *x) {
   return solid_root(x)->hook;
 }
 
-/* FIXME: REVIEW */
-void set_path_parent(node *x, node* y) {
-#ifdef DEBUG
-  if (x != solid_root(x))
-    fail("set_pparent: x != solid_root(x)");
-#endif
-  x->hook = y;
-}
-
 void reverse(node *x) {
 #ifdef DEBUG
   if (!x) fail("reverse: null argument");
@@ -129,7 +131,7 @@ bool reversal_state(node *x) {
   if (!x) fail("reversal_state: null argument");
 #endif
   bool b;
-  for (; x; x = solid_parent(x))
+  for (b = x->reversed, x = solid_parent(x); x; x = solid_parent(x))
     b = (b != x->reversed); /* Exclusive OR */
   return b;
 }
@@ -157,16 +159,16 @@ void rotr(node *x) {
 #ifdef DEBUG
   if (!x) fail("rotr: null argument");
 #endif
-  node *y = solid_parent(x);
+  node *y = x->hook; /* solid_parent(x); */
   node *z = right(x);
 
   set_left(y, z);
-  set_solid_parent(z, y);
+  if (z) set_hook(z, y);
 
   set_right(x, y);
-  set_solid_parent(x, solid_parent(y));
+  set_hook(x, solid_parent(y));
 
-  set_solid_parent(y, x);
+  set_hook(y, x);
 }
 
 /* FIXME: REVIEW */
@@ -174,16 +176,16 @@ void rotl(node *x) {
 #ifdef DEBUG
   if (!x) fail("rotl: null argument");
 #endif
-  node *y = solid_parent(x);
+  node *y = x->hook; /* solid_parent(x); */
   node *z = left(x);
 
   set_right(y, z);
-  set_solid_parent(z, y);
+  if (z) set_hook(z, y);
 
   set_left(x, y);
-  set_solid_parent(x, solid_parent(y));
+  set_hook(x, solid_parent(y));
 
-  set_solid_parent(y, x);
+  set_hook(y, x);
 }
 
 /* FIXME: REVIEW */
@@ -222,16 +224,17 @@ void splay(node *u) {
 
   /* First pass */
   /* FIXME: I think there's a bug here. rotations and changing x and y... hmm...*/
-  for (x = u; x; x = path_parent(x))
-    for (y = solid_parent(x); y; x = y, y = solid_parent(y))
+  for (x = u; x; x = x->hook)
+    for (y = solid_parent(x); y; y = solid_parent(x))
       splay_step(x, y);
 
   /* Second pass */
-  for (x = u; x; x = solid_parent(x))
-    set_left(solid_parent(x), x);
+  for (x = u; x; x = x->hook)
+    if (x->hook)
+      set_left(x->hook, x);
 
   /* Third pass */
-  for (x = u, y = solid_parent(x); y; x = y, y = solid_parent(y))
+  for (x = u, y = x->hook; y; y = x->hook)
     splay_step(x, y);
 }
 
@@ -258,7 +261,7 @@ void link(node *x, node *y) {
 #endif
   splay(x);
   splay(y);
-  set_solid_parent(x, y);
+  set_hook(x, y);
 }
 
 /* Delete the edge from x to its parent, thereby dividing the tree containing v
@@ -271,7 +274,7 @@ void cut(node *x) {
   splay(x);
 
   if (right(x)) {
-    set_solid_parent(right(x), NULL);
+    set_hook(right(x), NULL);
     set_right(x, NULL);
   }
 }
@@ -281,8 +284,9 @@ void expose(node *x) { /* access */
 #ifdef DEBUG
   if (!x) fail("expose: null argument");
 #endif
-  for (x = solid_root(x); x; x = solid_root(x))
-    if (path_parent(x)) set_left(path_parent(x), x);
+  for (x = solid_root(x); x->hook; x = solid_root(x))
+    if (x->hook)
+      set_left(x->hook, x);
 }
 
 /* evert(vertex v): Modify the tree containing vertex v by making v the root.
@@ -308,7 +312,7 @@ node **nodes;
    or this insertion would create a cycle then the operation has no effect. */
 /* FIXME: REVIEW */
 void Link(int u, int v) {
-  node *x = nodes[u], *y = nodes[v];
+  node *x = nodes[u-1], *y = nodes[v-1];
 
   if (x->hook == y || x == y->hook) /* edge already exists */
     return;
@@ -317,13 +321,16 @@ void Link(int u, int v) {
 
   reroot(x);
   link(x,y);
+#ifdef DEBUG
+  printf("Finished: Link(%d,%d)\n", u, v);
+#endif
 }
 
 /* Removes the edge linking the node u to the node v, if such an edge exists. If
 the edge does not exist this operation has no effect. */
 /* FIXME: REVIEW */
 void Cut(int u, int v) {
-  node *x = nodes[u], *y = nodes[v];
+  node *x = nodes[u-1], *y = nodes[v-1];
 
   if (x->hook != y && x != y->hook) /* edge does not exist */
     return;
@@ -335,6 +342,9 @@ void Cut(int u, int v) {
     cut(y);
     splay(x);
   }
+#ifdef DEBUG
+  printf("Finished: Cut(%d,%d)\n", u, v);
+#endif
 }
 
 /* Returns true if there is a connection from u to v. If such a connection does
@@ -342,8 +352,11 @@ void Cut(int u, int v) {
    sequence of edges, provided that it links u to v. */
 /* FIXME: REVIEW */
 void ConnectedQ(int u, int v) {
-  node *x = nodes[u], *y = nodes[v];
+  node *x = nodes[u-1], *y = nodes[v-1];
   printf("%c\n", root(x) == root(y) ? 'T' : 'F');
+#ifdef DEBUG
+  printf("Finished: ConnectedQ(%d,%d)\n", u, v);
+#endif
 }
 
 /*----------------------------------------------------------------------------*/
