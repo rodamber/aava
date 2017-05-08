@@ -34,6 +34,7 @@ struct node {
 
 typedef struct node node;
 
+/* FIXME: REVIEW */
 node *new_node() {
   node *x = malloc(sizeof(node));
 
@@ -45,6 +46,7 @@ node *new_node() {
   return x;
 }
 
+/* FIXME: REVIEW */
 node **new_forest(int n) {
   node **f = malloc(n * sizeof(node*));
   int i = 0;
@@ -52,6 +54,7 @@ node **new_forest(int n) {
   return f;
 }
 
+/* FIXME: REVIEW */
 void free_forest(node **f, int n) {
   int i = 0;
   for (; i < n; i++)
@@ -60,6 +63,7 @@ void free_forest(node **f, int n) {
 
 bool reversal_state(node *x);
 
+/* FIXME: REVIEW */
 node **left__(node *x) {
 #ifdef DEBUG
   if (!x) fail("left: null argument");
@@ -67,6 +71,7 @@ node **left__(node *x) {
   return reversal_state(x) ? &(x->right) : &(x->left);
 }
 
+/* FIXME: REVIEW */
 node **right__(node *x) {
 #ifdef DEBUG
   if (!x) fail("right: null argument");
@@ -74,6 +79,7 @@ node **right__(node *x) {
   return reversal_state(x) ? &(x->left) : &(x->right);
 }
 
+/* FIXME: REVIEW */
 node *left(node *x) {return *left__(x);}
 void set_left(node *x, node *y) {*left__(x) = y;}
 node *right(node *x) {return *right__(x);}
@@ -100,6 +106,7 @@ void set_hook(node *x, node* y) {
   x->hook = y;
 }
 
+/* FIXME: REVIEW */
 node *solid_root(node *x) {
 #ifdef DEBUG
   if (!x) fail("solid_root: null argument");
@@ -118,6 +125,7 @@ node *path_parent(node *x) {
   return solid_root(x)->hook;
 }
 
+/* FIXME: REVIEW */
 void reverse(node *x) {
 #ifdef DEBUG
   if (!x) fail("reverse: null argument");
@@ -136,6 +144,7 @@ bool reversal_state(node *x) {
   return b;
 }
 
+/* FIXME: REVIEW */
 node *leftmost(node *x) {
 #ifdef DEBUG
   if (!x) fail("leftmost: null argument");
@@ -145,6 +154,7 @@ node *leftmost(node *x) {
   return x;
 }
 
+/* FIXME: REVIEW */
 node *rightmost(node *x) {
 #ifdef DEBUG
   if (!x) fail("rightmost: null argument");
@@ -237,6 +247,7 @@ void splay(node *u) {
     splay_step(x, y);
 }
 
+/* FIXME: REVIEW */
 /* Return the root of the tree containing node x. */
 node *root(node *x) {
 #ifdef DEBUG
@@ -288,6 +299,7 @@ void expose(node *x) { /* access */
       set_left(x->hook, x);
 }
 
+/* FIXME: REVIEW */
 /* evert(vertex v): Modify the tree containing vertex v by making v the root.
                     (This operation can be regarded as reversing the direction
                     of everty edge on the path from v to the original root.) */
@@ -301,6 +313,7 @@ void reroot(node *x) { /* evert */
   splay(x);
 }
 
+/* FIXME: REVIEW */
 bool connected(node *x, node *y) {
   return root(x) == root(y);
 }
