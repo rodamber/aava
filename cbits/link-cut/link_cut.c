@@ -35,30 +35,17 @@ struct node {
 typedef struct node node;
 
 /* FIXME: REVIEW */
-node *new_node() {
-  node *x = malloc(sizeof(node));
-
-  x->left = NULL;
-  x->right = NULL;
-  x->hook = NULL;
-  x->reversed = false;
-
+node make_node() {
+  node x = { .left = NULL, .right = NULL, .hook = NULL, .reversed = false };
   return x;
 }
 
 /* FIXME: REVIEW */
-node **new_forest(int n) {
-  node **f = malloc(n * sizeof(node*));
+node *new_forest(int n) {
+  node *f = malloc(n * sizeof(node));
   int i = 0;
-  for (; i < n; i++) f[i] = new_node();
+  for (; i < n; i++) f[i] = make_node();
   return f;
-}
-
-/* FIXME: REVIEW */
-void free_forest(node **f, int n) {
-  int i = 0;
-  for (; i < n; i++)
-    free(f[i]);
 }
 
 bool reversal_state(node *x);
@@ -322,14 +309,17 @@ bool connected(node *x, node *y) {
 /* Project operations                                                         */
 /*----------------------------------------------------------------------------*/
 
-node **nodes;
+node *nodes;
 
 void print_state(int n) {
   int i = 0;
   for (; i < n; i++) {
-    printf("(%d,%p): {left: %p, right: %p, hook: %p, reversed: %d}\n",
-           i+1, nodes[i], nodes[i]->left, nodes[i]->right, nodes[i]->hook,
-           nodes[i]->reversed);
+    printf("%d: {left: %ld, right: %ld, hook: %ld, reversed: %d}\n",
+           i+1,
+           nodes[i].left  ? nodes[i].left  - nodes : 0,
+           nodes[i].right ? nodes[i].right - nodes : 0,
+           nodes[i].hook  ? nodes[i].hook  - nodes : 0,
+           nodes[i].reversed);
   }
 }
 
@@ -337,7 +327,7 @@ void print_state(int n) {
    or this insertion would create a cycle then the operation has no effect. */
 /* FIXME: REVIEW */
 void Link(int u, int v) {
-  node *x = nodes[u-1], *y = nodes[v-1];
+  node *x = &(nodes[u-1]), *y = &(nodes[v-1]);
 
   if (x->hook == y || x == y->hook) /* edge already exists */
     return;
@@ -355,7 +345,7 @@ void Link(int u, int v) {
 the edge does not exist this operation has no effect. */
 /* FIXME: REVIEW */
 void Cut(int u, int v) {
-  node *x = nodes[u-1], *y = nodes[v-1];
+  node *x = &(nodes[u-1]), *y = &(nodes[v-1]);
 
   if (x->hook != y && x != y->hook) /* edge does not exist */
     return;
@@ -377,7 +367,7 @@ void Cut(int u, int v) {
    sequence of edges, provided that it links u to v. */
 /* FIXME: REVIEW */
 bool ConnectedQ(int u, int v) {
-  node *x = nodes[u-1], *y = nodes[v-1];
+  node *x = &(nodes[u-1]), *y = &(nodes[v-1]);
   return connected(x,y);
 #ifdef DEBUG
   printf("Finished: ConnectedQ(%d,%d)\n", u, v);
@@ -390,7 +380,7 @@ bool ConnectedQ(int u, int v) {
 
 /* For QuickCheck */
 void init(int n) {nodes = new_forest(n);}
-void finish(int n) {free_forest(nodes, n);};
+void finally() {free(nodes);};
 
 int main_link_cut() {
   int n;
@@ -414,8 +404,8 @@ int main_link_cut() {
     }
   }
 
-  finish(n);
+  finally();
   return 0;
 }
 
-/* int main() { return main_link_cut(); } */
+int main() { return main_link_cut(); }
