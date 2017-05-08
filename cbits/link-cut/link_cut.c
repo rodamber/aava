@@ -301,6 +301,10 @@ void reroot(node *x) { /* evert */
   splay(x);
 }
 
+bool connected(node *x, node *y) {
+  return root(x) == root(y);
+}
+
 /*----------------------------------------------------------------------------*/
 /* Project operations                                                         */
 /*----------------------------------------------------------------------------*/
@@ -359,9 +363,9 @@ void Cut(int u, int v) {
    not exist it returns false. A connection may consist of a single edge, or a
    sequence of edges, provided that it links u to v. */
 /* FIXME: REVIEW */
-void ConnectedQ(int u, int v) {
+bool ConnectedQ(int u, int v) {
   node *x = nodes[u-1], *y = nodes[v-1];
-  printf("%c\n", root(x) == root(y) ? 'T' : 'F');
+  printf("%c\n", connected(x,y) ? 'T' : 'F');
 #ifdef DEBUG
   printf("Finished: ConnectedQ(%d,%d)\n", u, v);
 #endif
