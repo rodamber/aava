@@ -415,3 +415,32 @@ int main_link_cut() {
 }
 
 int main() { return main_link_cut(); }
+
+/* tests
+
+   should probably check reversal state
+
+=01 check
+4 L 1 2 L 2 3 Q 4 2 C 3 2 L 3 2 Q 2 3 X
+F T
+
+=02 check
+4 L 1 2 L 2 3 L 3 4 C 4 3 L 4 3 Q 4 2 C 1 2 L 1 4 Q 4 1 X
+T T
+
+=03 seg fault after finishing the 4th link
+4 L 1 2 L 2 3 L 3 4 C 1 2 L 1 2 Q 4 3 C 4 3 L 4 3 Q 4 2 C 1 2 L 1 4 Q 2 4 C 2 1 L 4 1 Q 2 3 X
+T T T T
+
+=04 seg fault after finishing 1st cut
+4 L 1 2 L 2 3 L 3 4 C 2 1 L 2 1 Q 4 3 Q 4 2 C 2 3 L 2 3 Q 3 2 C 3 2 L 4 1 Q 2 3 C 1 2 L 1 3 Q 3 1 C 2 3 L 2 4 Q 4 1 C 1 2 L 1 2 Q 4 1 Q 3 1 C 4 3 L 4 1 Q 3 4 X
+T T T T T T T T F
+
+=05 Wrong result; gives F F F
+10 L 1 2 L 2 3 L 3 4 L 4 5 L 5 6 C 6 5 L 6 5 Q 8 2 Q 3 4 C 1 2 L 1 4 Q 5 3 X
+F T T
+
+=06 maybe an infinite loop after the 4th cut ?
+20 L 1 2 L 2 3 L 3 4 L 4 5 L 5 6 L 6 7 L 7 8 L 8 9 L 9 10 L 10 11 Q 19 10 C 8 9 L 12 9 C 8 7 L 15 4 Q 18 8 Q 14 16 Q 12 1 C 4 3 L 17 3 Q 14 5 Q 10 13 C 3 4 L 3 7 Q 7 12 C 11 10 L 11 10 Q 2 11 Q 15 20 X
+F F F F F F F F F
+*/
