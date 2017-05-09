@@ -34,6 +34,10 @@ struct node {
 
 typedef struct node node;
 
+void pstate();
+void pnode(node *);
+void prevstate();
+
 /* FIXME: REVIEW */
 node make_node() {
   node x = { .left = NULL, .right = NULL, .hook = NULL, .reversed = false };
@@ -55,6 +59,7 @@ node **left__(node *x) {
 #ifdef DEBUG
   if (!x) fail("left: null argument");
 #endif
+  /* FIXME: not O(1)!!! */
   return reversal_state(x) ? &(x->right) : &(x->left);
 }
 
@@ -63,6 +68,7 @@ node **right__(node *x) {
 #ifdef DEBUG
   if (!x) fail("right: null argument");
 #endif
+  /* FIXME: not O(1)!!! */
   return reversal_state(x) ? &(x->left) : &(x->right);
 }
 
@@ -156,16 +162,19 @@ void rotr(node *x) {
 #ifdef DEBUG
   if (!x) fail("rotr: null argument");
 #endif
-  node *y = x->hook; /* solid_parent(x); */
-  node *z = right(x);
+  node *y = x->hook;
+  node *z = y->hook;
+  node *B = right(x);
 
-  set_left(y, z);
-  if (z) set_hook(z, y);
+  set_left(y, B); if (B) set_hook(B, y);
+  set_right(x, y); set_hook(y, x);
 
-  set_right(x, y);
-  set_hook(x, solid_parent(y));
+  if (z) {
+    if (y == left(z)) set_left(z,x);
+    else             set_right(z,x);
+  }
 
-  set_hook(y, x);
+  set_hook(x, z);
 }
 
 /* FIXME: REVIEW */
@@ -173,16 +182,19 @@ void rotl(node *x) {
 #ifdef DEBUG
   if (!x) fail("rotl: null argument");
 #endif
-  node *y = x->hook; /* solid_parent(x); */
-  node *z = left(x);
+  node *y = x->hook;
+  node *z = y->hook;
+  node *B = left(x);
 
-  set_right(y, z);
-  if (z) set_hook(z, y);
+  set_right(y, B); if (B) set_hook(B, y);
+  set_left(x, y); set_hook(y, x);
 
-  set_left(x, y);
-  set_hook(x, solid_parent(y));
+  if (z) {
+    if (y == right(z)) set_right(z,x);
+    else             set_left(z,x);
+  }
 
-  set_hook(y, x);
+  set_hook(x, z);
 }
 
 /* FIXME: REVIEW */
@@ -193,6 +205,7 @@ void splay_step(node *x, node *y) {
 #endif
   node *z = solid_parent(y);
 
+  /* FIXME: maybe we must these in one go, because of the reversed bit!!! */
   if (!z) { /* zig */
     (x == left(y)) ? rotr(x) : rotl(x);
   } else {
@@ -268,11 +281,23 @@ void cut(node *x) {
 #ifdef DEBUG
   if (!x) fail("cut: null argument");
 #endif
+  puts("At cut b4 splay");
+  pstate();
+  prevstate();
+
   splay(x);
 
-  if (right(x)) {
-    set_hook(right(x), NULL);
+  puts("At cut after splay");
+  pstate();
+  prevstate();
+
+  node *y = right(x);
+
+  printf("pnode(right(x)) = "); pnode(y);
+
+  if (y) {
     set_right(x, NULL);
+    set_hook(y, NULL);
   }
 }
 
@@ -281,6 +306,9 @@ void expose(node *x) { /* access */
 #ifdef DEBUG
   if (!x) fail("expose: null argument");
 #endif
+  set_left(x, NULL);
+  set_right(x, NULL);
+
   for (x = solid_root(x); x->hook; x = solid_root(x))
     if (x->hook)
       set_left(x->hook, x);
@@ -312,6 +340,10 @@ node *nodes;
 int nodes_size;
 
 void pnode(node *x) {
+  if (!x) {
+    printf("nil");
+    return;
+  }
   printf("    %ld: {left: %ld, right: %ld, hook: %ld, reversed: %d}\n",
          x - nodes + 1,
          x->left  ? x->left  - nodes + 1: 0,
@@ -325,6 +357,13 @@ void pstate() {
   int i = 0;
   for (; i < nodes_size; i++)
     pnode(&(nodes[i]));
+}
+
+void prevstate() {
+  puts("");
+  int i = 0;
+  for (; i < nodes_size; i++)
+    printf("reversal_state(&nodes[%d]) = %d\n", i, reversal_state(&nodes[i]));
 }
 
 /* Adds an edge linking the node u to the node v. If such an edge already exists
@@ -344,6 +383,7 @@ void Link(int u, int v) {
   link(x,y);
 #ifdef DEBUG
   printf("Finished: Link(%d,%d)\n", u, v);
+  pstate();
 #endif
 }
 
@@ -367,6 +407,7 @@ void Cut(int u, int v) {
   }
 #ifdef DEBUG
   printf("Finished: Cut(%d,%d)\n", u, v);
+  pstate();
 #endif
 }
 
@@ -381,6 +422,7 @@ bool ConnectedQ(int u, int v) {
   return connected(x,y);
 #ifdef DEBUG
   printf("Finished: ConnectedQ(%d,%d)\n", u, v);
+  pstate();
 #endif
 }
 
@@ -428,7 +470,7 @@ F T
 4 L 1 2 L 2 3 L 3 4 C 4 3 L 4 3 Q 4 2 C 1 2 L 1 4 Q 4 1 X
 T T
 
-=03 seg fault after finishing the 4th link
+=03 loop and seg fault at some point
 4 L 1 2 L 2 3 L 3 4 C 1 2 L 1 2 Q 4 3 C 4 3 L 4 3 Q 4 2 C 1 2 L 1 4 Q 2 4 C 2 1 L 4 1 Q 2 3 X
 T T T T
 
