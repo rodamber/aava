@@ -1,5 +1,3 @@
-/* #define NDEBUG */
-
 #include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -65,6 +63,7 @@ void pstate() {
 void rotr(node *x, node *y) {
   assert(x != NULL);
   assert(y != NULL);
+  assert(x->hook == y);
 
   node *z = y->hook;
   node *B = x->right;
@@ -88,12 +87,15 @@ void rotr(node *x, node *y) {
   }
 
   x->hook = z;
+
+  assert(y->hook == x);
 }
 
 /* FIXME: REVIEW */
 void rotl(node *x, node *y) {
   assert(x != NULL);
   assert(y != NULL);
+  assert(x->hook == y);
 
   node *z = y->hook;
   node *B = x->left;
@@ -117,6 +119,8 @@ void rotl(node *x, node *y) {
   }
 
   x->hook = z;
+
+  assert(y->hook == x);
 }
 
 void flip(node *x) {
@@ -338,3 +342,21 @@ int main_link_cut() {
 int main() {
   return main_link_cut();
 }
+
+
+/*
+4
+L 1 2
+L 2 3
+L 3 4
+C 2 1
+L 2 1
+Q 4 3
+Q 4 2
+C 2 3
+L 2 3
+Q 3 2
+C 3 2
+L 4 1
+Q 2 3
+*/
