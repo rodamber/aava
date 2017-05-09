@@ -81,8 +81,8 @@ void rotr(node *x, node *y) {
   if (z) {
     if (y == z->left) {
       z->left = x;
-    } else {
-      assert(y == z->right);
+    } else if (y == z->right){
+      /* assert(y == z->right); */
       z->right = x;
     }
   }
@@ -110,8 +110,8 @@ void rotl(node *x, node *y) {
   if (z) {
     if (y == z->right) {
       z->right = x;
-    } else {
-      assert(y == z->left);
+    } else if (y == z->left){
+      /* assert(y == z->left); */
       z->left = x;
     }
   }
@@ -194,13 +194,13 @@ void splay_step(node *x, node *y) {
       assert(y == z->right);
 
       rotr(x,y);
-      rotl(x,y);
+      rotl(x,z);
     } else {/* zig-zag */
       assert(x == y->right);
       assert(y == z->left);
 
       rotl(x,y);
-      rotr(x,y);
+      rotr(x,z);
     }
   }
 
@@ -217,8 +217,9 @@ void splay(node *u) {
   /* First pass */
   for (x = u; x; x = x->hook) {
     for (y = solid_parent(x); y; y = solid_parent(x)) {
-      splay_step(x, y);
+      splay_step(x,y);
     }
+    unflip(x);
   }
 
   /* Second pass */
@@ -248,6 +249,7 @@ void reroot(node *x) {
   flip(x);
 }
 
+
 /* Follows left pointers of x. Returns if y is found. */
 bool search_left(node *x, node *y) {
   for (x = x->left; x; x = x->left) {
@@ -275,7 +277,6 @@ bool connected(node *x, node *y) {
   reroot(x);
   access(y);
 
-  /* FIXME: is this too slow? */
   return search_left(y,x) || search_right(y,x);
 }
 
@@ -286,8 +287,6 @@ void link(node *x, node *y) {
   if (connected(x,y)) {
     return;
   }
-  /* We already accessed them both in the connected(x,y) call, so we just set
-     the link. */
   x->hook = y;
 }
 
@@ -295,19 +294,17 @@ void cut(node *x, node *y) {
   assert(x != NULL);
   assert(y != NULL);
 
-  reroot(x);
-  access(y);
+  if (!connected(x,y)) {
+    return;
+  }
 
   if (x == y->left) {
     y->left = NULL;
+    x->hook = NULL;
   } else if (x == y->right){
     y->right = NULL;
-  } else {
-    assert(!connected(x,y));
-    assert(x->hook == NULL);
+    x->hook = NULL;
   }
-
-  x->hook = NULL;
 }
 
 /*----------------------------------------------------------------------------*/
