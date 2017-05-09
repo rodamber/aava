@@ -117,8 +117,6 @@ void unflip(node *x) {
     return;
   }
 
-  assert(x->flipped);
-
   node *y = x->left;
   x->left = x->right;
   x->right = y;
@@ -130,30 +128,87 @@ void unflip(node *x) {
   assert(not(x->flipped));
 }
 
-void zig(node *x, node *y) {
-  assert(x != NULL);
-  assert(y != NULL);
+/* NB: It doesn't matter if the node is flipped or not */
+/* FIXME: REVIEW */
+node *solid_parent(node *x) {
+  if (x->hook == NULL) {
+    return NULL;
+  } else if (x != x->hook->right && x != x->hook->left) {
+    return NULL;
+  } else {
+    return x->hook;
+  }
 }
 
-void zigzig(node *x, node *y, node *z) {
-  assert(x != NULL);
-  assert(y != NULL);
-  assert(z != NULL);
-}
-
-void zigzag(node *x, node *y, node *z) {
-  assert(x != NULL);
-  assert(y != NULL);
-  assert(z != NULL);
-}
-
+/* FIXME: REVIEW */
 void splay_step(node *x, node *y) {
   assert(x != NULL);
   assert(y != NULL);
+
+  node *z = solid_parent(y);
+
+  /* are the unflips in the correct place? it shouldn't matter */
+  if (!z) { /* zig */
+    unflip(y);
+    unflip(x);
+
+    if (x == y->left) {
+      rotr(x,y);
+    } else {
+      assert(x == y->right);
+
+      rotl(x,y);
+    }
+  } else {
+    unflip(z);
+    unflip(y);
+    unflip(x);
+
+    if (x == y->left && y == z->left) { /* zig-zig */
+      rotr(y,z);
+      rotr(x,y);
+    } else if (x == y->right && y == z->right) { /* zig-zig */
+      rotl(y,z);
+      rotl(x,y);
+    } else if (x == y->left) { /* zig-zag */
+      assert(y == z->right);
+
+      rotr(x,y);
+      rotl(x,y);
+    } else {/* zig-zag */
+      assert(x == y->right);
+      assert(y == z->left);
+
+      rotl(x,y);
+      rotr(x,y);
+    }
+  }
 }
 
-void splay(node *x) {
-  assert(x != NULL);
+/* FIXME: REVIEW */
+void splay(node *u) {
+  assert(u != NULL);
+
+  node *x, *y;
+
+  /* First pass */
+  for (x = u; x; x = x->hook) {
+    for (y = solid_parent(x); y; y = solid_parent(x)) {
+      splay_step(x, y);
+    }
+  }
+
+  /* Second pass */
+  for (x = u; x; x = x->hook) {
+    if (x->hook) {
+      x->hook->left = x;
+    }
+  }
+
+  /* Third pass */
+  for (x = u, y = x->hook; y; y = x->hook) {
+    splay_step(x, y);
+  }
 }
 
 /*----------------------------------------------------------------------------*/
