@@ -18,6 +18,8 @@ void fail(char *s) {
   raise(SIGSEGV);
 }
 
+#define not(X) (!(X))
+
 /*----------------------------------------------------------------------------*/
 /* Link/Cut tree internal representation                                       */
 /*----------------------------------------------------------------------------*/
@@ -49,6 +51,7 @@ node *new_forest(int n) {
 
 /*----------------------------------------------------------------------------*/
 
+/* FIXME: REVIEW */
 void rotr(node *x, node *y) {
   assert(x != NULL);
   assert(y != NULL);
@@ -77,6 +80,7 @@ void rotr(node *x, node *y) {
   x->hook = z;
 }
 
+/* FIXME: REVIEW */
 void rotl(node *x, node *y) {
   assert(x != NULL);
   assert(y != NULL);
@@ -105,8 +109,25 @@ void rotl(node *x, node *y) {
   x->hook = z;
 }
 
+/* FIXME: REVIEW */
 void unflip(node *x) {
   assert(x != NULL);
+
+  if (not(x->flipped)) {
+    return;
+  }
+
+  assert(x->flipped);
+
+  node *y = x->left;
+  x->left = x->right;
+  x->right = y;
+
+  x->flipped = false;
+  x->left->flipped = not(x->left->flipped);
+  x->right->flipped = not(x->right->flipped);
+
+  assert(not(x->flipped));
 }
 
 void zig(node *x, node *y) {
