@@ -8,12 +8,12 @@
 /* Utilities                                                                  */
 /*----------------------------------------------------------------------------*/
 
-void *undefined(const char *s, ...) {
+void *undefined(char *s, ...) {
   fprintf(stderr, "*** undefined: %s\n", s);
   exit(-1);
 }
 
-void fail(const char *s) {
+void fail(char *s) {
   fprintf(stderr, "*** %s\n", s);
   raise(SIGSEGV);
 }
@@ -36,7 +36,7 @@ node *new_forest(int n) {
 
   node *f = malloc(n * sizeof(node));
 
-  if (f != NULL) {
+  if (f) {
     int i;
     for (i = 0; i < n; i++) {
       node x = { .left = NULL, .right = NULL, .hook = NULL, .flipped = false };
@@ -49,68 +49,114 @@ node *new_forest(int n) {
 
 /*----------------------------------------------------------------------------*/
 
-void rotr(const node *x, const node *y) {
+void rotr(node *x, node *y) {
+  assert(x != NULL);
+  assert(y != NULL);
+
+  node *z = y->hook;
+  node *B = x->right;
+
+  y->left = B;
+
+  if (B) {
+    B->hook = y;
+  }
+
+  x->right = y;
+  y->hook = x;
+
+  if (z) {
+    if (y == z->left) {
+      z->left = x;
+    } else {
+      assert(y == z->right);
+      z->right = x;
+    }
+  }
+
+  x->hook = z;
+}
+
+void rotl(node *x, node *y) {
+  assert(x != NULL);
+  assert(y != NULL);
+
+  node *z = y->hook;
+  node *B = x->left;
+
+  y->right = B;
+
+  if (B) {
+    B->hook = y;
+  }
+
+  x->left = y;
+  y->hook = x;
+
+  if (z) {
+    if (y == z->right) {
+      z->right = x;
+    } else {
+      assert(y == z->left);
+      z->left = x;
+    }
+  }
+
+  x->hook = z;
+}
+
+void unflip(node *x) {
+  assert(x != NULL);
+}
+
+void zig(node *x, node *y) {
   assert(x != NULL);
   assert(y != NULL);
 }
 
-void rotl(const node *x, const node *y) {
-  assert(x != NULL);
-  assert(y != NULL);
-}
-
-void unflip(const node *x) {
-  assert(x != NULL);
-}
-
-void zig(const node *x, const node *y) {
-  assert(x != NULL);
-  assert(y != NULL);
-}
-
-void zigzig(const node *x, const node *y, const node *z) {
+void zigzig(node *x, node *y, node *z) {
   assert(x != NULL);
   assert(y != NULL);
   assert(z != NULL);
 }
 
-void zigzag(const node *x, const node *y, const node *z) {
+void zigzag(node *x, node *y, node *z) {
   assert(x != NULL);
   assert(y != NULL);
   assert(z != NULL);
 }
 
-void splay_step(const node *x, const node *y) {
+void splay_step(node *x, node *y) {
   assert(x != NULL);
   assert(y != NULL);
 }
 
-void splay(const node *x) {
+void splay(node *x) {
   assert(x != NULL);
 }
 
 /*----------------------------------------------------------------------------*/
 
-/* void access(const node *x) { */
+/* void access(node *x) { */
 /*   assert(x != NULL); */
 /* } */
 #define access(X) splay(X)
 
-void reroot(const node *x) {
+void reroot(node *x) {
   assert(x != NULL);
 }
 
-void link(const node *x, const node *y) {
-  assert(x != NULL);
-  assert(y != NULL);
-}
-
-void cut(const node *x, const node *y) {
+void link(node *x, node *y) {
   assert(x != NULL);
   assert(y != NULL);
 }
 
-bool connected(const node *x, const node *y) {
+void cut(node *x, node *y) {
+  assert(x != NULL);
+  assert(y != NULL);
+}
+
+bool connected(node *x, node *y) {
   assert(x != NULL);
   assert(y != NULL);
   return false;
