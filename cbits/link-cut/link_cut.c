@@ -1,24 +1,10 @@
+/* #define NDEBUG */
+
 #include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
-
-/*----------------------------------------------------------------------------*/
-/* Utilities                                                                  */
-/*----------------------------------------------------------------------------*/
-
-void *undefined(char *s, ...) {
-  fprintf(stderr, "*** undefined: %s\n", s);
-  exit(-1);
-}
-
-void fail(char *s) {
-  fprintf(stderr, "*** %s\n", s);
-  raise(SIGSEGV);
-}
-
-#define not(X) (!(X))
 
 /*----------------------------------------------------------------------------*/
 /* Link/Cut tree internal representation                                       */
@@ -32,21 +18,45 @@ typedef struct node {
 } node;
 
 node *forest;
+int forest_size;
 
-node *new_forest(int n) {
-  assert(n > 0);
+node *new_forest(int forest_size) {
+  assert(forest_size > 0);
 
-  node *f = malloc(n * sizeof(node));
+  node *f = calloc(forest_size, sizeof(node));
 
   if (f) {
     int i;
-    for (i = 0; i < n; i++) {
+    for (i = 0; i < forest_size; i++) {
       node x = { .left = NULL, .right = NULL, .hook = NULL, .flipped = false };
       f[i] = x;
     }
   }
 
   return f;
+}
+
+/*----------------------------------------------------------------------------*/
+
+void pnode(node *x) {
+  if (!x) {
+    printf("pnode: nil");
+    return;
+  }
+
+  printf("    %ld: {left: %ld, right: %ld, hook: %ld, flipd: %d}\n",
+         x - forest + 1,
+         x->left  ? x->left  - forest + 1: 0,
+         x->right ? x->right - forest + 1: 0,
+         x->hook  ? x->hook  - forest + 1: 0,
+         x->flipped);
+}
+
+void pstate() {
+  puts("");
+  int i;
+  for (i = 0; i < forest_size; i++)
+    pnode(&(forest[i]));
 }
 
 /*----------------------------------------------------------------------------*/
@@ -109,11 +119,16 @@ void rotl(node *x, node *y) {
   x->hook = z;
 }
 
+void flip(node *x) {
+  assert(x != NULL);
+  x->flipped = true;
+}
+
 /* FIXME: REVIEW */
 void unflip(node *x) {
   assert(x != NULL);
 
-  if (not(x->flipped)) {
+  if (x->flipped == false) {
     return;
   }
 
@@ -122,10 +137,15 @@ void unflip(node *x) {
   x->right = y;
 
   x->flipped = false;
-  x->left->flipped = not(x->left->flipped);
-  x->right->flipped = not(x->right->flipped);
 
-  assert(not(x->flipped));
+  if (x->left) {
+    x->left->flipped = !(x->left->flipped);
+  }
+  if (x->right) {
+    x->right->flipped = !(x->right->flipped);
+  }
+
+  assert(!(x->flipped));
 }
 
 /* NB: It doesn't matter if the node is flipped or not */
@@ -183,6 +203,9 @@ void splay_step(node *x, node *y) {
       rotr(x,y);
     }
   }
+
+  assert(x->flipped == false);
+  assert(y->flipped == false);
 }
 
 /* FIXME: REVIEW */
@@ -209,51 +232,93 @@ void splay(node *u) {
   for (x = u, y = x->hook; y; y = x->hook) {
     splay_step(x, y);
   }
+
+  assert(u->hook == NULL);
+  assert(u->flipped == false);
 }
 
 /*----------------------------------------------------------------------------*/
 
-/* void access(node *x) { */
-/*   assert(x != NULL); */
-/* } */
 #define access(X) splay(X)
 
 void reroot(node *x) {
   assert(x != NULL);
+
+  access(x);
+  flip(x);
 }
 
-void link(node *x, node *y) {
-  assert(x != NULL);
-  assert(y != NULL);
+/* Follows left pointers of x. Returns if y is found. */
+bool search_left(node *x, node *y) {
+  for (x = x->left; x; x = x->left) {
+    if (x == y) {
+      return true;
+    }
+  }
+  return false;
 }
 
-void cut(node *x, node *y) {
-  assert(x != NULL);
-  assert(y != NULL);
+/* Follows right pointers of x. Returns if y is found. */
+bool search_right(node *x, node *y) {
+  for (x = x->right; x; x = x->right) {
+    if (x == y) {
+      return true;
+    }
+  }
+  return false;
 }
 
 bool connected(node *x, node *y) {
   assert(x != NULL);
   assert(y != NULL);
-  return false;
+
+  reroot(x);
+  access(y);
+
+  /* FIXME: is this too slow? */
+  return search_left(y,x) || search_right(y,x);
+}
+
+void link(node *x, node *y) {
+  assert(x != NULL);
+  assert(y != NULL);
+
+  if (connected(x,y)) {
+    return;
+  }
+  /* We already accessed them both in the connected(x,y) call, so we just set
+     the link. */
+  x->hook = y;
+}
+
+void cut(node *x, node *y) {
+  assert(x != NULL);
+  assert(y != NULL);
+
+  reroot(x);
+  access(y);
+
+  if (x == y->left) {
+    y->left = NULL;
+  } else if (x == y->right){
+    y->right = NULL;
+  } else {
+    assert(!connected(x,y));
+    assert(x->hook == NULL);
+  }
+
+  x->hook = NULL;
 }
 
 /*----------------------------------------------------------------------------*/
 
-/* For QuickCheck */
-void init(int n) {
-  forest = new_forest(n);
-}
-
-void finally() {
-  free(forest);
-};
-
 int main_link_cut() {
-  int forest_size;
+#ifndef NDEBUG
+  puts("Debug mode.");
+#endif
   if (scanf(" %d", &forest_size) != 1)
     exit(-1);
-  init(forest_size);
+  forest = new_forest(forest_size);
 
   int u, v;
   while (true) {
@@ -269,7 +334,7 @@ int main_link_cut() {
     }
   }
 
-  finally();
+  free(forest);
   return 0;
 }
 

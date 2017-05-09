@@ -3,7 +3,7 @@ CC_FLAGS	= -O0 -ansi -Wall -Wfatal-errors
 
 .PHONY: clean
 
-debug: CC_FLAGS += -g -DNDEBUG
+debug: CC_FLAGS += -g -DDEBUG
 debug: all
 
 all: lc
