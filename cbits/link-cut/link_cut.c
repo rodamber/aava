@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -21,432 +22,126 @@ void fail(const char *s) {
 /* Link/Cut tree internal representation                                       */
 /*----------------------------------------------------------------------------*/
 
-struct node {
+typedef struct node {
   struct node *left;
   struct node *right;
-
-  /* FIXME: REVIEW: Why double pointer? */
   struct node *hook;
+  bool flipped;
+} node;
 
-  /* FIXME: REVIEW */
-  bool reversed;
-};
+node *forest;
 
-typedef struct node node;
-
-void pstate();
-void pnode(node *);
-void prevstate();
-
-/* FIXME: REVIEW */
-node make_node() {
-  node x = { .left = NULL, .right = NULL, .hook = NULL, .reversed = false };
-  return x;
-}
-
-/* FIXME: REVIEW */
 node *new_forest(int n) {
+  assert(n > 0);
+
   node *f = malloc(n * sizeof(node));
-  int i = 0;
-  for (; i < n; i++) f[i] = make_node();
+
+  if (f != NULL) {
+    int i;
+    for (i = 0; i < n; i++) {
+      node x = { .left = NULL, .right = NULL, .hook = NULL, .flipped = false };
+      f[i] = x;
+    }
+  }
+
   return f;
 }
 
-bool reversal_state(node *x);
+/*----------------------------------------------------------------------------*/
 
-/* FIXME: REVIEW */
-node **left__(node *x) {
-#ifdef DEBUG
-  if (!x) fail("left: null argument");
-#endif
-  /* FIXME: not O(1)!!! */
-  return reversal_state(x) ? &(x->right) : &(x->left);
+void rotr(const node *x, const node *y) {
+  assert(x != NULL);
+  assert(y != NULL);
 }
 
-/* FIXME: REVIEW */
-node **right__(node *x) {
-#ifdef DEBUG
-  if (!x) fail("right: null argument");
-#endif
-  /* FIXME: not O(1)!!! */
-  return reversal_state(x) ? &(x->left) : &(x->right);
+void rotl(const node *x, const node *y) {
+  assert(x != NULL);
+  assert(y != NULL);
 }
 
-/* FIXME: REVIEW */
-node *left(node *x) {return *left__(x);}
-void set_left(node *x, node *y) {*left__(x) = y;}
-node *right(node *x) {return *right__(x);}
-void set_right(node *x, node *y) {*right__(x) = y;}
-
-/* FIXME: REVIEW */
-/* Parent in the solid subtree of x. */
-node *solid_parent(node *x) {
-#ifdef DEBUG
-  if (!x) fail("sparent: null argument");
-#endif
-  if (x->hook == NULL)
-    return NULL;
-  if (x != right(x->hook) && x != left(x->hook))
-    return NULL;
-  return x->hook;
+void unflip(const node *x) {
+  assert(x != NULL);
 }
 
-/* FIXME: REVIEW */
-void set_hook(node *x, node* y) {
-#ifdef DEBUG
-  if (!x) fail("set_hook: null 1st argument");
-#endif
-  x->hook = y;
+void zig(const node *x, const node *y) {
+  assert(x != NULL);
+  assert(y != NULL);
 }
 
-/* FIXME: REVIEW */
-node *solid_root(node *x) {
-#ifdef DEBUG
-  if (!x) fail("solid_root: null argument");
-#endif
-  node *y = solid_parent(x);
-  while (y) {x = y; y = solid_parent(y);}
-  return x;
+void zigzig(const node *x, const node *y, const node *z) {
+  assert(x != NULL);
+  assert(y != NULL);
+  assert(z != NULL);
 }
 
-/* FIXME: REVIEW */
-/* Path-parent. */
-node *path_parent(node *x) {
-#ifdef DEBUG
-  if (!x) fail("pparent: null argument");
-#endif
-  return solid_root(x)->hook;
+void zigzag(const node *x, const node *y, const node *z) {
+  assert(x != NULL);
+  assert(y != NULL);
+  assert(z != NULL);
 }
 
-/* FIXME: REVIEW */
-void reverse(node *x) {
-#ifdef DEBUG
-  if (!x) fail("reverse: null argument");
-#endif
-  x->reversed = !(x->reversed);
+void splay_step(const node *x, const node *y) {
+  assert(x != NULL);
+  assert(y != NULL);
 }
 
-/* FIXME: REVIEW */
-bool reversal_state(node *x) {
-#ifdef DEBUG
-  if (!x) fail("reversal_state: null argument");
-#endif
-  bool b;
-  for (b = x->reversed, x = solid_parent(x); x; x = solid_parent(x))
-    b = (b != x->reversed); /* Exclusive OR */
-  return b;
-}
-
-/* FIXME: REVIEW */
-node *leftmost(node *x) {
-#ifdef DEBUG
-  if (!x) fail("leftmost: null argument");
-#endif
-  node *y = left(x);
-  while (y) {x = y; y = left(y);}
-  return x;
-}
-
-/* FIXME: REVIEW */
-node *rightmost(node *x) {
-#ifdef DEBUG
-  if (!x) fail("rightmost: null argument");
-#endif
-  node *y = right(x);
-  while (y) {x = y; y = right(y);}
-  return x;
-}
-
-/* FIXME: REVIEW */
-void rotr(node *x) {
-#ifdef DEBUG
-  if (!x) fail("rotr: null argument");
-#endif
-  node *y = x->hook;
-  node *z = y->hook;
-  node *B = right(x);
-
-  set_left(y, B); if (B) set_hook(B, y);
-  set_right(x, y); set_hook(y, x);
-
-  if (z) {
-    if (y == left(z)) set_left(z,x);
-    else             set_right(z,x);
-  }
-
-  set_hook(x, z);
-}
-
-/* FIXME: REVIEW */
-void rotl(node *x) {
-#ifdef DEBUG
-  if (!x) fail("rotl: null argument");
-#endif
-  node *y = x->hook;
-  node *z = y->hook;
-  node *B = left(x);
-
-  set_right(y, B); if (B) set_hook(B, y);
-  set_left(x, y); set_hook(y, x);
-
-  if (z) {
-    if (y == right(z)) set_right(z,x);
-    else             set_left(z,x);
-  }
-
-  set_hook(x, z);
-}
-
-/* FIXME: REVIEW */
-void splay_step(node *x, node *y) {
-#ifdef DEBUG
-  if (!x) fail("splay_step: null x");
-  if (!y) fail("splay_step: null y");
-#endif
-  node *z = solid_parent(y);
-
-  /* FIXME: maybe we must these in one go, because of the reversed bit!!! */
-  if (!z) { /* zig */
-    (x == left(y)) ? rotr(x) : rotl(x);
-  } else {
-    if (x == left(y) && y == left(z)) { /* zig-zig */
-      rotr(y);
-      rotr(x);
-    } else if (x == right(y) && y == right(z)) { /* zig-zig */
-      rotl(y);
-      rotl(x);
-    } else if (x == left(y)) { /* zig-zag */
-      rotr(x);
-      rotl(x);
-    } else {/* zig-zag */
-      rotl(x);
-      rotr(x);
-    }
-  }
-}
-
-/* FIXME: REVIEW */
-void splay(node *u) {
-#ifdef DEBUG
-  if (!u) fail("splay: null argument");
-#endif
-  node *x, *y;
-
-  /* First pass */
-  for (x = u; x; x = x->hook)
-    for (y = solid_parent(x); y; y = solid_parent(x))
-      splay_step(x, y);
-
-  /* Second pass */
-  for (x = u; x; x = x->hook)
-    if (x->hook)
-      set_left(x->hook, x);
-
-  /* Third pass */
-  for (x = u, y = x->hook; y; y = x->hook)
-    splay_step(x, y);
-}
-
-/* FIXME: REVIEW */
-/* Return the root of the tree containing node x. */
-node *root(node *x) {
-#ifdef DEBUG
-  if (!x) fail("root: null argument");
-#endif
-  splay(x);
-
-  node *y = rightmost(x);
-  splay(y);
-
-  return y;
-}
-
-/* Add an edge from x to y, thereby making x a child of y in the forest. This
-   operation assumes that x is the root of one tree and y is in another tree. */
-/* FIXME: REVIEW */
-void link(node *x, node *y) {
-#ifdef DEBUG
-  if (!x) fail("link: null x");
-  if (!y) fail("link: null y");
-#endif
-  splay(x);
-  splay(y);
-  set_hook(x, y);
-}
-
-/* Delete the edge from x to its parent, thereby dividing the tree containing v
-   into two trees. This operation assumes that x is not a tree root. */
-/* FIXME: REVIEW */
-void cut(node *x) {
-#ifdef DEBUG
-  if (!x) fail("cut: null argument");
-#endif
-  puts("At cut b4 splay");
-  pstate();
-  prevstate();
-
-  splay(x);
-
-  puts("At cut after splay");
-  pstate();
-  prevstate();
-
-  node *y = right(x);
-
-  printf("pnode(right(x)) = "); pnode(y);
-
-  if (y) {
-    set_right(x, NULL);
-    set_hook(y, NULL);
-  }
-}
-
-/* FIXME: REVIEW */
-void expose(node *x) { /* access */
-#ifdef DEBUG
-  if (!x) fail("expose: null argument");
-#endif
-  set_left(x, NULL);
-  set_right(x, NULL);
-
-  for (x = solid_root(x); x->hook; x = solid_root(x))
-    if (x->hook)
-      set_left(x->hook, x);
-}
-
-/* FIXME: REVIEW */
-/* evert(vertex v): Modify the tree containing vertex v by making v the root.
-                    (This operation can be regarded as reversing the direction
-                    of everty edge on the path from v to the original root.) */
-void reroot(node *x) { /* evert */
-#ifdef DEBUG
-  if (!x) fail("evert: null argument");
-#endif
-  expose(x);
-  reverse(x);
-  splay(x);
-}
-
-/* FIXME: REVIEW */
-bool connected(node *x, node *y) {
-  return root(x) == root(y);
+void splay(const node *x) {
+  assert(x != NULL);
 }
 
 /*----------------------------------------------------------------------------*/
-/* Project operations                                                         */
-/*----------------------------------------------------------------------------*/
 
-node *nodes;
-int nodes_size;
+/* void access(const node *x) { */
+/*   assert(x != NULL); */
+/* } */
+#define access(X) splay(X)
 
-void pnode(node *x) {
-  if (!x) {
-    printf("nil");
-    return;
-  }
-  printf("    %ld: {left: %ld, right: %ld, hook: %ld, reversed: %d}\n",
-         x - nodes + 1,
-         x->left  ? x->left  - nodes + 1: 0,
-         x->right ? x->right - nodes + 1: 0,
-         x->hook  ? x->hook  - nodes + 1: 0,
-         x->reversed);
+void reroot(const node *x) {
+  assert(x != NULL);
 }
 
-void pstate() {
-  puts("");
-  int i = 0;
-  for (; i < nodes_size; i++)
-    pnode(&(nodes[i]));
+void link(const node *x, const node *y) {
+  assert(x != NULL);
+  assert(y != NULL);
 }
 
-void prevstate() {
-  puts("");
-  int i = 0;
-  for (; i < nodes_size; i++)
-    printf("reversal_state(&nodes[%d]) = %d\n", i, reversal_state(&nodes[i]));
+void cut(const node *x, const node *y) {
+  assert(x != NULL);
+  assert(y != NULL);
 }
 
-/* Adds an edge linking the node u to the node v. If such an edge already exists
-   or this insertion would create a cycle then the operation has no effect. */
-/* FIXME: REVIEW */
-void Link(int u, int v) {
-  if (u == v || u > nodes_size || v > nodes_size)
-    return;
-  node *x = &(nodes[u-1]), *y = &(nodes[v-1]);
-
-  if (x->hook == y || x == y->hook) /* edge already exists */
-    return;
-  if (root(x) == root(y)) /* cycle */
-    return;
-
-  reroot(x);
-  link(x,y);
-#ifdef DEBUG
-  printf("Finished: Link(%d,%d)\n", u, v);
-  pstate();
-#endif
+bool connected(const node *x, const node *y) {
+  assert(x != NULL);
+  assert(y != NULL);
+  return false;
 }
 
-/* Removes the edge linking the node u to the node v, if such an edge exists. If
-the edge does not exist this operation has no effect. */
-/* FIXME: REVIEW */
-void Cut(int u, int v) {
-  if (u == v || u > nodes_size || v > nodes_size)
-    return;
-  node *x = &(nodes[u-1]), *y = &(nodes[v-1]);
-
-  if (x->hook != y && x != y->hook) /* edge does not exist */
-    return;
-
-  if (x->hook == y) {
-    cut(x);
-    splay(y);
-  } else {
-    cut(y);
-    splay(x);
-  }
-#ifdef DEBUG
-  printf("Finished: Cut(%d,%d)\n", u, v);
-  pstate();
-#endif
-}
-
-/* Returns true if there is a connection from u to v. If such a connection does
-   not exist it returns false. A connection may consist of a single edge, or a
-   sequence of edges, provided that it links u to v. */
-/* FIXME: REVIEW */
-bool ConnectedQ(int u, int v) {
-  if (u == v || u > nodes_size || v > nodes_size)
-    return false;
-  node *x = &(nodes[u-1]), *y = &(nodes[v-1]);
-  return connected(x,y);
-#ifdef DEBUG
-  printf("Finished: ConnectedQ(%d,%d)\n", u, v);
-  pstate();
-#endif
-}
-
-/*----------------------------------------------------------------------------*/
-/* Main                                                                       */
 /*----------------------------------------------------------------------------*/
 
 /* For QuickCheck */
-void init(int n) {nodes = new_forest(n);}
-void finally() {free(nodes);};
+void init(int n) {
+  forest = new_forest(n);
+}
+
+void finally() {
+  free(forest);
+};
 
 int main_link_cut() {
-  if (scanf(" %d", &nodes_size) != 1)
+  int forest_size;
+  if (scanf(" %d", &forest_size) != 1)
     exit(-1);
-  init(nodes_size);
+  init(forest_size);
 
   int u, v;
   while (true) {
     if        (scanf(" L %d %d", &u, &v) == 2) {
-      Link(u,v);
+      link(&forest[u-1], &forest[v-1]);
     } else if (scanf(" C %d %d", &u, &v) == 2) {
-      Cut(u,v);
+      cut(&forest[u-1], &forest[v-1]);
     } else if (scanf(" Q %d %d", &u, &v) == 2) {
-      printf("%c\n", ConnectedQ(u,v) ? 'T' : 'F');
+      bool c = connected(&forest[u-1], &forest[v-1]);
+      printf("%c\n", c ? 'T' : 'F');
     } else {
       break;
     }
@@ -456,33 +151,6 @@ int main_link_cut() {
   return 0;
 }
 
-int main() { return main_link_cut(); }
-
-/* tests
-
-   should probably check reversal state
-
-=01 check
-4 L 1 2 L 2 3 Q 4 2 C 3 2 L 3 2 Q 2 3 X
-F T
-
-=02 check
-4 L 1 2 L 2 3 L 3 4 C 4 3 L 4 3 Q 4 2 C 1 2 L 1 4 Q 4 1 X
-T T
-
-=03 loop and seg fault at some point
-4 L 1 2 L 2 3 L 3 4 C 1 2 L 1 2 Q 4 3 C 4 3 L 4 3 Q 4 2 C 1 2 L 1 4 Q 2 4 C 2 1 L 4 1 Q 2 3 X
-T T T T
-
-=04 seg fault after finishing 1st cut
-4 L 1 2 L 2 3 L 3 4 C 2 1 L 2 1 Q 4 3 Q 4 2 C 2 3 L 2 3 Q 3 2 C 3 2 L 4 1 Q 2 3 C 1 2 L 1 3 Q 3 1 C 2 3 L 2 4 Q 4 1 C 1 2 L 1 2 Q 4 1 Q 3 1 C 4 3 L 4 1 Q 3 4 X
-T T T T T T T T F
-
-=05 Wrong result; gives F F F
-10 L 1 2 L 2 3 L 3 4 L 4 5 L 5 6 C 6 5 L 6 5 Q 8 2 Q 3 4 C 1 2 L 1 4 Q 5 3 X
-F T T
-
-=06 maybe an infinite loop after the 4th cut ?
-20 L 1 2 L 2 3 L 3 4 L 4 5 L 5 6 L 6 7 L 7 8 L 8 9 L 9 10 L 10 11 Q 19 10 C 8 9 L 12 9 C 8 7 L 15 4 Q 18 8 Q 14 16 Q 12 1 C 4 3 L 17 3 Q 14 5 Q 10 13 C 3 4 L 3 7 Q 7 12 C 11 10 L 11 10 Q 2 11 Q 15 20 X
-F F F F F F F F F
-*/
+int main() {
+  return main_link_cut();
+}
