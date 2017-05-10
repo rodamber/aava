@@ -244,7 +244,13 @@ void splay(node *u) {
 
 /*----------------------------------------------------------------------------*/
 
-#define access(X) splay(X)
+/* #define access(X) splay(X) */
+void access(node *x) {
+  assert(x != NULL);
+
+  x->left = NULL;
+  splay(x);
+}
 
 void reroot(node *x) {
   assert(x != NULL);
@@ -291,6 +297,7 @@ void link(node *x, node *y) {
   if (connected(x,y)) {
     return;
   }
+
   x->hook = y;
 }
 
@@ -325,14 +332,22 @@ int main_link_cut() {
   while (true) {
     if        (scanf(" L %d %d", &u, &v) == 2) {
       link(&forest[u-1], &forest[v-1]);
+
+      /* printf("L(%d,%d)",u,v); */
     } else if (scanf(" C %d %d", &u, &v) == 2) {
       cut(&forest[u-1], &forest[v-1]);
+
+      /* printf("C(%d,%d)",u,v); */
     } else if (scanf(" Q %d %d", &u, &v) == 2) {
       bool c = connected(&forest[u-1], &forest[v-1]);
       printf("%c\n", c ? 'T' : 'F');
+
+      /* printf("Q(%d,%d)",u,v); */
     } else {
       break;
     }
+
+    /* pstate(); */
   }
 
   free(forest);
@@ -345,6 +360,9 @@ int main() {
 
 
 /*
+
+4 L 1 2 L 2 3 L 3 4 C 2 1 L 2 1 Q 4 3 Q 4 2 C 2 3 L 2 3 Q 3 2 C 3 2 L 4 1 Q 2 3
+
 4
 L 1 2
 L 2 3
@@ -359,4 +377,20 @@ Q 3 2
 C 3 2
 L 4 1
 Q 2 3
+
+Expected: T T T T T T T T F
+
+4 L 1 2 L 2 3 L 3 4 C 3 2 L 4 1 Q 2 3 X
+
+4
+L 1 2 L 2 3 L 3 4
+C 3 2
+L 4 1 (with L 1 4 we get T)
+Q 2 3 (with Q 3 2 we get T)
+X
+
+Expected: T
+Actual: F
+
 */
+
