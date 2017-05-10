@@ -1,4 +1,5 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 import Foreign
@@ -20,155 +21,88 @@ import Test.QuickCheck.Arbitrary
 import Test.QuickCheck.Gen
 import Test.QuickCheck.Monadic
 
+import Data.DeriveTH
+
 --------------------------------------------------------------------------------
--- FFI                                                                        --
+
+data Node
+type NodePtr = Ptr Node
+
+foreign import ccall unsafe "alloc" c_alloc :: CInt -> IO NodePtr
+foreign import ccall unsafe "link_" c_link :: CInt -> CInt -> IO ()
+foreign import ccall unsafe "cut_" c_cut :: CInt -> CInt -> IO ()
+foreign import ccall unsafe "connected_" c_connected :: CInt -> CInt -> IO Bool
+
+alloc = c_alloc . fromIntegral
+link x y = c_link (fromIntegral x) (fromIntegral y)
+cut x y = c_cut (fromIntegral x) (fromIntegral y)
+connected x y = c_connected (fromIntegral x) (fromIntegral y)
+
+withForest :: (Positive Int) -> IO a -> IO a
+withForest (Positive forestSize) io =
+  do ptr <- alloc forestSize
+     ret <- io
+     free ptr
+     return ret
+
 --------------------------------------------------------------------------------
 
-foreign import ccall unsafe "init"
-    c_init :: CInt -> IO ()
+data Command a = Link      (Positive a) (Positive a)
+               | Cut       (Positive a) (Positive a)
+               | Connected (Positive a) (Positive a)
+               deriving (Show, Eq)
 
-start :: Int -> IO ()
-start = c_init . fromIntegral
+$(derive makeIs ''Command)
 
-foreign import ccall unsafe "finally"
-    c_finally :: IO ()
+type Cmd = Command Int
 
-finally :: IO ()
-finally = c_finally
+inputs :: Cmd -> (Int,Int)
+inputs (Link      (Positive x) (Positive y)) = (x,y)
+inputs (Cut       (Positive x) (Positive y)) = (x,y)
+inputs (Connected (Positive x) (Positive y)) = (x,y)
 
-foreign import ccall unsafe "Link"
-    c_Link :: CInt -> CInt -> IO ()
+genCmd :: Positive Int -> Gen Cmd
+genCmd (Positive n) = do
+  cmd <- elements [Link, Cut, Connected]
+  x <- choose (1, n - 1)
+  y <- choose (x, n)
+  return (cmd (Positive x) (Positive y))
 
-link :: Int -> Int -> IO ()
-link u v = c_Link (fromIntegral u) (fromIntegral v)
+runCommand :: Cmd -> IO ()
+runCommand (Link      (Positive x) (Positive y)) = link x y
+runCommand (Cut       (Positive x) (Positive y)) = cut x y
+runCommand (Connected (Positive x) (Positive y)) = connected x y
 
-foreign import ccall unsafe "Cut"
-    c_Cut :: CInt -> CInt -> IO ()
+data Input = Input { forestSize :: (Positive Int)
+                   , commands   :: [Cmd]
+                   } deriving (Show, Eq)
 
-cut :: Int -> Int -> IO ()
-cut u v = c_Cut (fromIntegral u) (fromIntegral v)
-
-foreign import ccall unsafe "ConnectedQ"
-    c_ConnectedQ :: CInt -> CInt -> IO Bool
-
-connected :: Int -> Int -> IO Bool
-connected u v = c_ConnectedQ (fromIntegral u) (fromIntegral v)
-
-foreign import ccall unsafe "pstate"
-    c_pstate :: IO ()
-
-pstate = c_pstate
-
-withNodes :: Int -> IO a -> IO a
-withNodes n f = do
-  start n
-  res <- f
-  finally
-  return res
-
--- data Action a = Action (Int -> Int -> IO a) Int Int
--- data Actions = Actions { nodeCount :: Int , actions :: [Action a] }
-
-data Action = Action { actionChar :: Char, actionU :: Int, actionV :: Int}
-  deriving (Eq, Show)
-data Actions = Actions { nodeCount :: Int , actions :: [Action] }
-  deriving (Eq, Show)
-
-instance Arbitrary Actions where
+instance Arbitrary Input where
   arbitrary = do
-    n <- arbitrarySizedNatural `suchThat` (> 10)
-    cs <- listOf1 $ elements ['l', 'c', 'q']
-    as <- forM cs $ \c -> do
-      u <- choose (0, n-2)
-      v <- choose (u+1, n-1)
-      return $ Action c u v
-    return $ Actions n as
+    forestSize <- arbitrary `suchThat` ((> 3) . getPositive)
+    cmds <- listOf1 (genCmd forestSize)
+    return (Input forestSize cmds)
 
-newtype LinkConActions = LinkConActions (Actions, Int, Int)
-  deriving (Eq, Show)
+inputSuchThat :: (Input -> Bool) -> Gen Input
+inputSuchThat p = arbitrary `suchThat` p
 
-instance Arbitrary LinkConActions where
-  arbitrary = do
-    (Actions n as) <- arbitrary
-    u <- choose (0, n-2)
-    v <- choose (u+1, n-1)
-    let as = filter (\(Action c _ _) -> c /= 'c') as
-    return $ LinkConActions (Actions n as, u, v)
+linkThenCut :: Gen Input
+linkThenCut = inputSuchThat $ \(Input _ cmds) ->
+  let fst = head cmds
+      snd = head (tail cmds)
+  in length cmds == 2 &&
+     isLink fst &&
+     isCut  snd &&
+     inputs fst == inputs snd
 
-fun :: Char -> (Int -> Int -> IO ())
-fun c = case c of 'l' -> link
-                  'c' -> cut
-                  'q' -> \u -> Control.Monad.void . connected u
+--------------------------------------------------------------------------------
 
-data Simple = Simple Int Int Int deriving (Show, Eq)
-
-instance Arbitrary Simple where
-  arbitrary = do
-    n <- arbitrarySizedNatural `suchThat` (> 10)
-    u <- choose(0, n - 2)
-    v <- choose(u + 1, n - 1)
-    return (Simple n u v)
-
-prop_cutAfterLinkIsNotConnected (Simple n u v) =
+prop_linkThenCutIsNotConnected (Input forestSize commands) =
   monadicIO $ do
-    c <- run $ withNodes n $ do
-      c <- do
-        link u v
-        -- pstate
-        cut u v
-        -- pstate
-        connected u v
-      -- pstate
-      return c
+    c <- run $ withForest forestSize $ do
+      traverse runCommand commands
+      return (uncurry connected (inputs (head commands)))
     assert (not c)
 
-prop_linkAfterCutIsConnected (Simple n u v) =
-  monadicIO $ do
-    c <- run $ withNodes n $ do
-      c <- do
-        cut u v
-        pstate
-        link u v
-        pstate
-        connected u v
-      pstate
-      return c
-    assert c
-
-
--- prop_generalizedLinkedAreConnected (Actions n as) (Positive u) (Positive v) =
---   monadicIO $ do
---     -- run $ putStrLn $ "n: " ++ show n ++ ", u: " ++ show u ++ ", v: " ++ show v
---     pre (u < v && v < n)
---     res <- run $ withNodes n $ do
---       link u v
---       connected u v
-
---     assert res
-
--- prop_generalizedLinkedAreConnected (LinkConActions ((Actions n as), u, v)) =
---   monadicIO $ do
---     run $ putStrLn $ "n: " ++ show n ++ ", u: " ++ show u ++ ", v: " ++ show v
---     res <- run $ withNodes n $ do
---       link u v
---       -- forM_ as $ \(Action c w x) -> fun c w x
---       connected u v
-
---     assert res
-
--- prop_generalizedLinkedAreConnected
-
---------------------------------------------------------------------------------
---                                                                            --
---------------------------------------------------------------------------------
-
--- spec = do
---   describe "Link and Connect" $ do
---     prop "..." $ prop_generalizedLinkedAreConnected
-
-return []
-runtests = $quickCheckAll
-
-main = do
-  runtests
-  -- hspec spec
+-- return []
+main = quickCheck (forAll linkThenCut prop_linkThenCutIsNotConnected)

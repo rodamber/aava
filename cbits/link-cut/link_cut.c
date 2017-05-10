@@ -251,7 +251,6 @@ void reroot(node *x) {
   flip(x);
 }
 
-
 /* Follows left pointers of x. Returns if y is found. */
 bool search_left(node *x, node *y) {
   for (x = x->left; x; x = x->left) {
@@ -312,10 +311,28 @@ void cut(node *x, node *y) {
 
 /*----------------------------------------------------------------------------*/
 
+/* This is here just for QuickCheck */
+node *alloc(int forest_size) {
+  forest = new_forest(forest_size);
+  return forest;
+}
+
+void link_(int x, int y) {
+  link(&forest[x-1], &forest[y-1]);
+}
+
+void cut_(int x, int y) {
+  cut(&forest[x-1], &forest[y-1]);
+}
+
+void connected_(int x, int y) {
+  connected(&forest[x-1], &forest[y-1]);
+}
+
 int main_link_cut() {
   if (scanf(" %d", &forest_size) != 1)
     exit(-1);
-  forest = new_forest(forest_size);
+  alloc(forest_size);
 
   int u, v;
   while (true) {
@@ -335,6 +352,4 @@ int main_link_cut() {
   return 0;
 }
 
-int main() {
-  return main_link_cut();
-}
+/* int main() {return main_link_cut();} */
