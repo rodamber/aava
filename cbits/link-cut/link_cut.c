@@ -313,9 +313,6 @@ void cut(node *x, node *y) {
 /*----------------------------------------------------------------------------*/
 
 int main_link_cut() {
-#ifndef NDEBUG
-  puts("Debug mode.");
-#endif
   if (scanf(" %d", &forest_size) != 1)
     exit(-1);
   forest = new_forest(forest_size);
