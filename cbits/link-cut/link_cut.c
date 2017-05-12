@@ -50,11 +50,15 @@ void pnode(node *x) {
          x->flipped);
 }
 
+void pnode2(int i) {
+  pnode(&(forest[i-1]));
+}
+
 void pstate() {
   puts("");
   int i;
-  for (i = 0; i < forest_size; i++)
-    pnode(&(forest[i]));
+  for (i = 1; i <= forest_size; i++)
+    pnode2(i);
 }
 
 /*----------------------------------------------------------------------------*/

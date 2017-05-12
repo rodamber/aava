@@ -1,6 +1,11 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
 
 import Foreign
 import Foreign.C.Types
@@ -21,8 +26,6 @@ import Test.QuickCheck.Arbitrary
 import Test.QuickCheck.Gen
 import Test.QuickCheck.Monadic
 
-import Data.DeriveTH
-
 --------------------------------------------------------------------------------
 
 data Node
@@ -32,14 +35,22 @@ foreign import ccall unsafe "alloc" c_alloc :: CInt -> IO NodePtr
 foreign import ccall unsafe "link_" c_link :: CInt -> CInt -> IO ()
 foreign import ccall unsafe "cut_" c_cut :: CInt -> CInt -> IO ()
 foreign import ccall unsafe "connected_" c_connected :: CInt -> CInt -> IO Bool
+foreign import ccall unsafe "pnode2" c_pnode2 :: CInt -> IO ()
 
-alloc = c_alloc . fromIntegral
-link x y = c_link (fromIntegral x) (fromIntegral y)
-cut x y = c_cut (fromIntegral x) (fromIntegral y)
-connected x y = c_connected (fromIntegral x) (fromIntegral y)
+alloc = c_alloc . fromIntegral . getPositive
+
+link      x y = c_link      (fromIntegral (getPositive x))
+                            (fromIntegral (getPositive y))
+cut       x y = c_cut       (fromIntegral (getPositive x))
+                            (fromIntegral (getPositive y))
+connected x y = c_connected (fromIntegral (getPositive x))
+                            (fromIntegral (getPositive y))
+
+pnode :: Int -> IO ()
+pnode = c_pnode2 . fromIntegral
 
 withForest :: (Positive Int) -> IO a -> IO a
-withForest (Positive forestSize) io =
+withForest forestSize  io =
   do ptr <- alloc forestSize
      ret <- io
      free ptr
@@ -47,62 +58,111 @@ withForest (Positive forestSize) io =
 
 --------------------------------------------------------------------------------
 
-data Command a = Link      (Positive a) (Positive a)
-               | Cut       (Positive a) (Positive a)
-               | Connected (Positive a) (Positive a)
-               deriving (Show, Eq)
+data Link
+data Cut
+data Connected
 
-$(derive makeIs ''Command)
+class CmdType ct input output | ct -> input, ct -> output where
+  data Cmd ct :: *
 
-type Cmd = Command Int
+  mkCmd :: input -> Cmd ct
+  inputs :: Cmd ct -> input
+  runCmd :: Cmd ct -> IO output
 
-inputs :: Cmd -> (Int,Int)
-inputs (Link      (Positive x) (Positive y)) = (x,y)
-inputs (Cut       (Positive x) (Positive y)) = (x,y)
-inputs (Connected (Positive x) (Positive y)) = (x,y)
+instance CmdType Link (Positive Int, Positive Int) () where
+  data Cmd Link = CmdLink (Positive Int) (Positive Int)
+    deriving (Eq, Show)
 
-genCmd :: Positive Int -> Gen Cmd
-genCmd (Positive n) = do
-  cmd <- elements [Link, Cut, Connected]
-  x <- choose (1, n - 1)
-  y <- choose (x, n)
-  return (cmd (Positive x) (Positive y))
+  mkCmd (x,y) = CmdLink x y
+  inputs (CmdLink x y) = (x,y)
+  runCmd (CmdLink x y) = link x y
 
-runCommand :: Cmd -> IO ()
-runCommand (Link      (Positive x) (Positive y)) = link x y
-runCommand (Cut       (Positive x) (Positive y)) = cut x y
-runCommand (Connected (Positive x) (Positive y)) = connected x y
+instance CmdType Cut (Positive Int, Positive Int) () where
+  data Cmd Cut = CmdCut (Positive Int) (Positive Int)
+    deriving (Eq, Show)
 
-data Input = Input { forestSize :: (Positive Int)
-                   , commands   :: [Cmd]
-                   } deriving (Show, Eq)
+  mkCmd (x,y) = CmdCut x y
+  inputs (CmdCut x y) = (x,y)
+  runCmd (CmdCut x y) = cut x y
 
-instance Arbitrary Input where
-  arbitrary = do
-    forestSize <- arbitrary `suchThat` ((> 3) . getPositive)
-    cmds <- listOf1 (genCmd forestSize)
-    return (Input forestSize cmds)
+instance CmdType Connected (Positive Int, Positive Int) Bool where
+  data Cmd Connected = CmdConnected (Positive Int) (Positive Int)
+    deriving (Eq, Show)
 
-inputSuchThat :: (Input -> Bool) -> Gen Input
-inputSuchThat p = arbitrary `suchThat` p
+  mkCmd (x,y) = CmdConnected x y
+  inputs (CmdConnected x y) = (x,y)
+  runCmd (CmdConnected x y) = connected x y
 
-linkThenCut :: Gen Input
-linkThenCut = inputSuchThat $ \(Input _ cmds) ->
-  let fst = head cmds
-      snd = head (tail cmds)
-  in length cmds == 2 &&
-     isLink fst &&
-     isCut  snd &&
-     inputs fst == inputs snd
+genCmd :: CmdType ct (Positive Int, Positive Int) o
+       => Positive Int -> Gen (Cmd ct)
+genCmd (Positive n) =
+  do x <- choose (1, n - 1)
+     y <- choose (x, n)
+     return (mkCmd (Positive x, Positive y))
 
 --------------------------------------------------------------------------------
 
-prop_linkThenCutIsNotConnected (Input forestSize commands) =
-  monadicIO $ do
-    c <- run $ withForest forestSize $ do
-      traverse runCommand commands
-      return (uncurry connected (inputs (head commands)))
-    assert (not c)
+genForestSize :: Gen (Positive Int)
+genForestSize = arbitrary `suchThat` ((> 10) . getPositive)
 
--- return []
-main = quickCheck (forAll linkThenCut prop_linkThenCutIsNotConnected)
+genInput :: Positive Int -> Gen (Positive Int, Positive Int)
+genInput (Positive n) =
+  do x <- choose (1, n - 1)
+     y <- choose (x, n)
+     return (Positive x, Positive y)
+
+genProblem =
+  do n <- genForestSize
+     (x,y) <- genInput n
+     return (n, x, y)
+
+--------------------------------------------------------------------------------
+
+genLinkThenCut :: Gen (Positive Int, Cmd Link, Cmd Cut, Cmd Connected)
+genLinkThenCut =
+  do forestSize <- genForestSize
+     input <- genInput forestSize
+     return (forestSize, mkCmd input, mkCmd input, mkCmd input)
+
+prop_linkThenCutIsNotConnected (forestSize, link, cut, connected) =
+  monadicIO $ do
+    conn <- run $ withForest forestSize $ do
+      runCmd link
+      runCmd cut
+      runCmd connected
+    assert (not conn)
+
+prop_linkThenCutIsNotConnected2 (forestSize, x, y) =
+  monadicIO $ do
+    conn <- run $ withForest forestSize $ do
+      link x y
+      cut x y
+      connected x y
+    assert (not conn)
+
+-- --------------------------------------------------------------------------------
+
+-- -- return []
+-- main = verboseCheck (forAll genLinkThenCut prop_linkThenCutIsNotConnected)
+-- main = verboseCheck (forAll genProblem prop_linkThenCutIsNotConnected2)
+-- main = putStrLn "test suite not implemented"
+
+instance Num a => Num (Positive a) where
+  (Positive x) + (Positive y) = Positive (x + y)
+  (Positive x) * (Positive y) = Positive (x * y)
+  abs = fmap abs
+  signum = fmap signum
+  fromInteger = Positive . fromInteger
+  negate = fmap negate
+
+printNodes n = traverse_ pnode [1 .. getPositive n] >> putStrLn ""
+
+main = do
+  let n = Positive 5
+  withForest n $ do
+    printNodes n
+    link 1 2
+    link 2 3
+    link 3 4
+    quickCheck (prop_linkThenCutIsNotConnected2 (n, 1, 2))
+    printNodes n
