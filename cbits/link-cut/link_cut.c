@@ -1,9 +1,7 @@
 #include <assert.h>
-#include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
 
 /*----------------------------------------------------------------------------*/
 
@@ -13,9 +11,6 @@ typedef struct node {
   struct node *hook;
   bool flipped;
 } node;
-
-node *forest;
-int forest_size;
 
 node *new_forest(int forest_size) {
   assert(forest_size > 0);
@@ -31,33 +26,6 @@ node *new_forest(int forest_size) {
   }
 
   return f;
-}
-
-/*----------------------------------------------------------------------------*/
-
-void pnode(node *x) {
-  if (!x) {
-    printf("pnode: nil");
-    return;
-  }
-
-  printf("    %ld: {left: %ld, right: %ld, hook: %ld, flipped: %d}\n",
-         x - forest + 1,
-         x->left   ? x->left    - forest + 1 : 0,
-         x->right  ? x->right   - forest + 1 : 0,
-         x->hook   ? x->hook    - forest + 1 : 0,
-         x->flipped);
-}
-
-void pnode2(int i) {
-  pnode(&(forest[i-1]));
-}
-
-void pstate() {
-  puts("");
-  int i;
-  for (i = 1; i <= forest_size; i++)
-    pnode2(i);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -166,7 +134,6 @@ void splay_step(node *x, node *y) {
 
   node *z = solid_parent(y);
 
-  /* are the unflips in the correct place? it shouldn't matter */
   if (!z) { /* zig */
     unflip(y);
     unflip(x);
@@ -208,7 +175,7 @@ void splay_step(node *x, node *y) {
 }
 
 void splay(node *u) {
-  assert(u != NULL);
+  assert(u);
 
   node *x, *y;
 
@@ -298,40 +265,35 @@ void cut_(node *x, node *y) {
 
 /*----------------------------------------------------------------------------*/
 
-node *alloc(int n) {
-  forest_size = n;
-  forest = new_forest(forest_size);
-  return forest;
-}
-
-void link(int x, int y) {
+void link(node *forest, int x, int y) {
   link_(&forest[x-1], &forest[y-1]);
 }
 
-void cut(int x, int y) {
+void cut(node *forest, int x, int y) {
   cut_(&forest[x-1], &forest[y-1]);
 }
 
-bool connected(int x, int y) {
+bool connected(node *forest, int x, int y) {
   return connected_(&forest[x-1], &forest[y-1]);
 }
 
 /*----------------------------------------------------------------------------*/
 
 int main() {
-  int n;
-  if (scanf(" %d", &n) != 1)
+  int forest_size;
+
+  if (scanf(" %d", &forest_size) != 1)
     exit(-1);
-  alloc(n);
+  node *forest = new_forest(forest_size);
 
   int u, v;
   while (true) {
     if        (scanf(" L %d %d", &u, &v) == 2) {
-    link(u,v);
+      link(forest, u,v);
     } else if (scanf(" C %d %d", &u, &v) == 2) {
-      cut(u,v);
+      cut(forest, u,v);
     } else if (scanf(" Q %d %d", &u, &v) == 2) {
-      bool c = connected(u,v);
+      bool c = connected(forest, u,v);
       printf("%c\n", c ? 'T' : 'F');
     } else {
       break;
