@@ -39,9 +39,9 @@ data Node
 type NodePtr = Ptr Node
 
 foreign import ccall unsafe "alloc" c_alloc :: CInt -> IO NodePtr
-foreign import ccall unsafe "link_" c_link :: CInt -> CInt -> IO ()
-foreign import ccall unsafe "cut_" c_cut :: CInt -> CInt -> IO ()
-foreign import ccall unsafe "connected_" c_connected :: CInt -> CInt -> IO CInt
+foreign import ccall unsafe "link" c_link :: CInt -> CInt -> IO ()
+foreign import ccall unsafe "cut" c_cut :: CInt -> CInt -> IO ()
+foreign import ccall unsafe "connected" c_connected :: CInt -> CInt -> IO CInt
 foreign import ccall unsafe "pnode2" c_pnode2 :: CInt -> IO ()
 foreign import ccall unsafe "pstate" pstate :: IO ()
 
@@ -88,9 +88,9 @@ cmdGen n = do
 
 instance Arbitrary TestCase where
   arbitrary = do
-    -- n <- (getPositive <$> arbitrary) `suchThat` (\x -> 5 < x && x <= 30)
-    let n = 4
-    cmds <- resize 5 $ listOf1 $ cmdGen n
+    n <- (getPositive <$> arbitrary) `suchThat` (\x -> 5 < x && x <= 30)
+    -- let n = 4
+    cmds <- resize 30 $ listOf1 $ cmdGen n
     return (TestCase { forestSize = n , commands = reverse (X : cmds)})
 
 --------------------------------------------------------------------------------
@@ -107,17 +107,16 @@ prop_meetsSpec tc = monadicIO $ do
 
 main = do
   putStrLn ""
+
   quickCheckWith stdArgs { maxSuccess = 10000 } prop_meetsSpec
+
+  -- withForest 4 $ do
+  --   link 3 2
+  --   link 3 4
+  --   cut  4 2
+  --   print =<< connected 2 3
 
 {-
 === Input === X
-4
-C 2 1
-L 3 2
-L 2 1
-C 1 2
-Q 1 2
-X
 === Actual/Expected===
-T/F
 -}

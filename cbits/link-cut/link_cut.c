@@ -1,11 +1,10 @@
 #include <assert.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <signal.h>
+#include <string.h>
 
-/*----------------------------------------------------------------------------*/
-/* Link/Cut tree internal representation                                       */
 /*----------------------------------------------------------------------------*/
 
 typedef struct node {
@@ -42,11 +41,11 @@ void pnode(node *x) {
     return;
   }
 
-  printf("    %ld: {left: %ld, right: %ld, hook: %ld, flipd: %d}\n",
+  printf("    %ld: {left: %ld, right: %ld, hook: %ld, flipped: %d}\n",
          x - forest + 1,
-         x->left  ? x->left  - forest + 1: 0,
-         x->right ? x->right - forest + 1: 0,
-         x->hook  ? x->hook  - forest + 1: 0,
+         x->left   ? x->left    - forest + 1 : 0,
+         x->right  ? x->right   - forest + 1 : 0,
+         x->hook   ? x->hook    - forest + 1 : 0,
          x->flipped);
 }
 
@@ -64,8 +63,8 @@ void pstate() {
 /*----------------------------------------------------------------------------*/
 
 void rotr(node *x, node *y) {
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(x);
+  assert(y);
   assert(x->hook == y);
 
   node *z = y->hook;
@@ -84,7 +83,6 @@ void rotr(node *x, node *y) {
     if (y == z->left) {
       z->left = x;
     } else if (y == z->right){
-      /* assert(y == z->right); */
       z->right = x;
     }
   }
@@ -95,8 +93,8 @@ void rotr(node *x, node *y) {
 }
 
 void rotl(node *x, node *y) {
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(x);
+  assert(y);
   assert(x->hook == y);
 
   node *z = y->hook;
@@ -115,7 +113,6 @@ void rotl(node *x, node *y) {
     if (y == z->right) {
       z->right = x;
     } else if (y == z->left){
-      /* assert(y == z->left); */
       z->left = x;
     }
   }
@@ -126,12 +123,12 @@ void rotl(node *x, node *y) {
 }
 
 void flip(node *x) {
-  assert(x != NULL);
+  assert(x);
   x->flipped = true;
 }
 
 void unflip(node *x) {
-  assert(x != NULL);
+  assert(x);
 
   if (x->flipped == false) {
     return;
@@ -164,8 +161,8 @@ node *solid_parent(node *x) {
 }
 
 void splay_step(node *x, node *y) {
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(x);
+  assert(y);
 
   node *z = solid_parent(y);
 
@@ -242,27 +239,17 @@ void splay(node *u) {
 /*----------------------------------------------------------------------------*/
 
 void access(node *x) {
-  assert(x != NULL);
+  assert(x);
 
   splay(x);
   x->left = NULL;
 }
 
 void reroot(node *x) {
-  assert(x != NULL);
+  assert(x);
 
   access(x);
   flip(x);
-}
-
-/* Follows left pointers of x. Returns if y is found. */
-bool search_left(node *x, node *y) {
-  for (x = x->left; x; x = x->left) {
-    if (x == y) {
-      return true;
-    }
-  }
-  return false;
 }
 
 /* Follows right pointers of x. Returns if y is found. */
@@ -275,39 +262,35 @@ bool search_right(node *x, node *y) {
   return false;
 }
 
-bool connected(node *x, node *y) {
-  assert(x != NULL);
-  assert(y != NULL);
+bool connected_(node *x, node *y) {
+  assert(x);
+  assert(y);
 
   reroot(x);
   access(y);
 
-  return search_left(y,x) || search_right(y,x);
+  return search_right(y,x);
 }
 
-void link(node *x, node *y) {
-  assert(x != NULL);
-  assert(y != NULL);
+void link_(node *x, node *y) {
+  assert(x);
+  assert(y);
 
-  if (connected(x,y)) {
+  if (connected_(x,y)) {
     return;
   }
 
   x->hook = y;
 }
 
-void cut(node *x, node *y) {
-  assert(x != NULL);
-  assert(y != NULL);
+void cut_(node *x, node *y) {
+  assert(x);
+  assert(y);
 
-  if (!connected(x,y)) {
-    return;
-  }
+  reroot(x);
+  access(y);
 
-  if (x == y->left) {
-    y->left = NULL;
-    x->hook = NULL;
-  } else if (x == y->right){
+  if (y->right == x && y->right->left == NULL) {
     y->right = NULL;
     x->hook = NULL;
   }
@@ -315,37 +298,40 @@ void cut(node *x, node *y) {
 
 /*----------------------------------------------------------------------------*/
 
-/* This is here just for QuickCheck */
-node *alloc(int forest_size) {
+node *alloc(int n) {
+  forest_size = n;
   forest = new_forest(forest_size);
   return forest;
 }
 
-void link_(int x, int y) {
-  link(&forest[x-1], &forest[y-1]);
+void link(int x, int y) {
+  link_(&forest[x-1], &forest[y-1]);
 }
 
-void cut_(int x, int y) {
-  cut(&forest[x-1], &forest[y-1]);
+void cut(int x, int y) {
+  cut_(&forest[x-1], &forest[y-1]);
 }
 
-void connected_(int x, int y) {
-  connected(&forest[x-1], &forest[y-1]);
+bool connected(int x, int y) {
+  return connected_(&forest[x-1], &forest[y-1]);
 }
 
-int main_link_cut() {
-  if (scanf(" %d", &forest_size) != 1)
+/*----------------------------------------------------------------------------*/
+
+int main() {
+  int n;
+  if (scanf(" %d", &n) != 1)
     exit(-1);
-  alloc(forest_size);
+  alloc(n);
 
   int u, v;
   while (true) {
     if        (scanf(" L %d %d", &u, &v) == 2) {
-      link(&forest[u-1], &forest[v-1]);
+    link(u,v);
     } else if (scanf(" C %d %d", &u, &v) == 2) {
-      cut(&forest[u-1], &forest[v-1]);
+      cut(u,v);
     } else if (scanf(" Q %d %d", &u, &v) == 2) {
-      bool c = connected(&forest[u-1], &forest[v-1]);
+      bool c = connected(u,v);
       printf("%c\n", c ? 'T' : 'F');
     } else {
       break;
@@ -355,5 +341,3 @@ int main_link_cut() {
   free(forest);
   return 0;
 }
-
-/* int main() {return main_link_cut();} */
