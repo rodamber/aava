@@ -1,0 +1,27 @@
+* Notes 
+  - valgrind cachegrind max value heap
+  - +/- 1 sec cada teste
+  - compile with -O3
+
+* Advanced Algorithms Project Report
+** Part I: Text Searching
+*** Introduction
+*** Answers to the questions
+*** Tests
+*** Results
+*** Result discussion and Conclusions
+** Part II: Connectivity in Forests
+*** Introduction
+*** Answers to the questions
+*** Tests
+    # For each test, start by creating a linear tree.   
+    # Use trees with sizes ranging from 1k to 10M.
+    # Set n = 1M ops for each test.
+    # We're expecting an n * log(n) curve
+*** Results
+*** Result discussion and Conclusions
+
+#nodes -> (time, memory)
+
+$ valgrind --log-file="val.out" ../../src/a.out < $file > /dev/null
+$ head -n 10 val.out | tail -1 | cut -d " " -f 11 | sed "s/,//g"
