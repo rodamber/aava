@@ -584,7 +584,7 @@ result *boyer_moore(string const * const txt, string const * const pat) {
   }
 
   free(R);
-  free(N);
+  free_vector_int(N);
   free_vector_int(big_l_prime);
   free_vector_int(small_l_prime);
 
@@ -642,4 +642,6 @@ int main_() {
   return 0;
 }
 
-/* int main() { return main_(); } */
+int main() {
+  return main_();
+}
