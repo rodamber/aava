@@ -43,3 +43,4 @@ myout.d/*
 
 # Haskell
 .stack-work
+/auto/report.el
