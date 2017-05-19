@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 
-executable="./om"
+executable="$1"
 
-echo "n m time heap comparisons"
+if [ "$executable" == "./om" ]; then
+    echo "n m time heap comparisons"
+elif [ "$executable" == "./lc" ]; then
+    echo "n time heap"
+else
+    echo "Bad argument: $1"
+    exit -1
+fi
 
-for input in data/*; do
+for input in tests/*; do
     # Measure time.
     start=$(date +%s%N);
     cmps="$($executable < $input &)";
@@ -22,5 +29,10 @@ for input in data/*; do
     diff_nano=$(echo "$end - $start" | bc -l);
     diff_mili=$(echo "scale=2; $diff_nano / 1000000" | bc -l);
 
-    printf "$input $diff_mili $heap $cmps\n"
+    if [ "$executable" == "./om" ]; then
+        printf "$input $diff_mili $heap $cmps\n"
+    elif [ "$executable" == "./lc" ]; then
+        printf "$input $diff_mili $heap\n"
+    fi
+
 done;

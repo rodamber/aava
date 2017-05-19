@@ -11,20 +11,20 @@ using namespace std;
 
 string filename(int size) {
   stringstream ss;
-  ss << "data/lc-" << size << ".in";
+  ss << "tests/lc-" << size << ".in";
   return ss.str();
 }
 
 void link(ostream &out, int from, int to) {
-  out << "L" << from << " " << to << "\n";
+  out << "L " << from << " " << to << "\n";
 }
 
 void cut(ostream &out, int from, int to) {
-  out << "C" << from << " " << to << "\n";
+  out << "C " << from << " " << to << "\n";
 }
 
 void connected(ostream &out, int from, int to) {
-  out << "Q" << from << " " << to << "\n";
+  out << "Q " << from << " " << to << "\n";
 }
 
 void init(ostream &out, int size) {
@@ -38,12 +38,9 @@ void finish(ostream &out) {
 void linear_tree(ostream &out, int size) {
   init(out, size);
 
-  for (int i = 1; i <= size - 1; i++) {
-    for (int j = 2; j <= size; j++) {
+  for (int i = 1, j = 2; j <= size; i++, j++) {
       link(out, i, j);
-    }
   }
-
   cut(out, size/2, 1 + size/2);
 }
 
@@ -78,7 +75,7 @@ int main() {
 
   for (int i = _1_MiB; i <= 8 * _1_MiB; i += 56 * _1_KiB) {
     ofstream out(filename(i), ofstream::out);
-    test_case(out, i, _1_MiB);
+    test_case(out, i, 10);
     out.close();
   }
 

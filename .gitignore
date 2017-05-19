@@ -44,3 +44,14 @@ myout.d/*
 # Haskell
 .stack-work
 /auto/report.el
+/auto/report2.el
+/profile/gen
+/profile/lc
+/profile/lc_gen
+/profile/om
+/profile/om_gen
+/profile/tests
+/report.aux
+/report.log
+/report2.aux
+/report2.log

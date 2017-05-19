@@ -11,7 +11,7 @@ using namespace std;
 
 string filename(int i, int j) {
   stringstream ss;
-  ss << "data/txt-" << (i < 10 ? "0" : "") << i
+  ss << "tests/txt-" << (i < 10 ? "0" : "") << i
      <<     "-pat-" << (j < 10 ? "0" : "") << j << ".in";
   return ss.str();
 }
@@ -30,7 +30,7 @@ void write_rand_string(ostream &out, int size) {
 
 string naive_bad_filename(int size) {
   stringstream ss;
-  ss << "data/naive-bad-txt-" << (size < 10 ? "0" : "") << size << ".in";
+  ss << "tests/naive-bad-txt-" << (size < 10 ? "0" : "") << size << ".in";
   return ss.str();
 }
 
