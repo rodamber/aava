@@ -1,5 +1,10 @@
 \documentclass[12pt, a4paper]{article}
 
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{authblk}
+\usepackage{enumitem}
+\usepackage{graphicx}
 \usepackage{tikz}
 \usepackage{pgfplots}
 
@@ -8,7 +13,14 @@
 \usepgfplotslibrary{groupplots}
 \usetikzlibrary{pgfplots.groupplots}
 
+\title{\textbf{Advanced Algorithms Project Report}}
+\author{Rodrigo Bernardo \\ ist178942}
+\affil{Instituto Superior Técnico}
+
+\date{\today}
+
 \begin{document}
+\maketitle
 
 %------------------------------------------------------------------------------%
 % Time Profiling
@@ -136,7 +148,7 @@
     height=7cm,
     %
     xlabel=text size $n$ / characters,
-    ylabel=comparisons #
+    ylabel=comparisons \#
     %
     xtick={1e5,2e5,3e5,4e5,5e5,6e5,7e5,8e5,9e5,1e6},
     %
@@ -161,6 +173,93 @@
       \addplot+[only marks, mark=o] table [x=n,y=comparisons] {profile/data/bm256.dat};
   \end{groupplot}
   \node[text width=6cm,align=center,anchor=north] at ([yshift=+15mm]Comparisons Count c1r1.north) {Comparisons Count};
+\end{tikzpicture}
+
+%------------------------------------------------------------------------------%
+% Answers
+\begin{tikzpicture}
+  \pgfplotsset{every axis legend/.append style={
+      at={(0,1)},
+      anchor=north west}}
+  \begin{groupplot}[
+    group style={
+      group name=Corner Cases,
+      group size=1 by 3,
+      %
+      horizontal sep=1.5cm,
+      vertical sep=1.5cm,
+      %
+      xlabels at=edge bottom,
+      ylabels at=edge left,
+    },
+    footnotesize,
+    enlargelimits=false,
+    %
+    width=0.8\textwidth,
+    height=7cm,
+    %
+    xlabel=text size $n$ / characters,
+    ylabel=time $t$ / ms,
+    %
+    xtick={1e5,2e5,3e5,4e5,5e5,6e5,7e5,8e5,9e5,1e6},
+    %
+    xmajorgrids=true,
+    ymajorgrids=true,
+    grid style=dashed,
+    %
+    legend entries={$m=16$,$m=64$,$m=256$},
+    ]
+    %
+    \nextgroupplot[title=Naive Bad Case]
+      \addplot+[only marks, mark=square*] table [x=n,y=comparisons] {profile/data/naive-bad16.dat};
+      \addplot+[only marks, mark=triangle*] table [x=n,y=comparisons] {profile/data/naive-bad64.dat};
+      \addplot+[only marks, mark=o] table [x=n,y=comparisons] {profile/data/naive-bad256.dat};
+    \nextgroupplot[title=Boyer-Moore Sublinear]
+      \addplot+[only marks, mark=square*] table [x=n,y=comparisons] {profile/data/bm-sublinear16.dat};
+      \addplot+[only marks, mark=triangle*] table [x=n,y=comparisons] {profile/data/bm-sublinear64.dat};
+      \addplot+[only marks, mark=o] table [x=n,y=comparisons] {profile/data/bm-sublinear256.dat};
+  \end{groupplot}
+  \node[text width=6cm,align=center,anchor=north] at ([yshift=+15mm]Comparisons Count c1r1.north) {Answers to Questions};
+\end{tikzpicture}
+
+%------------------------------------------------------------------------------%
+% Link-Cut
+\begin{tikzpicture}
+  \pgfplotsset{every axis legend/.append style={
+      at={(0,1)},
+      anchor=north west}}
+  \begin{groupplot}[
+    group style={
+      group name=Link-Cut Tree,
+      group size=1 by 2,
+      %
+      horizontal sep=1cm,
+      vertical sep=1.5cm,
+      %
+      xlabels at=edge bottom,
+      ylabels at=edge left,
+    },
+    footnotesize,
+    enlargelimits=false,
+    %
+    width=0.8\textwidth,
+    height=7cm,
+    %
+    xlabel=Total number of nodes $n$,
+    %
+    % xtick={1e3,1e4,1e5,1e6,1e7},
+    %
+    xmajorgrids=true,
+    ymajorgrids=true,
+    grid style=dashed,
+    ]
+    %
+    \nextgroupplot[ylabel=time $t$ / ms,]
+      \addplot+[only marks, mark=*] table [x=n,y=time] {profile/data/link-cut-times.dat};
+    \nextgroupplot[ylabel=heap / bytes, scaled y ticks=base 10:-6,]
+      \addplot+[only marks, mark=*,] table [x=n,y=heap] {profile/data/link-cut.dat};
+  \end{groupplot}
+  \node[text width=6cm,align=center,anchor=north] at ([yshift=+15mm]Link-Cut Tree c1r1.north) {Link-Cut Tree};
 \end{tikzpicture}
 
 \end{document}
