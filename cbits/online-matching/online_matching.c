@@ -610,7 +610,8 @@ int main_() {
       read_(P);
       result = naive(T, P);
 
-      print_vector_int(result->positions);
+      /* print_vector_int(result->positions); */
+      printf("%d \n", result->comparisons);
 
       free_result(result);
       break;
@@ -618,7 +619,7 @@ int main_() {
       read_(P);
       result = knuth_morris_pratt(T, P);
 
-      print_vector_int(result->positions);
+      /* print_vector_int(result->positions); */
       printf("%d \n", result->comparisons);
 
       free_result(result);
@@ -627,7 +628,7 @@ int main_() {
       read_(P);
       result = boyer_moore(T, P);
 
-      print_vector_int(result->positions);
+      /* print_vector_int(result->positions); */
       printf("%d \n", result->comparisons);
 
       free_result(result);
