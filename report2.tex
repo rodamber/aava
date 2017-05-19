@@ -2,8 +2,8 @@
 
 \usepackage{tikz}
 \usepackage{pgfplots}
-\usepackage{caption,subcaption}
 
+\usetikzlibrary{matrix}
 \pgfplotsset{width=10cm,compat=1.13}
 \usepgfplotslibrary{groupplots}
 \usetikzlibrary{pgfplots.groupplots}
@@ -12,11 +12,6 @@
 
 %------------------------------------------------------------------------------%
 % Time Profiling
-\begin{figure}[!h]
-\centering
-\renewcommand\thesubfigure{(\alph{subfigure})}
-\caption{Time Profiling}\label{fig:plots}
-
 \begin{tikzpicture}
   \pgfplotsset{every axis legend/.append style={
       at={(0,1)},
@@ -27,7 +22,7 @@
       group size=1 by 3,
       %
       horizontal sep=1.5cm,
-      vertical sep=2cm,
+      vertical sep=1.5cm,
       %
       xlabels at=edge bottom,
       ylabels at=edge left,
@@ -35,39 +30,137 @@
     footnotesize,
     enlargelimits=false,
     %
-    width=10cm,
+    width=0.8\textwidth,
     height=7cm,
     %
-    xlabel=text size / characters,
+    xlabel=text size $n$ / characters,
     ylabel=time $t$ / ms,
+    %
+    xtick={1e5,2e5,3e5,4e5,5e5,6e5,7e5,8e5,9e5,1e6},
     %
     xmajorgrids=true,
     ymajorgrids=true,
     grid style=dashed,
     %
-    legend entries={Pattern size $=16$,Pattern size $=64$,Pattern size $=256$},
+    legend entries={$m=16$,$m=64$,$m=256$},
     ]
     %
-    \nextgroupplot
+    \nextgroupplot[title=Naive]
       \addplot+[only marks, mark=square*] table [x=n,y=time] {profile/data/naive16.dat};
       \addplot+[only marks, mark=triangle*] table [x=n,y=time] {profile/data/naive64.dat};
       \addplot+[only marks, mark=o] table [x=n,y=time] {profile/data/naive256.dat};
-    \nextgroupplot
+    \nextgroupplot[title=Knuth-Morris-Pratt]
       \addplot+[only marks, mark=square*] table [x=n,y=time] {profile/data/kmp16.dat};
       \addplot+[only marks, mark=triangle*] table [x=n,y=time] {profile/data/kmp64.dat};
       \addplot+[only marks, mark=o] table [x=n,y=time] {profile/data/kmp256.dat};
-    \nextgroupplot
+    \nextgroupplot[title=Boyer-Moore]
       \addplot+[only marks, mark=square*] table [x=n,y=time] {profile/data/bm16.dat};
       \addplot+[only marks, mark=triangle*] table [x=n,y=time] {profile/data/bm64.dat};
       \addplot+[only marks, mark=o] table [x=n,y=time] {profile/data/bm256.dat};
-
   \end{groupplot}
-
-  \node[text width=6cm,align=center,anchor=north] at ([yshift=-5mm]Time Profiling c1r1.south) {\captionof{subfigure}{Naive\label{subplot:one}}};
-  \node[text width=6cm,align=center,anchor=north] at ([yshift=-5mm]Time Profiling c1r2.south) {\captionof{subfigure}{Knuth-Morris-Pratt\label{subplot:two}}};
-  \node[text width=6cm,align=center,anchor=north] at ([yshift=-10mm]Time Profiling c1r3.south) {\captionof{subfigure}{Boyer-Moore\label{subplot:three}}};
+  \node[text width=6cm,align=center,anchor=north] at ([yshift=+15mm]Time Profiling c1r1.north) {Time Profiling};
 \end{tikzpicture}
 
-\end{figure}
+%------------------------------------------------------------------------------%
+% Heap Profiling
+\begin{tikzpicture}
+  \pgfplotsset{every axis legend/.append style={
+      at={(0,1)},
+      anchor=north west}}
+  \begin{groupplot}[
+    group style={
+      group name=Heap Profiling,
+      group size=1 by 3,
+      %
+      horizontal sep=1.5cm,
+      vertical sep=1.5cm,
+      %
+      xlabels at=edge bottom,
+      ylabels at=edge left,
+    },
+    footnotesize,
+    enlargelimits=false,
+    %
+    width=0.8\textwidth,
+    height=7cm,
+    %
+    xlabel=text size $n$ / characters,
+    ylabel=heap / bytes,
+    %
+    xtick={1e5,2e5,3e5,4e5,5e5,6e5,7e5,8e5,9e5,1e6},
+    %
+    xmajorgrids=true,
+    ymajorgrids=true,
+    grid style=dashed,
+    %
+    legend entries={$m=16$,$m=64$,$m=256$},
+    ]
+    %
+    \nextgroupplot[title=Naive]
+      \addplot+[only marks, mark=square*] table [x=n,y=heap] {profile/data/naive16.dat};
+      \addplot+[only marks, mark=triangle*] table [x=n,y=heap] {profile/data/naive64.dat};
+      \addplot+[only marks, mark=o] table [x=n,y=heap] {profile/data/naive256.dat};
+    \nextgroupplot[title=Knuth-Morris-Pratt]
+      \addplot+[only marks, mark=square*] table [x=n,y=heap] {profile/data/kmp16.dat};
+      \addplot+[only marks, mark=triangle*] table [x=n,y=heap] {profile/data/kmp64.dat};
+      \addplot+[only marks, mark=o] table [x=n,y=heap] {profile/data/kmp256.dat};
+    \nextgroupplot[title=Boyer-Moore]
+      \addplot+[only marks, mark=square*] table [x=n,y=heap] {profile/data/bm16.dat};
+      \addplot+[only marks, mark=triangle*] table [x=n,y=heap] {profile/data/bm64.dat};
+      \addplot+[only marks, mark=o] table [x=n,y=heap] {profile/data/bm256.dat};
+  \end{groupplot}
+  \node[text width=6cm,align=center,anchor=north] at ([yshift=+15mm]Heap Profiling c1r1.north) {Heap Profiling};
+\end{tikzpicture}
+
+%------------------------------------------------------------------------------%
+% Comparisons Count
+\begin{tikzpicture}
+  \pgfplotsset{every axis legend/.append style={
+      at={(0,1)},
+      anchor=north west}}
+  \begin{groupplot}[
+    group style={
+      group name=Comparisons Count,
+      group size=1 by 3,
+      %
+      horizontal sep=1.5cm,
+      vertical sep=1.5cm,
+      %
+      xlabels at=edge bottom,
+      ylabels at=edge left,
+    },
+    footnotesize,
+    enlargelimits=false,
+    %
+    width=0.8\textwidth,
+    height=7cm,
+    %
+    xlabel=text size $n$ / characters,
+    ylabel=comparisons #
+    %
+    xtick={1e5,2e5,3e5,4e5,5e5,6e5,7e5,8e5,9e5,1e6},
+    %
+    xmajorgrids=true,
+    ymajorgrids=true,
+    grid style=dashed,
+    %
+    legend entries={$m=16$,$m=64$,$m=256$},
+    ]
+    %
+    \nextgroupplot[title=Naive]
+      \addplot+[only marks, mark=square*] table [x=n,y=comparisons] {profile/data/naive16.dat};
+      \addplot+[only marks, mark=triangle*] table [x=n,y=comparisons] {profile/data/naive64.dat};
+      \addplot+[only marks, mark=o] table [x=n,y=comparisons] {profile/data/naive256.dat};
+    \nextgroupplot[title=Knuth-Morris-Pratt]
+      \addplot+[only marks, mark=square*] table [x=n,y=comparisons] {profile/data/kmp16.dat};
+      \addplot+[only marks, mark=triangle*] table [x=n,y=comparisons] {profile/data/kmp64.dat};
+      \addplot+[only marks, mark=o] table [x=n,y=comparisons] {profile/data/kmp256.dat};
+    \nextgroupplot[title=Boyer-Moore]
+      \addplot+[only marks, mark=square*] table [x=n,y=comparisons] {profile/data/bm16.dat};
+      \addplot+[only marks, mark=triangle*] table [x=n,y=comparisons] {profile/data/bm64.dat};
+      \addplot+[only marks, mark=o] table [x=n,y=comparisons] {profile/data/bm256.dat};
+  \end{groupplot}
+  \node[text width=6cm,align=center,anchor=north] at ([yshift=+15mm]Comparisons Count c1r1.north) {Comparisons Count};
+\end{tikzpicture}
 
 \end{document}
