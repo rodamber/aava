@@ -29,54 +29,28 @@
 \subsection{Overview}
 \subsection{Questions}
 
-% \begin{tikzpicture}
-% \begin{axis}[
-%   xlabel=n,
-%   ylabel=m,
-%   zlabel=time,
-%   area plot/.style={
-%     fill opacity=0.75,
-%     draw=orange!80!black,thick,
-%     fill=orange,
-%     mark=none,
-%   },
-%   grid=major,
-%   grid style=dashed,
-%   % xtick=data,
-%   ytick=data,
-% ]
-% \addplot3+[
-% % only marks,
-% % scatter,
-% % mark size=2pt
-% area plot
-% ] table[x=n,y=m,z=time] {profile/naive.dat};
-% \end{axis}
-% \end{tikzpicture}
-
-
 \centering
 \begin{tikzpicture}[trim axis left, trim axis right]
+  \pgfplotsset{every axis legend/.append style={
+      at={(0,1)},
+      anchor=north west}}
     \begin{axis}[
-        height=7cm,
-        width=0.8\textwidth,
-        enlargelimits=false,
-        title={Still don't know what I'll place here},
-        xlabel={x label here},
-        scaled x ticks = base 10:-4,
-        every y tick scale label/.style={at={(-0.060,1)}},
-        ylabel={y label},
-        ymajorgrids=true,
-        grid style=dashed,
-        log basis x={2}
+      height=7cm,
+      width=0.8\textwidth,
+      enlargelimits=false,
+      title={Naive Algorithm Time Measure},
+      xlabel={Text size},
+      ylabel={Elapsed time (ms)},
+      xmajorgrids=true,
+      every y tick scale label/.style={at={(-0.060,1)}},
+      ymajorgrids=true,
+      grid style=dashed,
+      log basis x={2},
+      legend entries={Pattern size $=16$,Pattern size $=64$,Pattern size $=256$},
     ]
-    \addplot+[
-        only marks,
-        scatter,
-        mark=x,
-        mark size=3pt,
-    ]
-        table [x=n,y=time] {profile/naive.dat};
+    \addplot+[only marks, mark=square*] table [x=n,y=time] {profile/naive16.dat};
+    \addplot+[only marks, mark=triangle*] table [x=n,y=time] {profile/naive64.dat};
+    \addplot+[only marks, mark=o] table [x=n,y=time] {profile/naive256.dat};
     \end{axis}
 \end{tikzpicture}
 
