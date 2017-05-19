@@ -1,7 +1,9 @@
+#define _POSIX_C_SOURCE 199309L
 #include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 /*----------------------------------------------------------------------------*/
 
@@ -279,27 +281,88 @@ bool connected(node *forest, int x, int y) {
 
 /*----------------------------------------------------------------------------*/
 
-int main() {
-  int forest_size;
+void linear_tree(node *forest, int size) {
+  int i, j;
+  for (i = 1, j = 2; j <= size; i++, j++) {
+    link(forest, i, j);
+  }
+  cut(forest, size/2, 1 + size/2);
+}
 
-  if (scanf(" %d", &forest_size) != 1)
-    exit(-1);
-  node *forest = new_forest(forest_size);
+int profile() {
+  srand(time(NULL));
 
-  int u, v;
-  while (true) {
-    if        (scanf(" L %d %d", &u, &v) == 2) {
-      link(forest, u,v);
-    } else if (scanf(" C %d %d", &u, &v) == 2) {
-      cut(forest, u,v);
-    } else if (scanf(" Q %d %d", &u, &v) == 2) {
-      bool c = connected(forest, u,v);
-      printf("%c\n", c ? 'T' : 'F');
-    } else {
-      break;
+  FILE *f = fopen("../../profile/data/link-cut-times.dat", "w+");
+
+  fputs("n time\n", f);
+
+  const int num_ops = 2000;
+  struct timespec start, end;
+
+  int size;
+  for (size = 1000; size <= 10e6; size += 1000) {
+    node *forest = new_forest(size);
+
+    /* linear_tree(forest, size); */
+
+    clock_gettime(CLOCK_REALTIME, &start);
+
+    int i;
+    for (i = 0; i < num_ops; i++) {
+      int from = 1 + rand() % size;
+      int to   = 1 + rand() % size;
+
+      switch (rand() % 3) {
+      case 0:
+        link(forest, from, to);
+        break;
+      case 1:
+        cut(forest, from, to);
+        break;
+      case 2:
+        connected(forest, from, to);
+        break;
+      }
     }
+
+    clock_gettime(CLOCK_REALTIME, &end);
+    double diff = (end.tv_sec - start.tv_sec) * 1E3 +
+      (end.tv_nsec - start.tv_nsec) / 1E6;
+
+    fprintf(f, "%d %lf\n", size, diff);
+
+    free(forest);
   }
 
-  free(forest);
+  fclose(f);
   return 0;
 }
+
+int main() {
+  return profile();
+}
+
+/* int main() { */
+/*   int forest_size; */
+
+/*   if (scanf(" %d", &forest_size) != 1) */
+/*     exit(-1); */
+/*   node *forest = new_forest(forest_size); */
+
+/*   int u, v; */
+/*   while (true) { */
+/*     if        (scanf(" L %d %d", &u, &v) == 2) { */
+/*       link(forest, u,v); */
+/*     } else if (scanf(" C %d %d", &u, &v) == 2) { */
+/*       cut(forest, u,v); */
+/*     } else if (scanf(" Q %d %d", &u, &v) == 2) { */
+/*       bool c = connected(forest, u,v); */
+/*       printf("%c\n", c ? 'T' : 'F'); */
+/*     } else { */
+/*       break; */
+/*     } */
+/*   } */
+
+/*   free(forest); */
+/*   return 0; */
+/* } */

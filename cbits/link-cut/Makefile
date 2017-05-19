@@ -1,10 +1,10 @@
-CC				= gcc-4.7
-CC_FLAGS	= -O0 -ansi -Wall -Wfatal-errors
+CC				= gcc
+CC_FLAGS	= -O3 -ansi -Wall -Wfatal-errors
 
 .PHONY: clean
 
-debug: CC_FLAGS += -g -DDEBUG
-debug: all
+# debug: CC_FLAGS += -g -DDEBUG
+# debug: all
 
 all: lc
 
