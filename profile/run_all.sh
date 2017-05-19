@@ -3,22 +3,22 @@
 gcc-4.7 -O3 ../cbits/online-matching/online_matching.c -o om
 
 echo "Starting naive..."
-# sed -i 's/^\(K\|B\)/N/' data/txt-*-pat-*.in
+sed -i 's/^\(K\|B\)/N/' data/*
 
 echo "Running naive..."
-./run.sh > naive-test.csv
+./run.sh > naive.dat
 
 echo "Starting KMP..."
-# sed -i 's/^\(N\|B\)/K/' data/txt-*-pat-*.in
+sed -i 's/^\(N\|B\)/K/' data/*
 
 echo "Running KMP..."
-./run.sh > kmp-test.csv
+./run.sh > kmp.dat
 
-# echo "Starting BM..."
-# sed -i 's/^\(N\|K\)/B/' data/txt-*-pat-*.in
+echo "Starting BM..."
+sed -i 's/^\(N\|K\)/B/' data/*
 
-# echo "Running BM..."
-# ./run.sh > bm-test.csv
+echo "Running BM..."
+./run.sh > bm.dat
 
 echo "Finished!"
 
