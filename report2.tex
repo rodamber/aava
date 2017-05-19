@@ -9,7 +9,7 @@
 \usepackage{pgfplots}
 
 \usetikzlibrary{matrix}
-\pgfplotsset{width=10cm,compat=1.13}
+\pgfplotsset{compat=1.13}
 \usepgfplotslibrary{groupplots}
 \usetikzlibrary{pgfplots.groupplots}
 
@@ -21,6 +21,30 @@
 
 \begin{document}
 \maketitle
+
+\section{Text Searching}
+\subsection{Overview}
+In this section we discuss the implementation and profiling of the naive,
+Knuth-Morris-Pratt and Boyer-Moore algorithms for string matching. The
+implementation for the Knuth-Morris-Pratt algorithm was taken from the
+third edition of the book \textit{Introduction to Algorithms}, while the
+implementation for the Boyer-Moore algorithm was taken from \textit{Algorithms
+on Strings, Trees, and Sequences}.
+
+\subsection{Tests and Expectations}
+In this project the naive algorithm serves as a baseline for testing the other
+two algorithms, which we expect to be much faster in all situations.
+\paragraph{}
+We profile time and heap usage, as well as the number of comparisons each
+algorithm performs. We test the algorithms on randomly generated text and
+pattern strings consisting of 'A', 'T', 'C' and 'G' characters only.
+\paragraph{}
+We expect the Knuth-Morris-Pratt and Boyer-Moore to run on $O(n+m)$ both on time
+and space, where $n$ is the length of the text and $m$ is the length of pattern.
+The complexity of the naive algorithm is also $O(n+m)$ in the average case, but
+it decays to $O(nm)$ in the worst case.
+
+\subsection{Results}
 
 %------------------------------------------------------------------------------%
 % Time Profiling
@@ -144,11 +168,13 @@
     footnotesize,
     enlargelimits=false,
     %
+    max space between ticks=25pt,
+    %
     width=0.8\textwidth,
     height=7cm,
     %
     xlabel=text size $n$ / characters,
-    ylabel=comparisons \#
+    ylabel=comparisons \#,
     %
     xtick={1e5,2e5,3e5,4e5,5e5,6e5,7e5,8e5,9e5,1e6},
     %
@@ -199,7 +225,7 @@
     height=7cm,
     %
     xlabel=text size $n$ / characters,
-    ylabel=time $t$ / ms,
+    ylabel=comparisons \#,
     %
     xtick={1e5,2e5,3e5,4e5,5e5,6e5,7e5,8e5,9e5,1e6},
     %
@@ -221,6 +247,45 @@
   \end{groupplot}
   \node[text width=6cm,align=center,anchor=north] at ([yshift=+15mm]Comparisons Count c1r1.north) {Answers to Questions};
 \end{tikzpicture}
+
+\subsection{Results Analysis and Conclusions}
+\subsubsection{Time and Heap Profiling}
+We can check that all the algorithms run in linear time and space, and that
+Knuth-Morris-Pratt and Boyer-Moore have much better performance than naive. The
+naive and Knuth-Morris-Pratt running times don't seem to be much affected by the
+increase in size of the pattern. Boyer-Moore actually runs faster and in less
+space with bigger patterns.
+\subsubsection{Answers to the Questions in the Project Specification}
+The naive algorithm worst-case happens when the text has many similar substrings
+to the pattern. In the penultimate plot we can see the result of an experience
+were we applied the naive algorithm to texts and patterns with these
+caracteristics. We see, as expected, that the algorithm makes many more
+comparisons the bigger the pattern.
+
+In the last plot we find the answer to why the Boyer-Moore is claimed to be
+sublinear. We applied this algorithm against texts and patterns where the
+matching process failed quickly. By use of the bad character, the algorithm
+manages to skip a lot of characters, thus managing to perform fewer comparisons.
+By abusing this rule the algorithm may reach the end of the text without making
+$O(n+m)$ comparisons, as we can see in the plot.
+
+\section{Connectivity in Forests}
+\subsection{Overview}
+In this problem we aim to maintain the connectivity information of a forest. For
+that we use an implementation of Link-Cut trees with Splay Trees, based on the
+paper \textit{Self-adjusting binary trees}, by Sleator and Tarjan. 
+\subsection{Tests and Expectations}
+We test the implementation time and space performance. For each $n$ (the number
+of nodes), we start by building a linear tree. A cut then follows, cutting the
+tree in two halves. Then we apply 2000 random operations (a link, a cut or
+a connected query), and measure the time those operations take.
+
+We're expecting linear increases in space usage with the increase of the number
+of nodes, as the algorithm only does one explicit memory allocation per node,
+and doesn't use recursion. Also, we're expecting the tree's operations to run
+all in $log(n)$ amortized time.
+
+\subsection{Results}
 
 %------------------------------------------------------------------------------%
 % Link-Cut
@@ -261,5 +326,12 @@
   \end{groupplot}
   \node[text width=6cm,align=center,anchor=north] at ([yshift=+15mm]Link-Cut Tree c1r1.north) {Link-Cut Tree};
 \end{tikzpicture}
+
+\subsection{Results Analysis}
+The time plot shows a curve that resembles a logarithm. While we cannot assert
+that each operation runs, by itself, in $log(n)$, we can assert that in an
+amortized sense.
+
+The space usage is completely linear on the number of nodes, as expected.
 
 \end{document}

@@ -15,7 +15,7 @@ Naive serves as the control. We test KMP and BM against the naive algorithm.
 - Naive: find examples with bad performance.
   - txt: aaaaaab, ptrn: aab
 - KMP: relate the # of comparisons to the text size.
-- BM: show examples of bad performance (O(n*m))
+- BM: show examples of bad performance (O(n*m))jjjjjjjjjjjjjj
 - BM: relate the # of comparisons to the text size.
 - BM: why is it claimed to be sublinear?
 
@@ -23,11 +23,6 @@ Naive serves as the control. We test KMP and BM against the naive algorithm.
 *** Result Analysis and Conclusions
 ** Part II: Connectivity in Forests
 *** Introduction
-*** Answers to the questions
 *** Tests
-# For each test, start by creating a linear tree.   
-# Use trees with sizes ranging from 1k to 10M.
-# Set n = 1M ops for each test.
-# We're expecting an n * log(n) curve
 *** Results
 *** Result Analysis and Conclusions
