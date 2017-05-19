@@ -39,7 +39,6 @@ executable online-matching-profile
                      , transformers
                      , bytestring >= 0.10
                      , random
-                     , vector
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   default-extensions:  BangPatterns
                      , OverloadedStrings
