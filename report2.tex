@@ -1,0 +1,73 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{caption,subcaption}
+
+\pgfplotsset{width=10cm,compat=1.13}
+\usepgfplotslibrary{groupplots}
+\usetikzlibrary{pgfplots.groupplots}
+
+\begin{document}
+
+%------------------------------------------------------------------------------%
+% Time Profiling
+\begin{figure}[!h]
+\centering
+\renewcommand\thesubfigure{(\alph{subfigure})}
+\caption{Time Profiling}\label{fig:plots}
+
+\begin{tikzpicture}
+  \pgfplotsset{every axis legend/.append style={
+      at={(0,1)},
+      anchor=north west}}
+  \begin{groupplot}[
+    group style={
+      group name=Time Profiling,
+      group size=1 by 3,
+      %
+      horizontal sep=1.5cm,
+      vertical sep=2cm,
+      %
+      xlabels at=edge bottom,
+      ylabels at=edge left,
+    },
+    footnotesize,
+    enlargelimits=false,
+    %
+    width=10cm,
+    height=7cm,
+    %
+    xlabel=text size / characters,
+    ylabel=time $t$ / ms,
+    %
+    xmajorgrids=true,
+    ymajorgrids=true,
+    grid style=dashed,
+    %
+    legend entries={Pattern size $=16$,Pattern size $=64$,Pattern size $=256$},
+    ]
+    %
+    \nextgroupplot
+      \addplot+[only marks, mark=square*] table [x=n,y=time] {profile/data/naive16.dat};
+      \addplot+[only marks, mark=triangle*] table [x=n,y=time] {profile/data/naive64.dat};
+      \addplot+[only marks, mark=o] table [x=n,y=time] {profile/data/naive256.dat};
+    \nextgroupplot
+      \addplot+[only marks, mark=square*] table [x=n,y=time] {profile/data/kmp16.dat};
+      \addplot+[only marks, mark=triangle*] table [x=n,y=time] {profile/data/kmp64.dat};
+      \addplot+[only marks, mark=o] table [x=n,y=time] {profile/data/kmp256.dat};
+    \nextgroupplot
+      \addplot+[only marks, mark=square*] table [x=n,y=time] {profile/data/bm16.dat};
+      \addplot+[only marks, mark=triangle*] table [x=n,y=time] {profile/data/bm64.dat};
+      \addplot+[only marks, mark=o] table [x=n,y=time] {profile/data/bm256.dat};
+
+  \end{groupplot}
+
+  \node[text width=6cm,align=center,anchor=north] at ([yshift=-5mm]Time Profiling c1r1.south) {\captionof{subfigure}{Naive\label{subplot:one}}};
+  \node[text width=6cm,align=center,anchor=north] at ([yshift=-5mm]Time Profiling c1r2.south) {\captionof{subfigure}{Knuth-Morris-Pratt\label{subplot:two}}};
+  \node[text width=6cm,align=center,anchor=north] at ([yshift=-10mm]Time Profiling c1r3.south) {\captionof{subfigure}{Boyer-Moore\label{subplot:three}}};
+\end{tikzpicture}
+
+\end{figure}
+
+\end{document}
