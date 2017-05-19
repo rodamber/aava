@@ -29,7 +29,7 @@
 \subsection{Overview}
 \subsection{Questions}
 
-\centering
+% Naive
 \begin{tikzpicture}[trim axis left, trim axis right]
   \pgfplotsset{every axis legend/.append style={
       at={(0,1)},
@@ -38,14 +38,13 @@
       height=7cm,
       width=0.8\textwidth,
       enlargelimits=false,
-      title={Naive Algorithm Time Measure},
+      title={Naive Algorithm Time Profiling},
       xlabel={Text size},
-      ylabel={Elapsed time (ms)},
+      ylabel={Elapsed Time (ms)},
       xmajorgrids=true,
       every y tick scale label/.style={at={(-0.060,1)}},
       ymajorgrids=true,
       grid style=dashed,
-      log basis x={2},
       legend entries={Pattern size $=16$,Pattern size $=64$,Pattern size $=256$},
     ]
     \addplot+[only marks, mark=square*] table [x=n,y=time] {profile/naive16.dat};
@@ -54,53 +53,214 @@
     \end{axis}
 \end{tikzpicture}
 
-\centering
 \begin{tikzpicture}[trim axis left, trim axis right]
+  \pgfplotsset{every axis legend/.append style={
+      at={(0,1)},
+      anchor=north west}}
     \begin{axis}[
-        height=7cm,
-        width=0.8\textwidth,
-        enlargelimits=false,
-        title={Still don't know what I'll place here},
-        xlabel={x label here},
-        scaled x ticks = base 10:-4,
-        every y tick scale label/.style={at={(-0.060,1)}},
-        ylabel={y label},
-        ymajorgrids=true,
-        grid style=dashed,
-        log basis x={2}
+      height=7cm,
+      width=0.8\textwidth,
+      enlargelimits=false,
+      title={Naive Algorithm Heap Profiling},
+      xlabel={Text size},
+      ylabel={Heap (Bytes)},
+      xmajorgrids=true,
+      every y tick scale label/.style={at={(-0.060,1)}},
+      ymajorgrids=true,
+      grid style=dashed,
+      legend entries={Pattern size $=16$,Pattern size $=64$,Pattern size $=256$},
     ]
-    \addplot+[
-        only marks,
-        scatter,
-        mark=x,
-        mark size=3pt,
-    ]
-        table [x=n,y=time] {profile/kmp.dat};
+    \addplot+[only marks, mark=square*] table [x=n,y=heap] {profile/naive16.dat};
+    \addplot+[only marks, mark=triangle*] table [x=n,y=heap] {profile/naive64.dat};
+    \addplot+[only marks, mark=o] table [x=n,y=heap] {profile/naive256.dat};
     \end{axis}
 \end{tikzpicture}
 
-\centering
 \begin{tikzpicture}[trim axis left, trim axis right]
+  \pgfplotsset{every axis legend/.append style={
+      at={(0,1)},
+      anchor=north west}}
     \begin{axis}[
-        height=7cm,
-        width=0.8\textwidth,
-        enlargelimits=false,
-        title={Still don't know what I'll place here},
-        xlabel={x label here},
-        scaled x ticks = base 10:-4,
-        every y tick scale label/.style={at={(-0.060,1)}},
-        ylabel={y label},
-        ymajorgrids=true,
-        grid style=dashed,
-        log basis x={2},
+      height=7cm,
+      width=0.8\textwidth,
+      enlargelimits=false,
+      title={Naive Algorithm Bad Case Time Profiling},
+      xlabel={Text size},
+      ylabel={Elapsed Time (ms)},
+      xmajorgrids=true,
+      every y tick scale label/.style={at={(-0.060,1)}},
+      ymajorgrids=true,
+      grid style=dashed,
+      legend entries={Pattern size $=16$,Pattern size $=64$,Pattern size $=256$},
     ]
-    \addplot+[
-        only marks,
-        scatter,
-        mark=x,
-        mark size=3pt,
+    \addplot+[only marks, mark=square*] table [x=n,y=time] {profile/naive-bad16.dat};
+    \addplot+[only marks, mark=triangle*] table [x=n,y=time] {profile/naive-bad64.dat};
+    \addplot+[only marks, mark=o] table [x=n,y=time] {profile/naive-bad256.dat};
+    \end{axis}
+\end{tikzpicture}
+
+% KMP
+
+\begin{tikzpicture}[trim axis left, trim axis right]
+  \pgfplotsset{every axis legend/.append style={
+      at={(0,1)},
+      anchor=north west}}
+    \begin{axis}[
+      height=7cm,
+      width=0.8\textwidth,
+      enlargelimits=false,
+      title={Knuth-Morris-Pratt Algorithm Time Profiling},
+      xlabel={Text size},
+      ylabel={Elapsed Time (ms)},
+      xmajorgrids=true,
+      every y tick scale label/.style={at={(-0.060,1)}},
+      ymajorgrids=true,
+      grid style=dashed,
+      legend entries={Pattern size $=16$,Pattern size $=64$,Pattern size $=256$},
     ]
-        table [x=n,y=time] {profile/bm.dat};
+    \addplot+[only marks, mark=square*] table [x=n,y=time] {profile/kmp16.dat};
+    \addplot+[only marks, mark=triangle*] table [x=n,y=time] {profile/kmp64.dat};
+    \addplot+[only marks, mark=o] table [x=n,y=time] {profile/kmp256.dat};
+    \end{axis}
+\end{tikzpicture}
+
+\begin{tikzpicture}[trim axis left, trim axis right]
+  \pgfplotsset{every axis legend/.append style={
+      at={(0,1)},
+      anchor=north west}}
+    \begin{axis}[
+      height=7cm,
+      width=0.8\textwidth,
+      enlargelimits=false,
+      title={Knuth-Morris-Pratt Algorithm Heap Profiling},
+      xlabel={Text size},
+      ylabel={Heap (Bytes)},
+      xmajorgrids=true,
+      every y tick scale label/.style={at={(-0.060,1)}},
+      ymajorgrids=true,
+      grid style=dashed,
+      legend entries={Pattern size $=16$,Pattern size $=64$,Pattern size $=256$},
+    ]
+    \addplot+[only marks, mark=square*] table [x=n,y=heap] {profile/kmp16.dat};
+    \addplot+[only marks, mark=triangle*] table [x=n,y=heap] {profile/kmp64.dat};
+    \addplot+[only marks, mark=o] table [x=n,y=heap] {profile/kmp256.dat};
+    \end{axis}
+\end{tikzpicture}
+
+\begin{tikzpicture}[trim axis left, trim axis right]
+  \pgfplotsset{every axis legend/.append style={
+      at={(0,1)},
+      anchor=north west}}
+    \begin{axis}[
+      height=7cm,
+      width=0.8\textwidth,
+      enlargelimits=false,
+      title={Knuth-Morris-Pratt Algorithm Comparisons},
+      xlabel={Text size},
+      ylabel={Comparisons \#},
+      xmajorgrids=true,
+      every y tick scale label/.style={at={(-0.060,1)}},
+      ymajorgrids=true,
+      grid style=dashed,
+      legend entries={Pattern size $=16$,Pattern size $=64$,Pattern size $=256$},
+    ]
+    \addplot+[only marks, mark=square*] table [x=n,y=comparisons] {profile/kmp16.dat};
+    \addplot+[only marks, mark=triangle*] table [x=n,y=comparisons] {profile/kmp64.dat};
+    \addplot+[only marks, mark=o] table [x=n,y=comparisons] {profile/kmp256.dat};
+    \end{axis}
+\end{tikzpicture}
+
+% Boyer-Moore
+
+\begin{tikzpicture}[trim axis left, trim axis right]
+  \pgfplotsset{every axis legend/.append style={
+      at={(0,1)},
+      anchor=north west}}
+    \begin{axis}[
+      height=7cm,
+      width=0.8\textwidth,
+      enlargelimits=false,
+      title={Boyer-Moore Algorithm Time Profiling},
+      xlabel={Text size},
+      ylabel={Elapsed Time (ms)},
+      xmajorgrids=true,
+      every y tick scale label/.style={at={(-0.060,1)}},
+      ymajorgrids=true,
+      grid style=dashed,
+      legend entries={Pattern size $=16$,Pattern size $=64$,Pattern size $=256$},
+    ]
+    \addplot+[only marks, mark=square*] table [x=n,y=time] {profile/bm16.dat};
+    \addplot+[only marks, mark=triangle*] table [x=n,y=time] {profile/bm64.dat};
+    \addplot+[only marks, mark=o] table [x=n,y=time] {profile/bm256.dat};
+    \end{axis}
+\end{tikzpicture}
+
+\begin{tikzpicture}[trim axis left, trim axis right]
+  \pgfplotsset{every axis legend/.append style={
+      at={(0,1)},
+      anchor=north west}}
+    \begin{axis}[
+      height=7cm,
+      width=0.8\textwidth,
+      enlargelimits=false,
+      title={Boyer-Moore Algorithm Heap Profiling},
+      xlabel={Text size},
+      ylabel={Heap (Bytes)},
+      xmajorgrids=true,
+      every y tick scale label/.style={at={(-0.060,1)}},
+      ymajorgrids=true,
+      grid style=dashed,
+      legend entries={Pattern size $=16$,Pattern size $=64$,Pattern size $=256$},
+    ]
+    \addplot+[only marks, mark=square*] table [x=n,y=heap] {profile/bm16.dat};
+    \addplot+[only marks, mark=triangle*] table [x=n,y=heap] {profile/bm64.dat};
+    \addplot+[only marks, mark=o] table [x=n,y=heap] {profile/bm256.dat};
+    \end{axis}
+\end{tikzpicture}
+
+\begin{tikzpicture}[trim axis left, trim axis right]
+  \pgfplotsset{every axis legend/.append style={
+      at={(0,1)},
+      anchor=north west}}
+    \begin{axis}[
+      height=7cm,
+      width=0.8\textwidth,
+      enlargelimits=false,
+      title={Boyer-Moore Algorithm Comparisons},
+      xlabel={Text size},
+      ylabel={Comparisons \#},
+      xmajorgrids=true,
+      every y tick scale label/.style={at={(-0.060,1)}},
+      ymajorgrids=true,
+      grid style=dashed,
+      legend entries={Pattern size $=16$,Pattern size $=64$,Pattern size $=256$},
+    ]
+    \addplot+[only marks, mark=square*] table [x=n,y=comparisons] {profile/bm16.dat};
+    \addplot+[only marks, mark=triangle*] table [x=n,y=comparisons] {profile/bm64.dat};
+    \addplot+[only marks, mark=o] table [x=n,y=comparisons] {profile/bm256.dat};
+    \end{axis}
+\end{tikzpicture}
+
+\begin{tikzpicture}[trim axis left, trim axis right]
+  \pgfplotsset{every axis legend/.append style={
+      at={(0,1)},
+      anchor=north west}}
+    \begin{axis}[
+      height=7cm,
+      width=0.8\textwidth,
+      enlargelimits=false,
+      title={Boyer-Moore Algorithm Sublinear Comparisons},
+      xlabel={Text size},
+      ylabel={Comparisons \#},
+      xmajorgrids=true,
+      every y tick scale label/.style={at={(-0.060,1)}},
+      ymajorgrids=true,
+      grid style=dashed,
+      legend entries={Pattern size $=16$,Pattern size $=64$,Pattern size $=256$},
+    ]
+    \addplot+[only marks, mark=square*] table [x=n,y=comparisons] {profile/bm-sublinear16.dat};
+    \addplot+[only marks, mark=triangle*] table [x=n,y=comparisons] {profile/bm-sublinear64.dat};
+    \addplot+[only marks, mark=o] table [x=n,y=comparisons] {profile/bm-sublinear256.dat};
     \end{axis}
 \end{tikzpicture}
 
