@@ -29,44 +29,106 @@
 \subsection{Overview}
 \subsection{Questions}
 
-% \centering
-% \begin{tikzpicture}[trim axis left, trim axis right]
-%     \begin{axis}[
-%         height=7cm,
-%         width=0.8\textwidth,
-%         enlargelimits=false,
-%         title={Memória ocupada em função de V + E},
-%         xlabel={V+E},
-%         scaled x ticks = base 10:-4,
-%         every y tick scale label/.style={at={(-0.060,1)}},
-%         ylabel={Memória ocupada (bytes)},
-%         ymajorgrids=true,
-%         grid style=dashed,
-%     ]
-%         \addplot+[
-%             only marks,
-%             scatter,
-%             mark=x,
-%             mark size=3pt,
-%         ]
-%         table{tests/data/mems.dat};
-%     \end{axis}
+% \begin{tikzpicture}
+% \begin{axis}[
+%   xlabel=n,
+%   ylabel=m,
+%   zlabel=time,
+%   area plot/.style={
+%     fill opacity=0.75,
+%     draw=orange!80!black,thick,
+%     fill=orange,
+%     mark=none,
+%   },
+%   grid=major,
+%   grid style=dashed,
+%   % xtick=data,
+%   ytick=data,
+% ]
+% \addplot3+[
+% % only marks,
+% % scatter,
+% % mark size=2pt
+% area plot
+% ] table[x=n,y=m,z=time] {profile/naive.dat};
+% \end{axis}
 % \end{tikzpicture}
 
+
+\centering
+\begin{tikzpicture}[trim axis left, trim axis right]
+    \begin{axis}[
+        height=7cm,
+        width=0.8\textwidth,
+        enlargelimits=false,
+        title={Still don't know what I'll place here},
+        xlabel={x label here},
+        scaled x ticks = base 10:-4,
+        every y tick scale label/.style={at={(-0.060,1)}},
+        ylabel={y label},
+        ymajorgrids=true,
+        grid style=dashed,
+        log basis x={2}
+    ]
+    \addplot+[
+        only marks,
+        scatter,
+        mark=x,
+        mark size=3pt,
+    ]
+        table [x=n,y=time] {profile/naive.dat};
+    \end{axis}
+\end{tikzpicture}
+
+\centering
+\begin{tikzpicture}[trim axis left, trim axis right]
+    \begin{axis}[
+        height=7cm,
+        width=0.8\textwidth,
+        enlargelimits=false,
+        title={Still don't know what I'll place here},
+        xlabel={x label here},
+        scaled x ticks = base 10:-4,
+        every y tick scale label/.style={at={(-0.060,1)}},
+        ylabel={y label},
+        ymajorgrids=true,
+        grid style=dashed,
+        log basis x={2}
+    ]
+    \addplot+[
+        only marks,
+        scatter,
+        mark=x,
+        mark size=3pt,
+    ]
+        table [x=n,y=time] {profile/kmp.dat};
+    \end{axis}
+\end{tikzpicture}
+
+\centering
+\begin{tikzpicture}[trim axis left, trim axis right]
+    \begin{axis}[
+        height=7cm,
+        width=0.8\textwidth,
+        enlargelimits=false,
+        title={Still don't know what I'll place here},
+        xlabel={x label here},
+        scaled x ticks = base 10:-4,
+        every y tick scale label/.style={at={(-0.060,1)}},
+        ylabel={y label},
+        ymajorgrids=true,
+        grid style=dashed,
+        log basis x={2},
+    ]
+    \addplot+[
+        only marks,
+        scatter,
+        mark=x,
+        mark size=3pt,
+    ]
+        table [x=n,y=time] {profile/bm.dat};
+    \end{axis}
+\end{tikzpicture}
+
 \end{document}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
