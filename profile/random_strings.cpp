@@ -56,6 +56,27 @@ void naive_bad_perf() {
   }
 }
 
+void write_bm_sublinear(ostream &out, int n, int m) {
+  ostringstream pat;
+
+  out << "T ";
+  for (int k = 1; k <= n - m; k++) {
+    if (k % m == 0) {
+      out << 'T';
+    } else {
+      out << 'G';
+    }
+  }
+
+  for (int k = 1; k <= m; k++) {
+      pat << 'C';
+  }
+  pat << 'A';
+
+  out << pat.str();
+  out << "\nB " << pat.str() << "\nX";
+}
+
 int main() {
   int _1_KiB = 1024;
   int _10_KiB = 10 * _1_KiB;
@@ -68,9 +89,11 @@ int main() {
 
       ofstream out(filename(n,m), ofstream::out);
 
-      out << "T "; write_bad_naive_string(out, n); //write_rand_string(out, n);
-      out << "N "; write_bad_naive_string(out, m); //write_rand_string(out, m);
-      out << "X\n";
+      // out << "T "; write_bad_naive_string(out, n); //write_rand_string(out, n);
+      // out << "N "; write_bad_naive_string(out, m); //write_rand_string(out, m);
+      // out << "X\n";
+
+      write_bm_sublinear(out, n, m);
 
       out.close();
     }
